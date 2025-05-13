@@ -359,13 +359,16 @@ export default function Home() {
               height={500}
               className="w-full aspect-[21/9] object-cover"
             />
-            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+            <Link
+              href="/gallery"
+              className="absolute inset-0 bg-black/30 flex items-center justify-center"
+            >
               <h2 className="text-white text-3xl font-medium">
                 Instagram-д <span className="italic">хуваалцсан</span>
                 <br />
                 агшинууд
               </h2>
-            </div>
+            </Link>
           </div>
         </div>
       </section>

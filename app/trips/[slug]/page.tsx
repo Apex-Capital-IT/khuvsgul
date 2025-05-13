@@ -8,6 +8,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
 
 export default function TripDetailPage({
   params,
@@ -27,9 +33,9 @@ export default function TripDetailPage({
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="container mx-auto px-4 relative z-10 text-white pt-16">
           <h1 className="text-4xl md:text-5xl font-medium">
-            Tropical <span className="italic">Paradise</span>
+            Халуун орны <span className="italic">Диваажин</span>
             <br />
-            Recreation
+            Амралт
           </h1>
         </div>
       </section>
@@ -81,37 +87,29 @@ export default function TripDetailPage({
                 </div>
               </div>
               <p className="text-gray-600 mb-6">
-                Unveil the beauty of tropical bliss. From sun-kissed shores to
-                vibrant cultural experiences, this journey promises you a
-                sensory escape.
+                Халуун орны гайхамшгийг нээ. Нарлаг эрэг, соёлын олон өнгө аяс бүхий аялал таны мэдрэмжийг сэргээх болно.
               </p>
               <p className="text-gray-600 mb-8">
-                Introducing our Tropical Paradise Package where we have curated
-                the best, finest elements of island living for an unforgettable
-                experience. Dive into the turquoise waters, feel the gentle sea
-                breeze, and immerse yourself in the magic of these tropical
-                havens. This is your ticket to the ultimate dream getaway, where
-                relaxation, adventure, and natural beauty converge for a
-                vacation of a lifetime.
+                Манай Халуун орны Диваажин багц аялалд бид арал дээрх амьдралын хамгийн шилдэг, тансаг элементүүдийг багтаасан. Хөх тэнгисийн усанд шумбаж, зөөлөн салхийг мэдэрч, халуун орны гайхамшигт уур амьсгалд умбаарай. Энэ бол таны мөрөөдлийн аялалд хүрэх тасалбар бөгөөд амралт, адал явдал, байгалийн гоо үзэсгэлэн нэг дор цогцолсон аялал юм.
               </p>
 
               <div className="grid grid-cols-3 gap-4 mb-8">
                 <div className="text-center p-4 border rounded-lg">
-                  <div className="font-medium">Price</div>
-                  <div className="text-xl font-bold">$999</div>
+                  <div className="font-medium">Үнэ</div>
+                  <div className="text-xl font-bold">999,000₮</div>
                 </div>
                 <div className="text-center p-4 border rounded-lg">
-                  <div className="font-medium">Quota</div>
-                  <div className="text-xl font-bold">20 Available</div>
+                  <div className="font-medium">Квот</div>
+                  <div className="text-xl font-bold">20 үлдсэн</div>
                 </div>
                 <div className="text-center p-4 border rounded-lg">
-                  <div className="font-medium">Schedule</div>
-                  <div className="text-xl font-bold">10 - 17 November 2023</div>
+                  <div className="font-medium">Хуваарь</div>
+                  <div className="text-xl font-bold">2023 оны 11-р сарын 10-17</div>
                 </div>
               </div>
 
               <div className="mb-8">
-                <h3 className="text-xl font-medium mb-4">Includes:</h3>
+                <h3 className="text-xl font-medium mb-4">Үүнд багтсан:</h3>
                 <ul className="space-y-2">
                   <li className="flex items-center">
                     <svg
@@ -128,7 +126,7 @@ export default function TripDetailPage({
                         d="M5 13l4 4L19 7"
                       />
                     </svg>
-                    Accommodations in luxury beachfront resorts
+                    Тансаг далайн эргийн амралтын газарт байрлах
                   </li>
                   <li className="flex items-center">
                     <svg
@@ -145,7 +143,7 @@ export default function TripDetailPage({
                         d="M5 13l4 4L19 7"
                       />
                     </svg>
-                    Daily breakfast, lunch, and dinner
+                    Өдөр бүрийн өглөөний цай, өдрийн хоол, оройн хоол
                   </li>
                   <li className="flex items-center">
                     <svg
@@ -162,7 +160,7 @@ export default function TripDetailPage({
                         d="M5 13l4 4L19 7"
                       />
                     </svg>
-                    Travel insurance & airport transfers
+                    Аяллын даатгал ба нисэх буудлын трансфер
                   </li>
                   <li className="flex items-center">
                     <svg
@@ -179,7 +177,7 @@ export default function TripDetailPage({
                         d="M5 13l4 4L19 7"
                       />
                     </svg>
-                    English-speaking guided island tours
+                    Англи хэлтэй аяллын хөтөчтэй арал тойрох аялал
                   </li>
                   <li className="flex items-center">
                     <svg
@@ -196,13 +194,13 @@ export default function TripDetailPage({
                         d="M5 13l4 4L19 7"
                       />
                     </svg>
-                    Local cultural & adventure experiences with locals
+                    Орон нутгийн соёл, адал явдалт туршлага
                   </li>
                 </ul>
               </div>
 
               <div className="mb-8">
-                <h3 className="text-xl font-medium mb-4">Excludes:</h3>
+                <h3 className="text-xl font-medium mb-4">Үүнд багтаагүй:</h3>
                 <ul className="space-y-2">
                   <li className="flex items-center">
                     <svg
@@ -219,7 +217,7 @@ export default function TripDetailPage({
                         d="M6 18L18 6M6 6l12 12"
                       />
                     </svg>
-                    Personal expenses (souvenirs, spa, etc.)
+                    Хувийн хэрэглээ (бэлэг дурсгал, спа гэх мэт)
                   </li>
                   <li className="flex items-center">
                     <svg
@@ -236,7 +234,7 @@ export default function TripDetailPage({
                         d="M6 18L18 6M6 6l12 12"
                       />
                     </svg>
-                    International tax & visa airfare
+                    Олон улсын татвар, виз, нислэгийн тийз
                   </li>
                   <li className="flex items-center">
                     <svg
@@ -253,78 +251,111 @@ export default function TripDetailPage({
                         d="M6 18L18 6M6 6l12 12"
                       />
                     </svg>
-                    Optional excursions
+                    Сонголттой аяллууд
                   </li>
                 </ul>
               </div>
 
               <div>
-                <h3 className="text-xl font-medium mb-4">Travel Plans</h3>
-                <div className="space-y-4">
-                  <div className="border rounded-lg p-4">
-                    <div className="font-medium mb-2">DAY 01</div>
-                    <div className="text-gray-600">Arrival in Bali</div>
-                  </div>
-                  <div className="border rounded-lg p-4">
-                    <div className="font-medium mb-2">DAY 02</div>
-                    <div className="text-gray-600">Beach Exploration</div>
-                    <ul className="text-sm text-gray-500 mt-2">
-                      <li>• Sunrise yoga session</li>
-                      <li>• Beach hopping and water sports</li>
-                      <li>• Evening relaxation at the resort</li>
-                    </ul>
-                  </div>
-                  <div className="border rounded-lg p-4">
-                    <div className="font-medium mb-2">DAY 03</div>
-                    <div className="text-gray-600">Cultural Encounter</div>
-                  </div>
-                  <div className="border rounded-lg p-4">
-                    <div className="font-medium mb-2">DAY 04</div>
-                    <div className="text-gray-600">Island Adventure</div>
-                  </div>
-                  <div className="border rounded-lg p-4">
-                    <div className="font-medium mb-2">DAY 05</div>
-                    <div className="text-gray-600">Island Hopping</div>
-                  </div>
-                  <div className="border rounded-lg p-4">
-                    <div className="font-medium mb-2">DAY 06</div>
-                    <div className="text-gray-600">Relaxation Day</div>
-                  </div>
-                  <div className="border rounded-lg p-4">
-                    <div className="font-medium mb-2">DAY 07</div>
-                    <div className="text-gray-600">Departure from Bali</div>
-                  </div>
-                </div>
+                <h3 className="text-xl font-medium mb-4">Аяллын төлөвлөгөө</h3>
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="day1">
+                    <AccordionTrigger>1-Р ӨДӨР: Бали-д ирэх</AccordionTrigger>
+                    <AccordionContent>
+                      <ul className="list-disc pl-5 text-gray-600">
+                        <li>Нисэх буудалд угтах, зочид буудалд хүргэх</li>
+                        <li>Чөлөөт цаг, амралт</li>
+                        <li>Оройн зоог</li>
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="day2">
+                    <AccordionTrigger>2-Р ӨДӨР: Далайн эргийн аялал</AccordionTrigger>
+                    <AccordionContent>
+                      <ul className="list-disc pl-5 text-gray-600">
+                        <li>Нар мандах йог</li>
+                        <li>Эрэг дагуу аялал, усан спорт</li>
+                        <li>Оройн амралт амралтын газарт</li>
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="day3">
+                    <AccordionTrigger>3-Р ӨДӨР: Соёлын аялал</AccordionTrigger>
+                    <AccordionContent>
+                      <ul className="list-disc pl-5 text-gray-600">
+                        <li>Орон нутгийн зах, музей үзэх</li>
+                        <li>Соёлын үзүүлбэр, уламжлалт хоол амтлах</li>
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="day4">
+                    <AccordionTrigger>4-Р ӨДӨР: Адал явдалт аялал</AccordionTrigger>
+                    <AccordionContent>
+                      <ul className="list-disc pl-5 text-gray-600">
+                        <li>Ууланд авиралт, байгалийн үзэсгэлэнт газруудаар зугаалах</li>
+                        <li>Адал явдалт тоглоом, спорт</li>
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="day5">
+                    <AccordionTrigger>5-Р ӨДӨР: Арал тойрох аялал</AccordionTrigger>
+                    <AccordionContent>
+                      <ul className="list-disc pl-5 text-gray-600">
+                        <li>Орон нутгийн арал, тосгодуудаар зочлох</li>
+                        <li>Далайн хоолны зоог</li>
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="day6">
+                    <AccordionTrigger>6-Р ӨДӨР: Амралтын өдөр</AccordionTrigger>
+                    <AccordionContent>
+                      <ul className="list-disc pl-5 text-gray-600">
+                        <li>Чөлөөт цаг, спа үйлчилгээ</li>
+                        <li>Далайн эрэг дээр амрах</li>
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="day7">
+                    <AccordionTrigger>7-Р ӨДӨР: Балигаас буцах</AccordionTrigger>
+                    <AccordionContent>
+                      <ul className="list-disc pl-5 text-gray-600">
+                        <li>Өглөөний цай</li>
+                        <li>Чөлөөт цаг</li>
+                        <li>Нисэх буудал руу хүргүүлэх, нутаг буцах</li>
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </div>
             </div>
             <div>
               <div className="bg-white p-6 border rounded-lg sticky top-24">
                 <div className="flex justify-between mb-6">
-                  <div className="font-medium">Book Tour</div>
-                  <div className="text-gray-500">Messages</div>
+                  <div className="font-medium">Аялал захиалах</div>
+                  <div className="text-gray-500">Мессежүүд</div>
                 </div>
                 <form className="space-y-4">
                   <div>
                     <Input
                       type="text"
-                      placeholder="Full Name"
+                      placeholder="Бүтэн нэр"
                       className="w-full"
                     />
                   </div>
                   <div>
                     <Select>
                       <SelectTrigger>
-                        <SelectValue placeholder="Tour Package" />
+                        <SelectValue placeholder="Аяллын багц" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="tropical">
-                          Tropical Paradise Recreation
+                          Халуун орны Диваажин Амралт
                         </SelectItem>
                         <SelectItem value="mountain">
-                          Mountain Odyssey
+                          Уулын Адал Явдалт
                         </SelectItem>
                         <SelectItem value="cultural">
-                          Cultural Immersion
+                          Соёлын аялал
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -332,44 +363,44 @@ export default function TripDetailPage({
                   <div>
                     <Select>
                       <SelectTrigger>
-                        <SelectValue placeholder="Starting Date" />
+                        <SelectValue placeholder="Эхлэх огноо" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="nov10">10 November 2023</SelectItem>
-                        <SelectItem value="nov17">17 November 2023</SelectItem>
-                        <SelectItem value="nov24">24 November 2023</SelectItem>
+                        <SelectItem value="nov10">2023 оны 11-р сарын 10</SelectItem>
+                        <SelectItem value="nov17">2023 оны 11-р сарын 17</SelectItem>
+                        <SelectItem value="nov24">2023 оны 11-р сарын 24</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
                     <Select>
                       <SelectTrigger>
-                        <SelectValue placeholder="Number of Guests" />
+                        <SelectValue placeholder="Зочдын тоо" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="1">1 Person</SelectItem>
-                        <SelectItem value="2">2 People</SelectItem>
-                        <SelectItem value="3">3 People</SelectItem>
-                        <SelectItem value="4">4 People</SelectItem>
+                        <SelectItem value="1">1 хүн</SelectItem>
+                        <SelectItem value="2">2 хүн</SelectItem>
+                        <SelectItem value="3">3 хүн</SelectItem>
+                        <SelectItem value="4">4 хүн</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="pt-4 border-t">
                     <div className="flex justify-between mb-2">
-                      <div>Price (1pax)</div>
-                      <div className="font-medium">$999</div>
+                      <div>Үнэ (1 хүн)</div>
+                      <div className="font-medium">999,000₮</div>
                     </div>
                     <div className="flex justify-between mb-2">
-                      <div>Tax (10%)</div>
-                      <div className="font-medium">$99.90</div>
+                      <div>НӨАТ (10%)</div>
+                      <div className="font-medium">99,900₮</div>
                     </div>
                     <div className="flex justify-between font-bold">
-                      <div>Total</div>
-                      <div>$1,098.90</div>
+                      <div>Нийт</div>
+                      <div>1,098,900₮</div>
                     </div>
                   </div>
                   <Button className="w-full bg-black text-white hover:bg-gray-800">
-                    Book Now
+                    Одоо захиалах
                   </Button>
                 </form>
               </div>
@@ -381,18 +412,16 @@ export default function TripDetailPage({
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-medium mb-8">
-            Real <span className="italic">stories</span>
+            Жинхэнэ <span className="italic">түүхүүд</span>
             <br />
-            from travelers
+            аялагчдаас
           </h2>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="border bg-white rounded-lg p-6">
               <div className="flex items-start mb-4">
                 <div className="text-3xl text-gray-300 mr-2">"</div>
                 <p className="text-sm">
-                  My travel dreams finally came true, thanks to them. I explored
-                  places I never thought I would. Everything was seamless from
-                  start to finish during the trip.
+                  Аяллын маань мөрөөдөл биелсэн. Би хэзээ ч очиж үзнэ гэж бодоогүй газруудаар аялсан. Бүх зүйл эхнээсээ дуустал маш амар, саадгүй болсон.
                 </p>
               </div>
               <div className="flex items-center">
@@ -414,9 +443,7 @@ export default function TripDetailPage({
               <div className="flex items-start mb-4">
                 <div className="text-3xl text-gray-300 mr-2">"</div>
                 <p className="text-sm">
-                  They provided an amazing adventure that I'll never forget. The
-                  accommodations were top-notch, and the diversity was a perfect
-                  mix of relaxation and excitement.
+                  Тэд миний хэзээ ч мартахгүй гайхалтай адал явдлыг бүтээсэн. Байр, үйлчилгээ маш сайн, амралт ба адал явдлын төгс хослол байлаа.
                 </p>
               </div>
               <div className="flex items-center">
