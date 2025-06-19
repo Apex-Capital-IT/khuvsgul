@@ -63,10 +63,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen h-screen  flex items-center justify-center bg-white">
-      <div className="w-full max-w-[95vw] border-black border-[1px]  bg-white h-[95vh] rounded-3xl shadow-2xl flex overflow-hidden">
+    <div className="min-h-screen h-screen flex items-center justify-center bg-white">
+      <div className="w-full max-w-[95vw] md:max-w-[95vw] border-black border-[1px] bg-white h-full md:h-[95vh] rounded-none md:rounded-3xl shadow-2xl flex flex-col md:flex-row overflow-hidden">
         {/* Зүүн: Форм */}
-        <div className="flex-1 flex flex-col justify-center px-10 py-12">
+        <div className="flex-1 flex flex-col justify-center px-4 sm:px-8 md:px-10 py-8 md:py-12 overflow-y-auto">
           {/* Back button */}
           <a href="/" className="mb-6 self-start flex items-center gap-2 text-gray-600 hover:text-black transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
@@ -86,15 +86,15 @@ export default function LoginPage() {
             className="flex flex-col justify-center gap-4 items-center"
           >
             {error && (
-              <div className="w-[400px] p-3 mb-4 text-red-500 bg-red-50 border border-red-200 rounded-lg text-sm">
+              <div className="w-full max-w-xs md:w-[400px] p-3 mb-4 text-red-500 bg-red-50 border border-red-200 rounded-lg text-sm">
                 {error}
               </div>
             )}
-            <div>
+            <div className="w-full max-w-xs md:w-[400px]">
               <label className="block text-sm font-medium mb-1">Имэйл</label>
               <input
                 type="email"
-                className="w-[400px] mt-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                className="w-full mt-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
                 placeholder="Имэйлээ оруулна уу"
                 {...register("email", { required: "Имэйл заавал" })}
               />
@@ -104,11 +104,11 @@ export default function LoginPage() {
                 </p>
               )}
             </div>
-            <div>
+            <div className="w-full max-w-xs md:w-[400px]">
               <label className="block text-sm font-medium mb-1">Нууц үг</label>
               <input
                 type="password"
-                className="w-[400px] mt-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                className="w-full mt-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
                 placeholder="Нууц үгээ оруулна уу"
                 {...register("password", { required: "Нууц үг заавал" })}
               />
@@ -118,7 +118,7 @@ export default function LoginPage() {
                 </p>
               )}
             </div>
-            <div className="flex items-center justify-between w-[400px] text-sm">
+            <div className="flex items-center justify-between w-full max-w-xs md:w-[400px] text-sm">
               <div className="flex items-fl">
                 <input type="checkbox" id="remember" className="mr-1" />
                 <label htmlFor="remember">Сануулах</label>
@@ -133,7 +133,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-[400px] py-2 rounded-lg font-semibold transition-colors ${
+              className={`w-full max-w-xs md:w-[400px] py-2 rounded-lg font-semibold transition-colors ${
                 isLoading
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-black text-white hover:bg-gray-900"
