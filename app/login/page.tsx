@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 
 // API URL from environment variables
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://taiga-9fde.onrender.com";
@@ -11,6 +12,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     handleSubmit,
@@ -104,14 +106,27 @@ export default function LoginPage() {
                 </p>
               )}
             </div>
-            <div className="w-full max-w-xs md:w-[400px]">
+            <div className="w-full max-w-xs md:w-[400px] relative">
               <label className="block text-sm font-medium mb-1">Нууц үг</label>
               <input
-                type="password"
-                className="w-full mt-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                type={showPassword ? "text" : "password"}
+                className="w-full mt-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 pr-10"
                 placeholder="Нууц үгээ оруулна уу"
                 {...register("password", { required: "Нууц үг заавал" })}
               />
+              <button
+                type="button"
+                tabIndex={-1}
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute inset-y-12 right-2 flex items-center"
+                aria-label={showPassword ? "Нууц үг нуух" : "Нууц үг харах"}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
               {errors.password && (
                 <p className="text-red-500 text-sm mt-1">
                   {errors.password.message as string}

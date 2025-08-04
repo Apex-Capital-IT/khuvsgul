@@ -13,9 +13,8 @@ export default function ClientLayout({
   const hideHeaderFooter =
     pathname === "/login" ||
     pathname === "/signup" ||
-    pathname === "/admin/dashboard" ||
-    pathname === "/admin/login" ||
-    pathname === "/forgot-password";
+    pathname === "/forgot-password" ||
+    pathname.startsWith("/admin");
 
   return (
     <>

@@ -17,6 +17,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,6 +31,20 @@ export default function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isDropdownOpen) {
+        const target = event.target as Element;
+        if (!target.closest(".dropdown-container")) {
+          setIsDropdownOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isDropdownOpen]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -81,25 +96,40 @@ export default function Header() {
             Холбоо барих
           </Link>
           {isLoggedIn ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger
+            <div className="relative dropdown-container">
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className={`flex items-center justify-center w-10 h-10 rounded-full ${
                   scrolled ? "bg-gray-100" : "bg-white/10"
                 }`}
               >
                 <User className="w-5 h-5" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => router.push("/profile")}>
-                  <User className="w-4 h-4 mr-2" />
-                  Профайл
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Гарах
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </button>
+              {isDropdownOpen && (
+                <div className="absolute right-0 top-full mt-4 w-48 bg-white/90 backdrop-blur-sm shadow-md border border-gray-200 hover:rounded-lg rounded-lg z-[9999]">
+                  <button
+                    onClick={() => {
+                      router.push("/profile");
+                      setIsDropdownOpen(false);
+                    }}
+                    className="w-full flex items-center text-black px-4 py-2 text-sm hover:bg-black hover:text-white rounded-t-lg hover:rounded-t-lg transition-colors"
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    Профайл
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsDropdownOpen(false);
+                    }}
+                    className="w-full flex items-center px-4 py-2 text-black text-sm hover:bg-black hover:text-white rounded-b-lg hover:rounded-b-lg  transition-colors"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Гарах
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <Link
               href="/login"

@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 
 // API URL from environment variables
 const API_URL =
@@ -12,6 +13,7 @@ export default function SignupPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     handleSubmit,
@@ -33,9 +35,7 @@ export default function SignupPage() {
     try {
       const response = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: data.name,
           email: data.email,
@@ -45,11 +45,39 @@ export default function SignupPage() {
       });
 
       const result = await response.json();
-      console.log("STATUS:", response.status);
-      console.log("RESULT:", result);
+      console.log("Full API result:", result);
 
-      if (result.code !== 0) {
-        throw new Error(result.message || "Бүртгэл амжилтгүй боллоо");
+      // Handle your new error structure
+      if (!response.ok) {
+        let errorMsg = "Бүртгэл амжилтгүй боллоо";
+
+        // Check if the result has errorMessage property (your API structure)
+        if (result && result.errorMessage) {
+          errorMsg = result.errorMessage;
+        }
+        // Fallback to the old array structure if needed
+        else if (Array.isArray(result) && result[0]?.errors?.message) {
+          try {
+            // Parse the Zod error message JSON string
+            const zodErrors = JSON.parse(result[0].errors.message);
+            if (Array.isArray(zodErrors)) {
+              // Map each error: if path includes "password", prepend "Password: "
+              errorMsg = zodErrors
+                .map((e) =>
+                  e.path && e.path.includes("password")
+                    ? `Password: ${e.message}`
+                    : e.message
+                )
+                .join("\n");
+            } else if (zodErrors?.message) {
+              errorMsg = zodErrors.message;
+            }
+          } catch {
+            errorMsg = result[0].errors.message;
+          }
+        }
+
+        throw new Error(errorMsg);
       }
 
       // Successful registration
@@ -176,17 +204,30 @@ export default function SignupPage() {
                 </p>
               )}
             </div>
-            <div className="w-full max-w-xs md:w-[400px]">
+            <div className="w-full max-w-xs md:w-[400px] relative">
               <label className="block text-sm font-medium mb-1">Нууц үг</label>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 {...register("password", {
                   required: "Нууц үг заавал",
                   minLength: { value: 6, message: "Хамгийн багадаа 6 тэмдэгт" },
                 })}
-                className="w-full mt-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                className="w-full mt-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 pr-10"
                 placeholder="Нууц үгээ оруулна уу"
               />
+              <button
+                type="button"
+                tabIndex={-1}
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute inset-y-12 right-2 flex items-center"
+                aria-label={showPassword ? "Нууц үг нуух" : "Нууц үг харах"}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
               {errors.password && (
                 <p className="text-red-500 text-sm mt-1">
                   {errors.password.message}
