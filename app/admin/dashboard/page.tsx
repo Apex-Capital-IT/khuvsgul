@@ -221,7 +221,6 @@ export default function AdminDashboard() {
     { label: "Create Trip", icon: "Plus" },
     { label: "Categories", icon: "FolderOpen" },
     { label: "Bookings", icon: "Calendar" },
-    { label: "Messages", icon: "MessageSquare" },
   ];
 
   return (
@@ -229,7 +228,7 @@ export default function AdminDashboard() {
       <SidebarProvider className="w-66">
         <Sidebar className="bg-white border-r w-64 flex flex-col justify-between">
           <SidebarHeader className="p-6 text-2xl font-bold tracking-tight">
-            Coursue
+            Menu
           </SidebarHeader>
           <SidebarContent>
             <SidebarMenu>
@@ -866,55 +865,6 @@ export default function AdminDashboard() {
                 </Table>
               </CardContent>
             </Card>
-          </div>
-        )}
-        {selectedTab === "Messages" && (
-          <div className="px-8 py-6">
-            <div className="text-lg font-bold mb-4">Зурвасууд</div>
-            <div className="space-y-4">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <Avatar>
-                      <AvatarImage src="/placeholder-user.jpg" />
-                      <AvatarFallback>Б</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold">Бат-Эрдэнэ</h3>
-                        <span className="text-sm text-gray-500">
-                          2 цагийн өмнө
-                        </span>
-                      </div>
-                      <p className="text-gray-600">
-                        Хөвсгөл нуурын аялалд хэдэн хүн явж болох вэ?
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <Avatar>
-                      <AvatarImage src="/placeholder-user.jpg" />
-                      <AvatarFallback>С</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold">Сарангэрэл</h3>
-                        <span className="text-sm text-gray-500">
-                          5 цагийн өмнө
-                        </span>
-                      </div>
-                      <p className="text-gray-600">
-                        Говийн аялалд ямар тоног төхөөрөмж хэрэгтэй вэ?
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
           </div>
         )}
       </div>
