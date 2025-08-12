@@ -85,17 +85,17 @@ function parseJwt(token: string) {
 export default function AdminDashboard() {
   const router = useRouter();
   const [selectedTab, setSelectedTab] = useState("Dashboard");
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState("");
-  const [travels, setTravels] = useState([]);
+  const [travels, setTravels] = useState<any[]>([]);
   const [travelsLoading, setTravelsLoading] = useState(false);
   const [travelsError, setTravelsError] = useState("");
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [categoriesError, setCategoriesError] = useState("");
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState<any | null>(null);
   const [categoryForm, setCategoryForm] = useState({
     name: "",
     description: "",
@@ -758,6 +758,17 @@ export default function AdminDashboard() {
                 {travels.map((travel) => (
                   <Card key={travel._id}>
                     <CardContent className="p-6">
+                      {/* Trip cover image */}
+                      <div className="mb-4">
+                        <img
+                          src={
+                            (Array.isArray(travel.images) && travel.images[0])
+                              || "/placeholder.jpg"
+                          }
+                          alt={travel.title || "Trip image"}
+                          className="w-full h-40 object-cover rounded-lg"
+                        />
+                      </div>
                       <div className="flex items-center gap-3 mb-4">
                         <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                           <MapPin className="w-6 h-6 text-blue-600" />

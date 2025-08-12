@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -38,6 +38,9 @@ export default function CreateTripForm() {
     status: "SCHEDULED",
     categories: [] as string[],
   });
+
+  // Hold image files selected via file input for backend (Cloudinary) upload
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
 
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
@@ -166,74 +169,97 @@ export default function CreateTripForm() {
 
     // Create FormData object
     const formDataToSend = new FormData();
-    
+
     // Basic fields
     formDataToSend.append("title", formData.title);
     formDataToSend.append("description", formData.description);
-    
+
     // Location needs to be sent as a JSON string with specific format
-    formDataToSend.append("destination", JSON.stringify({
-      location: formData.location,
-      s: ""  // Add empty string for 's' property
-    }));
-    
+    formDataToSend.append(
+      "destination",
+      JSON.stringify({
+        location: formData.location,
+        s: "", // Add empty string for 's' property
+      })
+    );
+
     // Duration needs to be sent as a JSON string
-    formDataToSend.append("duration", JSON.stringify({
-      days: Number(formData.days),
-      nights: Number(formData.nights)
-    }));
-    
+    formDataToSend.append(
+      "duration",
+      JSON.stringify({
+        days: Number(formData.days),
+        nights: Number(formData.nights),
+      })
+    );
+
     // Convert price and quota to numbers
     formDataToSend.append("price", Number(formData.price).toString());
     formDataToSend.append("quota", Number(formData.totalQuota).toString());
-    
+
     // Date formatting
-    formDataToSend.append("startDateTime", new Date(formData.startDate).toISOString());
-    formDataToSend.append("endDateTime", new Date(formData.endDate).toISOString());
-    
+    formDataToSend.append(
+      "startDateTime",
+      new Date(formData.startDate).toISOString()
+    );
+    formDataToSend.append(
+      "endDateTime",
+      new Date(formData.endDate).toISOString()
+    );
+
     // Boolean fields
     formDataToSend.append("isSpecial", formData.isSpecial.toString());
     formDataToSend.append("status", formData.status);
 
     // Arrays need to be appended individually with [] notation
-    formData.categories.forEach(id => {
+    formData.categories.forEach((id) => {
       formDataToSend.append("categories[]", id);
     });
 
     // Filter out empty strings and append arrays
     formData.included
-      .filter(item => item.trim())
-      .forEach(item => {
+      .filter((item) => item.trim())
+      .forEach((item) => {
         formDataToSend.append("included[]", item);
       });
 
     formData.excluded
-      .filter(item => item.trim())
-      .forEach(item => {
+      .filter((item) => item.trim())
+      .forEach((item) => {
         formDataToSend.append("excluded[]", item);
       });
 
     // Plans need to be formatted as an array of objects
     const formattedPlans = formData.plans
-      .filter(p => p.title.trim())
-      .map(p => ({
+      .filter((p) => p.title.trim())
+      .map((p) => ({
         title: p.title,
-        items: p.items.filter(item => item.trim())
+        items: p.items.filter((item) => item.trim()),
       }));
     formDataToSend.append("plans", JSON.stringify(formattedPlans));
 
     // Images need to be appended as array
-    formData.images
-      .filter(img => img.trim())
-      .forEach(img => {
-        formDataToSend.append("images[]", img);
+    // If user provided direct image URLs, send them
+    if (formData.images?.length) {
+      formData.images
+        .filter((img) => (img || "").trim())
+        .forEach((img) => {
+          // Keep compatibility for string URLs expected by backend
+          formDataToSend.append("images[]", img);
+        });
+    }
+
+    // If the user selected files, append each file as `images` like Postman
+    if (imageFiles.length > 0) {
+      imageFiles.forEach((file) => {
+        formDataToSend.append("images", file);
       });
+    }
 
     try {
       // For debugging - log the FormData entries
       console.log("Sending form data:");
       for (let pair of formDataToSend.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
+        console.log(pair[0] + ": " + pair[1]);
       }
 
       const response = await fetch(`${API_URL}/admin/v1/travel`, {
@@ -246,13 +272,13 @@ export default function CreateTripForm() {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
-        throw new Error(data.errorMessage || 'Something went wrong');
+        throw new Error(data.errorMessage || "Something went wrong");
       }
 
       // Handle success
-      toast.success('Аялал амжилттай үүслээ!', {
+      toast.success("Аялал амжилттай үүслээ!", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -260,7 +286,7 @@ export default function CreateTripForm() {
         pauseOnHover: true,
         draggable: true,
       });
-      
+
       // Reset form after success
       setFormData({
         title: "",
@@ -280,10 +306,10 @@ export default function CreateTripForm() {
         status: "SCHEDULED",
         categories: [],
       });
-      
+      setImageFiles([]);
     } catch (error: any) {
-      console.error('Error creating trip:', error);
-      toast.error(error.message || 'Алдаа гарлаа. Дахин оролдоно уу.', {
+      console.error("Error creating trip:", error);
+      toast.error(error.message || "Алдаа гарлаа. Дахин оролдоно уу.", {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -569,36 +595,58 @@ export default function CreateTripForm() {
             </Button>
           </div>
 
-          {/* Images */}
+          {/* Image files (upload like Postman -> backend uploads to Cloudinary) */}
           <div>
-            <Label>Зургийн холбоосууд</Label>
-            {formData.images.map((image, index) => (
-              <div key={index} className="flex gap-2 mt-2">
-                <Input
-                  value={image}
-                  onChange={(e) =>
-                    handleArrayChange("images", index, e.target.value)
-                  }
-                  placeholder="https://example.com/image.jpg"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => removeArrayItem("images", index)}
-                >
-                  Устгах
-                </Button>
+            <Label htmlFor="imageFiles">Зураг файлууд (Cloudinary)</Label>
+            <Input
+              id="imageFiles"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={(e) => {
+                const files = Array.from(e.target.files || []);
+                setImageFiles(files);
+              }}
+            />
+            {imageFiles.length > 0 && (
+              <div className="mt-2 space-y-2">
+                {imageFiles.map((file, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between text-sm border rounded p-2"
+                  >
+                    <div className="truncate mr-2">
+                      {file.name}{" "}
+                      <span className="text-gray-500">
+                        ({Math.round(file.size / 1024)} KB)
+                      </span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setImageFiles((prev) =>
+                          prev.filter((_, i) => i !== idx)
+                        )
+                      }
+                    >
+                      Устгах
+                    </Button>
+                  </div>
+                ))}
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setImageFiles([])}
+                  >
+                    Бүх файлыг арилгах
+                  </Button>
+                </div>
               </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => addArrayItem("images")}
-              className="mt-2"
-            >
-              Зураг нэмэх
-            </Button>
+            )}
           </div>
 
           {/* Status */}

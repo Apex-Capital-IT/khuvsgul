@@ -25,26 +25,38 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+type FeaturedTrip = {
+  id: string;
+  href: string;
+  title: string;
+  location: string;
+  duration: string;
+  price: number;
+  featured: boolean;
+  category: string;
+  image: string;
+};
+
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://taiga-9fde.onrender.com";
 
 // Fetch featured trips from API
 const useFeaturedTrips = () => {
-  const [trips, setTrips] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [trips, setTrips] = useState<FeaturedTrip[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTrips = async () => {
       try {
-        const res = await fetch(`${API_URL}/travel?pageNumber=1&pageSize=4`);
+        const res = await fetch(`${API_URL}/travel?pageNumber=1&pageSize=100`);
         const data = await res.json();
         if (data.code === 0) {
           // pull the array out of data.response.docs
           const raw = Array.isArray(data.response.docs)
             ? data.response.docs
             : [];
-          const formatted = raw.map((trip) => ({
+          const formatted: FeaturedTrip[] = raw.map((trip: any) => ({
             id: trip._id,
             href: `/trips/${trip._id}`,
             title: trip.title,
@@ -54,7 +66,10 @@ const useFeaturedTrips = () => {
             } шөнө`,
             price: trip.price,
             featured: trip.isSpecial,
-            category: trip.categories?.[0] || "other",
+            category:
+              typeof trip.categories?.[0] === "string"
+                ? (trip.categories?.[0] as string)
+                : trip.categories?.[0]?.name || "other",
             image: trip.images?.[0] || "/cover.avif",
           }));
           setTrips(formatted);
@@ -62,7 +77,8 @@ const useFeaturedTrips = () => {
           throw new Error(data.message || "Unexpected API response");
         }
       } catch (err) {
-        setError(err.message);
+        const message = err instanceof Error ? err.message : "Unknown error";
+        setError(message);
       } finally {
         setLoading(false);
       }
@@ -84,10 +100,10 @@ const filterOptions = [
 ];
 
 export default function TripsPage() {
-  const [activeCategory, setActiveCategory] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortOrder, setSortOrder] = useState("all");
+  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [sortOrder, setSortOrder] = useState<string>("all");
   const itemsPerPage = 4;
 
   const {
@@ -107,7 +123,7 @@ export default function TripsPage() {
         trip.location.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     })
-    .sort((a, b) => {
+    .sort((a: FeaturedTrip, b: FeaturedTrip) => {
       switch (sortOrder) {
         case "price-asc":
           return a.price - b.price;
@@ -135,14 +151,14 @@ export default function TripsPage() {
     setCurrentPage(1);
   }, [activeCategory, searchQuery, sortOrder]);
 
-  const handlePageChange = (page) => {
+  const handlePageChange = (page: number) => {
     setCurrentPage(page);
     document
       .getElementById("trips-section")
       ?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleSortChange = (value) => setSortOrder(value);
+  const handleSortChange = (value: string) => setSortOrder(value);
 
   return (
     <>
