@@ -35,6 +35,7 @@ export default async function TripDetailPage({
   // Await params before using slug
   const { slug } = await params;
   const trip = await getTrip(slug);
+  const comments: any[] = Array.isArray(trip.comments) ? trip.comments : [];
 
   return (
     <>
@@ -308,7 +309,7 @@ export default async function TripDetailPage({
         </div>
       </section>
 
-      {/* Testimonials section can remain static or be enhanced with real data if available */}
+      {/* Testimonials-style comments from real data */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-medium mb-8">
@@ -316,57 +317,38 @@ export default async function TripDetailPage({
             <br />
             аялагчдаас
           </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="border bg-white rounded-lg p-6">
-              <div className="flex items-start mb-4">
-                <div className="text-3xl text-gray-300 mr-2">"</div>
-                <p className="text-sm">
-                  Аяллын маань мөрөөдөл биелсэн. Би хэзээ ч очиж үзнэ гэж
-                  бодоогүй газруудаар аялсан. Бүх зүйл эхнээсээ дуустал маш
-                  амар, саадгүй болсон.
-                </p>
-              </div>
-              <div className="flex items-center">
-                <div className="w-8 h-8 rounded-full bg-gray-200 mr-3 overflow-hidden">
-                  <Image
-                    src={trip.images?.[0] || "/cover.avif"}
-                    alt="Avatar"
-                    width={32}
-                    height={32}
-                  />
+          {comments.length === 0 ? (
+            <div className="text-gray-500">Одоогоор сэтгэгдэл алга.</div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-6">
+              {comments.map((c: any, idx: number) => (
+                <div key={c._id || idx} className="border bg-white rounded-lg p-6">
+                  <div className="flex items-start mb-4">
+                    <div className="text-3xl text-gray-300 mr-2">"</div>
+                    <p className="text-sm">{c.content || c.comment || c.text}</p>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 rounded-full bg-gray-200 mr-3 overflow-hidden">
+                      <Image
+                        src={trip.images?.[0] || "/placeholder-user.jpg"}
+                        alt="Avatar"
+                        width={32}
+                        height={32}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium">
+                        {typeof c.user === "string" ? "Зочин" : c.user?.name || "Зочин"}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {c.createdAt ? new Date(c.createdAt).toLocaleDateString() : ""}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs font-medium">Priya Mehta</p>
-                  <p className="text-xs text-gray-500">India</p>
-                </div>
-              </div>
+              ))}
             </div>
-            <div className="border bg-white rounded-lg p-6">
-              <div className="flex items-start mb-4">
-                <div className="text-3xl text-gray-300 mr-2">"</div>
-                <p className="text-sm">
-                  Тэд миний хэзээ ч мартахгүй гайхалтай адал явдлыг бүтээсэн.
-                  Байр, үйлчилгээ маш сайн, амралт ба адал явдлын төгс хослол
-                  байлаа.
-                </p>
-              </div>
-              <div className="flex items-center">
-                <div className="w-8 h-8 rounded-full bg-gray-200 mr-3 overflow-hidden">
-                  <Image
-                    src={trip.images?.[0] || "/cover.avif"}
-                    alt="Avatar"
-                    width={32}
-                    height={32}
-                  />
-                </div>
-
-                <div>
-                  <p className="text-xs font-medium">Javier Rodriguez</p>
-                  <p className="text-xs text-gray-500">Spain</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </section>
       <section className="py-16 bg-gray-50">

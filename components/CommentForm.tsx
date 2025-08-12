@@ -19,18 +19,26 @@ export default function CommentForm({ tripId }: CommentFormProps) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/login");
-      return;
-    }
-  }, [router]);
+  // Removed redirect when user is not logged in so trip page remains accessible.
+  // We will handle auth on submit instead.
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess(false);
+
+    // Require login on submit, not on page load
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("Нэвтэрсний дараа сэтгэгдэл үлдээнэ үү");
+      return;
+    }
+
+    // Disallow empty or whitespace-only comments
+    if (comment.trim().length === 0) {
+      setError("сэтгэгдэл бичнэ үү");
+      return;
+    }
 
     if (comment.length > 800) {
       setError("Сэтгэгдэл 800 тэмдэгтэнд багтах ёстой");
@@ -43,10 +51,7 @@ export default function CommentForm({ tripId }: CommentFormProps) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // Append token if needed for authenticated API
-          ...(localStorage.getItem("token") && {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          }),
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ comment }),
       });
@@ -58,6 +63,8 @@ export default function CommentForm({ tripId }: CommentFormProps) {
 
       setSuccess(true);
       setComment("");
+      // Ask server components to re-fetch data so the new comment appears
+      router.refresh();
     } catch (err: any) {
       setError(err.message);
     } finally {
