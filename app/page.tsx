@@ -1,39 +1,39 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import BenefitsSection from "@/components/benefits-section";
 import NewsletterForm from "@/components/newsletter-form";
 import Testimonials from "@/components/testimonials";
+import { useI18n } from "@/components/LanguageProvider";
 
 export default function Home() {
+  const { t } = useI18n();
   return (
     <>
       <section className="relative h-screen flex items-center">
         <Image
           src="/cover.avif"
-          alt="Нүүр зургийн ар дэвсгэр"
+          alt={t("home.hero.imageAlt")}
           fill
           className="object-cover"
           priority
         />
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="container mx-auto px-4 relative z-10 text-white pt-16">
-          <p className="text-sm mb-2">
-            Дараагийн адал явдлаа төлөвлөх зөв газар
-          </p>
+          <p className="text-sm mb-2">{t("home.hero.kicker")}</p>
           <h1 className="text-4xl md:text-6xl font-medium mb-4">
-            <span className="italic">Зүгээр л</span> очих газар биш
+            <span className="italic">{t("home.hero.title.part1")}</span> {t("home.hero.title.part2")}
             <br />
-            <span className="italic">жинхэнэ</span> аялалд
+            <span className="italic">{t("home.hero.title.part3")}</span> {t("home.hero.title.part4")}
             <br />
-            <span className="italic">бидэнтэй хамт</span> гараарай.
+            <span className="italic">{t("home.hero.title.part5")}</span> {t("home.hero.title.part6")}
           </h1>
           <p className="max-w-md mb-8 text-sm">
-            Бидэнтэй хамт гайхалтай гэрэл зураг, сэтгэл хөдөлгөм адал явдлаар
-            дамжуулан олон соёлын хаалгыг нээнэ.
+            {t("home.hero.description")}
           </p>
           <Button asChild className="bg-white text-black hover:bg-gray-100">
-            <Link href="/trips">Дэлгэрэнгүй</Link>
+            <Link href="/trips">{t("home.hero.cta")}</Link>
           </Button>
         </div>
       </section>
@@ -42,12 +42,12 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-end mb-8">
             <h2 className="text-2xl font-medium">
-              Заавал <span className="italic">туршиж үзэх</span>
+              {t("home.mustTry.title.part1")} <span className="italic">{t("home.mustTry.title.part2")}</span>
               <br />
-              багцууд
+              {t("home.mustTry.title.part3")}
             </h2>
             <Link href="/trips" className="text-sm underline">
-              Бүх багцыг харах
+              {t("home.mustTry.seeAll")}
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -55,7 +55,7 @@ export default function Home() {
               <Link href="/trips/tropical-paradise" className="block">
                 <Image
                   src="/cover.avif"
-                  alt="Тропикийн диваажин"
+                  alt={t("home.card1.imageAlt")}
                   width={300}
                   height={400}
                   className="w-full aspect-[3/4] object-cover"
@@ -79,7 +79,7 @@ export default function Home() {
                   </button>
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent text-white">
-                  <h3 className="font-medium mb-1">Тропикийн диваажин</h3>
+                  <h3 className="font-medium mb-1">{t("home.card1.title")}</h3>
                   <div className="flex items-center text-xs mb-2">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -101,7 +101,7 @@ export default function Home() {
                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                       />
                     </svg>
-                    Бали, Индонез
+                    {t("home.card1.location")}
                   </div>
                   <div className="flex items-center text-xs">
                     <svg
@@ -118,7 +118,7 @@ export default function Home() {
                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                       />
                     </svg>
-                    7 өдөр, 6 шөнө
+                    {t("home.card1.duration")}
                   </div>
                   <div className="mt-2 font-medium">$999</div>
                 </div>
@@ -128,7 +128,7 @@ export default function Home() {
               <Link href="/trips/mountain-odyssey" className="block">
                 <Image
                   src="/cover.avif"
-                  alt="Уулын аялал"
+                  alt={t("home.card2.imageAlt")}
                   width={300}
                   height={400}
                   className="w-full aspect-[3/4] object-cover"
@@ -152,7 +152,7 @@ export default function Home() {
                   </button>
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent text-white">
-                  <h3 className="font-medium mb-1">Уулын аялал</h3>
+                  <h3 className="font-medium mb-1">{t("home.card2.title")}</h3>
                   <div className="flex items-center text-xs mb-2">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -174,7 +174,7 @@ export default function Home() {
                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                       />
                     </svg>
-                    Катманду, Балба
+                    {t("home.card2.location")}
                   </div>
                   <div className="flex items-center text-xs">
                     <svg
@@ -191,7 +191,7 @@ export default function Home() {
                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                       />
                     </svg>
-                    10 өдөр, 9 шөнө
+                    {t("home.card2.duration")}
                   </div>
                   <div className="mt-2 font-medium">$1499</div>
                 </div>
@@ -201,7 +201,7 @@ export default function Home() {
               <Link href="/trips/cultural-immersion" className="block">
                 <Image
                   src="/cover.avif"
-                  alt="Түүхэнд хүрэх"
+                  alt={t("home.card3.imageAlt")}
                   width={300}
                   height={400}
                   className="w-full aspect-[3/4] object-cover"
@@ -225,7 +225,7 @@ export default function Home() {
                   </button>
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent text-white">
-                  <h3 className="font-medium mb-1">Түүхэнд хүрэх</h3>
+                  <h3 className="font-medium mb-1">{t("home.card3.title")}</h3>
                   <div className="flex items-center text-xs mb-2">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -247,7 +247,7 @@ export default function Home() {
                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                       />
                     </svg>
-                    Куско, Перу
+                    {t("home.card3.location")}
                   </div>
                   <div className="flex items-center text-xs">
                     <svg
@@ -264,7 +264,7 @@ export default function Home() {
                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                       />
                     </svg>
-                    5 өдөр, 4 шөнө
+                    {t("home.card3.duration")}
                   </div>
                   <div className="mt-2 font-medium">$899</div>
                 </div>
@@ -274,7 +274,7 @@ export default function Home() {
               <Link href="/trips/urban-adventure" className="block">
                 <Image
                   src="/cover.avif"
-                  alt="Шийдэгдэх аялал"
+                  alt={t("home.card4.imageAlt")}
                   width={300}
                   height={400}
                   className="w-full aspect-[3/4] object-cover"
@@ -298,7 +298,7 @@ export default function Home() {
                   </button>
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent text-white">
-                  <h3 className="font-medium mb-1">Шийдэгдэх аялал</h3>
+                  <h3 className="font-medium mb-1">{t("home.card4.title")}</h3>
                   <div className="flex items-center text-xs mb-2">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -320,7 +320,7 @@ export default function Home() {
                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                       />
                     </svg>
-                    Токио, Япон
+                    {t("home.card4.location")}
                   </div>
                   <div className="flex items-center text-xs">
                     <svg
@@ -337,7 +337,7 @@ export default function Home() {
                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                       />
                     </svg>
-                    6 өдөр, 5 шөнө
+                    {t("home.card4.duration")}
                   </div>
                   <div className="mt-2 font-medium">$1099</div>
                 </div>
@@ -354,7 +354,7 @@ export default function Home() {
           <div className="relative rounded-xl overflow-hidden">
             <Image
               src="/cover.avif"
-              alt="Аялалын зургийн агшинууд"
+              alt={t("home.gallery.imageAlt")}
               width={1200}
               height={500}
               className="w-full aspect-[21/9] object-cover"
@@ -364,9 +364,9 @@ export default function Home() {
               className="absolute inset-0 bg-black/30 flex items-center justify-center"
             >
               <h2 className="text-white text-3xl font-medium">
-                Instagram-д <span className="italic">хуваалцсан</span>
+                {t("home.gallery.title.part1")} <span className="italic">{t("home.gallery.title.part2")}</span>
                 <br />
-                агшинууд
+                {t("home.gallery.title.part3")}
               </h2>
             </Link>
           </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Menu, X, User, LogOut } from "lucide-react";
+import { Menu, X, User, LogOut, Globe } from "lucide-react";
 import Image from "next/image";
 import {
   DropdownMenu,
@@ -11,9 +11,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/components/LanguageProvider";
 
 export default function Header() {
   const router = useRouter();
+  const { t, locale, setLocale } = useI18n();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -66,7 +68,7 @@ export default function Header() {
     >
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Link href="/" className="text-xl font-light italic">
-          Taiga
+          {t("brand.name")}
         </Link>
 
         {/* Desktop Navigation */}
@@ -75,26 +77,40 @@ export default function Header() {
             href="/trips"
             className="text-sm font-medium hover:text-gray-600 transition-colors"
           >
-            Аялал
+            {t("nav.trips")}
           </Link>
           <Link
             href="/"
             className="text-sm font-medium hover:text-gray-600 transition-colors"
           >
-            Чиглэл
+            {t("nav.destination")}
           </Link>
           <Link
             href="/about"
             className="text-sm font-medium hover:text-gray-600 transition-colors"
           >
-            Бидний тухай
+            {t("nav.about")}
           </Link>
           <Link
             href="/contact"
             className="text-sm font-medium hover:text-gray-600 transition-colors"
           >
-            Холбоо барих
+            {t("nav.contact")}
           </Link>
+          <div>
+            <DropdownMenu>
+              <DropdownMenuTrigger className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm ${
+                scrolled ? "bg-gray-100 text-gray-800" : "bg-white/10 text-white"
+              }`}>
+                <Globe className="w-4 h-4" />
+                {locale === "en" ? "English" : "Монгол"}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setLocale("en")}>English</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setLocale("mn")}>Монгол</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
           {isLoggedIn ? (
             <div className="relative dropdown-container">
               <button
@@ -115,7 +131,7 @@ export default function Header() {
                     className="w-full flex items-center text-black px-4 py-2 text-sm hover:bg-black hover:text-white rounded-t-lg hover:rounded-t-lg transition-colors"
                   >
                     <User className="w-4 h-4 mr-2" />
-                    Профайл
+                    {t("nav.profile")}
                   </button>
                   <button
                     onClick={() => {
@@ -125,7 +141,7 @@ export default function Header() {
                     className="w-full flex items-center px-4 py-2 text-black text-sm hover:bg-black hover:text-white rounded-b-lg hover:rounded-b-lg  transition-colors"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
-                    Гарах
+                    {t("nav.logout")}
                   </button>
                 </div>
               )}
@@ -139,7 +155,7 @@ export default function Header() {
                   : "bg-white text-black hover:text-blue-600"
               }`}
             >
-              Нэвтрэх
+              {t("nav.login")}
             </Link>
           )}
         </nav>
@@ -173,7 +189,7 @@ export default function Header() {
             className="text-xl font-light italic text-gray-800"
             onClick={() => setMobileMenuOpen(false)}
           >
-            Khuvsgul
+            {t("brand.name")}
           </Link>
         </div>
 
@@ -183,28 +199,28 @@ export default function Header() {
             className="text-gray-800 text-lg py-4 border-b border-gray-100 hover:text-gray-600 transition-colors"
             onClick={() => setMobileMenuOpen(false)}
           >
-            Аялал
+            {t("nav.trips")}
           </Link>
           <Link
             href="/destination"
             className="text-gray-800 text-lg py-4 border-b border-gray-100 hover:text-gray-600 transition-colors"
             onClick={() => setMobileMenuOpen(false)}
           >
-            Чиглэл
+            {t("nav.destination")}
           </Link>
           <Link
             href="/about"
             className="text-gray-800 text-lg py-4 border-b border-gray-100 hover:text-gray-600 transition-colors"
             onClick={() => setMobileMenuOpen(false)}
           >
-            Бидний тухай
+            {t("nav.about")}
           </Link>
           <Link
             href="/contact"
             className="text-gray-800 text-lg py-4 hover:text-gray-600 transition-colors"
             onClick={() => setMobileMenuOpen(false)}
           >
-            Холбоо барих
+            {t("nav.contact")}
           </Link>
           {isLoggedIn ? (
             <>
@@ -213,7 +229,7 @@ export default function Header() {
                 className="text-gray-800 text-lg py-4 border-b border-gray-100 hover:text-gray-600 transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Профайл
+                {t("nav.profile")}
               </Link>
               <button
                 onClick={() => {
@@ -222,7 +238,7 @@ export default function Header() {
                 }}
                 className="text-gray-800 text-lg py-4 hover:text-red-600 transition-colors text-left"
               >
-                Гарах
+                {t("nav.logout")}
               </button>
             </>
           ) : (
@@ -232,17 +248,25 @@ export default function Header() {
                 className="text-gray-800 text-lg py-4 border-b border-gray-100 hover:text-blue-600 transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Нэвтрэх
+                {t("nav.login")}
               </Link>
               <Link
                 href="/signup"
                 className="text-gray-800 text-lg py-4 hover:text-green-600 transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Бүртгүүлэх
+                {t("nav.signup")}
               </Link>
             </>
           )}
+          <div className="pt-4">
+            <div className="inline-flex items-center gap-2 border rounded-xl px-3 py-2">
+              <Globe className="w-4 h-4 text-gray-700" />
+              <button className={`text-sm ${locale === "en" ? "font-semibold" : "text-gray-500"}`} onClick={() => setLocale("en")}>English</button>
+              <span className="text-gray-300">/</span>
+              <button className={`text-sm ${locale === "mn" ? "font-semibold" : "text-gray-500"}`} onClick={() => setLocale("mn")}>Монгол</button>
+            </div>
+          </div>
         </nav>
       </div>
     </header>

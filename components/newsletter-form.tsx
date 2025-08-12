@@ -1,9 +1,12 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
+import { useI18n } from "@/components/LanguageProvider";
 
 export default function NewsletterForm() {
+  const { t } = useI18n();
   return (
     <section className="relative py-16 bg-gray-100 overflow-hidden">
       <div className="absolute inset-0 z-0">
@@ -12,15 +15,12 @@ export default function NewsletterForm() {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-xl mx-auto text-center mb-8">
           <h2 className="text-3xl font-medium mb-2">
-            <span className="italic">Шинэ</span> аялалд
+            <span className="italic">{t("newsletter.title.part1")}</span> {t("newsletter.title.part2")}
             <br />
-            <span className="italic">гарахад</span> бэлэн үү?
+            <span className="italic">{t("newsletter.title.part3")}</span> {t("newsletter.title.part4")}
           </h2>
           <p className="text-gray-600 text-sm">
-            Мөрөөдлийн амралтаа цаашид мөрөөдөл хэвээр үлдээх хэрэггүй. Одоо
-            үйлдэл хийж бидэнд дараагийн мартагдашгүй адал явдлаа бүтээлцэхийг
-            зөвшөөрнө үү. Аялалын мөрөөдлөө мартагдашгүй бодит зүйл болгоход
-            бидэнтэй нэгдээрэй.
+            {t("newsletter.description")}
           </p>
         </div>
         <div className="max-w-md mx-auto bg-white/40 backdrop-blur-sm p-6 rounded-lg">
@@ -29,14 +29,14 @@ export default function NewsletterForm() {
               <div className="w-1/2">
                 <input
                   type="text"
-                  placeholder="Нэр"
+                  placeholder={t("newsletter.form.name")}
                   className="w-full border-b border-gray-300 focus:outline-none focus:border-black bg-transparent placeholder-gray-400 text-sm py-2"
                 />
               </div>
               <div className="w-1/2">
                 <input
                   type="tel"
-                  placeholder="Утасны дугаар"
+                  placeholder={t("newsletter.form.phone")}
                   className="w-full border-b border-gray-300 focus:outline-none focus:border-black bg-transparent placeholder-gray-400 text-sm py-2"
                 />
               </div>
@@ -44,7 +44,7 @@ export default function NewsletterForm() {
             <div>
               <input
                 type="email"
-                placeholder="И-мэйл хаяг"
+                placeholder={t("newsletter.form.email")}
                 className="w-full border-b border-gray-300 focus:outline-none focus:border-black bg-transparent placeholder-gray-400 text-sm py-2"
               />
             </div>
@@ -58,12 +58,11 @@ export default function NewsletterForm() {
                 htmlFor="terms"
                 className="text-xs text-gray-600 leading-tight"
               >
-                Мэдээллийн товхимолд бүртгүүлснээр би Үйлчилгээний нөхцөлийг
-                зөвшөөрч байна
+                {t("newsletter.form.terms")}
               </label>
             </div>
             <button className="flex items-center justify-center w-full rounded-full py-2 px-4 bg-black text-white hover:bg-gray-800 text-sm font-medium">
-              Одоо бүртгүүлэх
+              {t("newsletter.form.submit")}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-4 w-4 ml-2"

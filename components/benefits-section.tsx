@@ -1,19 +1,20 @@
+"use client";
+import { useI18n } from "@/components/LanguageProvider";
+
 export default function BenefitsSection() {
+  const { t } = useI18n();
   return (
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <div>
             <h2 className="text-2xl font-medium mb-4">
-              Бидний үнэн <span className="italic">итгэл</span>
+              {t("benefits.title.part1")} <span className="italic">{t("benefits.title.part2")}</span>
               <br />
-              <span className="italic">таны</span> ашиг тусын төлөө
+              <span className="italic">{t("benefits.title.part3")}</span> {t("benefits.title.part4")}
             </h2>
             <p className="text-gray-600 text-sm mb-4">
-              Бидний итгэл үнэмшил нь зүгээр л үг биш, харин бидний санал болгож буй 
-              аялал бүрийн үндэс юм. Тогтвортой байдал, жинхэнэ бодит байдал, 
-              хэрэглэгчид төвлөсөн байдлыг эрхэмлэснээр бидэнтэй хийх аялал бүр таны хувьд 
-              үнэ цэнэтэй байх болно.
+              {t("benefits.description")}
             </p>
           </div>
           <div className="space-y-4">
@@ -35,11 +36,8 @@ export default function BenefitsSection() {
                 </svg>
               </div>
               <div>
-                <h3 className="font-medium mb-1">Хэрэглэгчид төвлөсөн</h3>
-                <p className="text-xs text-gray-600">
-                  Таны сэтгэл ханамж бол бидний аялалын үйлчилгээг чиглүүлэгч луужин юм. 
-                  Бид таны хэрэгцээг эн тэргүүнд тавьж байна.
-                </p>
+                <h3 className="font-medium mb-1">{t("benefits.point1.title")}</h3>
+                <p className="text-xs text-gray-600">{t("benefits.point1.description")}</p>
               </div>
             </div>
             <div className="bg-white p-4 rounded-lg flex items-start space-x-4">
@@ -60,11 +58,8 @@ export default function BenefitsSection() {
                 </svg>
               </div>
               <div>
-                <h3 className="font-medium mb-1">Тогтвортой аялал</h3>
-                <p className="text-xs text-gray-600">
-                  Орон нутгийн байгаль орчин, нутгийн иргэдийг хүндэтгэсэн тогтвортой, 
-                  байгальд ээлтэй аяллыг эрхэмлэдэг.
-                </p>
+                <h3 className="font-medium mb-1">{t("benefits.point2.title")}</h3>
+                <p className="text-xs text-gray-600">{t("benefits.point2.description")}</p>
               </div>
             </div>
             <div className="bg-white p-4 rounded-lg flex items-start space-x-4">
@@ -85,11 +80,8 @@ export default function BenefitsSection() {
                 </svg>
               </div>
               <div>
-                <h3 className="font-medium mb-1">Жинхэнэ туршлага</h3>
-                <p className="text-xs text-gray-600">
-                  Бид аялал нь таныг мартагдашгүй, жинхэнэ орон нутгийн 
-                  соёлын туршлага, сонирхолтой газруудтай холбох ёстой гэдэгт итгэдэг.
-                </p>
+                <h3 className="font-medium mb-1">{t("benefits.point3.title")}</h3>
+                <p className="text-xs text-gray-600">{t("benefits.point3.description")}</p>
               </div>
             </div>
             <div className="bg-white p-4 rounded-lg flex items-start space-x-4">
@@ -110,11 +102,8 @@ export default function BenefitsSection() {
                 </svg>
               </div>
               <div>
-                <h3 className="font-medium mb-1">Чанартай хөтөч</h3>
-                <p className="text-xs text-gray-600">
-                  Аялал бүрийг мэдлэгтэй, хүсэл эрмэлзэлтэй хөтчид удирдан, 
-                  таны аяллын туршлагыг улам баяжуулна.
-                </p>
+                <h3 className="font-medium mb-1">{t("benefits.point4.title")}</h3>
+                <p className="text-xs text-gray-600">{t("benefits.point4.description")}</p>
               </div>
             </div>
           </div>

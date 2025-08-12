@@ -322,10 +322,15 @@ export default async function TripDetailPage({
           ) : (
             <div className="grid md:grid-cols-2 gap-6">
               {comments.map((c: any, idx: number) => (
-                <div key={c._id || idx} className="border bg-white rounded-lg p-6">
+                <div
+                  key={c._id || idx}
+                  className="border bg-white rounded-lg p-6"
+                >
                   <div className="flex items-start mb-4">
                     <div className="text-3xl text-gray-300 mr-2">"</div>
-                    <p className="text-sm">{c.content || c.comment || c.text}</p>
+                    <p className="text-sm">
+                      {c.content || c.comment || c.text}
+                    </p>
                   </div>
                   <div className="flex items-center">
                     <div className="w-8 h-8 rounded-full bg-gray-200 mr-3 overflow-hidden">
@@ -338,10 +343,14 @@ export default async function TripDetailPage({
                     </div>
                     <div>
                       <p className="text-xs font-medium">
-                        {typeof c.user === "string" ? "Зочин" : c.user?.name || "Зочин"}
+                        {typeof c.user === "string"
+                          ? "Зочин"
+                          : c.user?.name || "Зочин"}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {c.createdAt ? new Date(c.createdAt).toLocaleDateString() : ""}
+                        {c.createdAt
+                          ? new Date(c.createdAt).toLocaleDateString()
+                          : ""}
                       </p>
                     </div>
                   </div>
