@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +17,7 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 import CommentForm from "@/components/CommentForm";
+import { useState, useEffect } from "react";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://taiga-9fde.onrender.com";
@@ -26,28 +29,139 @@ async function getTrip(slug: string) {
   return data.response;
 }
 
-export default async function TripDetailPage({
+export default function TripDetailPage({
   params,
 }: {
   // In Next.js 15+, `params` is a promise
   params: Promise<{ slug: string }>;
 }) {
   // Await params before using slug
-  const { slug } = await params;
-  const trip = await getTrip(slug);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [trip, setTrip] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Use useEffect to fetch data since this is now a client component
+  useEffect(() => {
+    const fetchTrip = async () => {
+      try {
+        const { slug } = await params;
+        const tripData = await getTrip(slug);
+        setTrip(tripData);
+      } catch (error) {
+        console.error('Failed to fetch trip:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTrip();
+  }, [params]);
+
+  if (loading || !trip) {
+    return <div>Loading...</div>;
+  }
+
   const comments: any[] = Array.isArray(trip.comments) ? trip.comments : [];
+  const images = trip.images || [];
+  const hasMultipleImages = images.length > 1;
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const previousImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  // Function to convert YouTube URLs to embed format
+  const getEmbedUrl = (url: string): string => {
+    if (!url) return '';
+    
+    // Handle YouTube URLs
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      let videoId = '';
+      
+      if (url.includes('youtube.com/watch?v=')) {
+        videoId = url.split('v=')[1]?.split('&')[0] || '';
+      } else if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1]?.split('?')[0] || '';
+      }
+      
+      if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}`;
+      }
+    }
+    
+    // Handle Vimeo URLs
+    if (url.includes('vimeo.com/')) {
+      const videoId = url.split('vimeo.com/')[1]?.split('?')[0] || '';
+      if (videoId) {
+        return `https://player.vimeo.com/video/${videoId}`;
+      }
+    }
+    
+    // Return original URL if not a recognized video platform
+    return url;
+  };
 
   return (
     <>
       <section className="relative h-[300px] flex items-center">
         <Image
-          src={trip.images?.[0] || "/cover.avif"}
+          src={images[currentImageIndex] || "/cover.avif"}
           alt={trip.title || "Trip Cover"}
           fill
           className="object-cover"
           priority
         />
         <div className="absolute inset-0 bg-black/20"></div>
+        
+        {/* Navigation buttons - only show if there are multiple images */}
+        {hasMultipleImages && (
+          <>
+            <Button
+              onClick={previousImage}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white border-0"
+              size="sm"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </Button>
+            
+            <Button
+              onClick={nextImage}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white border-0"
+              size="sm"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </Button>
+          </>
+        )}
+
         <div className="container mx-auto px-4 relative z-10 text-white pt-16">
           <h1 className="text-4xl md:text-5xl font-medium">
             {trip.title || "Аяллын нэр"}
@@ -308,6 +422,31 @@ export default async function TripDetailPage({
           </div>
         </div>
       </section>
+
+      {/* Video Section */}
+      {trip.videos && Array.isArray(trip.videos) && trip.videos.length > 0 && trip.videos.some((video: string) => video.trim()) && (
+        <section className="py-16 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <h2 className="text-2xl font-medium mb-8">
+              Аяллын <span className="italic">видео</span>
+            </h2>
+            <div className="max-w-4xl mx-auto space-y-6">
+              {trip.videos.filter((video: string) => video.trim()).map((video: string, index: number) => (
+                <div key={index} className="relative aspect-video bg-gray-200 rounded-lg overflow-hidden">
+                  <iframe
+                    src={getEmbedUrl(video)}
+                    title={`${trip.title} - Аяллын видео ${index + 1}`}
+                    className="w-full h-full"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Testimonials-style comments from real data */}
       <section className="py-16 bg-gray-50">

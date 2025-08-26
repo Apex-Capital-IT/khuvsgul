@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Menu, X, User, LogOut, Globe } from "lucide-react";
-import Image from "next/image";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,7 +25,6 @@ export default function Header() {
       setScrolled(window.scrollY > 10);
     };
 
-    // Check if user is logged in
     const token = localStorage.getItem("token");
     setIsLoggedIn(!!token);
 
@@ -98,16 +96,24 @@ export default function Header() {
             {t("nav.contact")}
           </Link>
           <div>
-            <DropdownMenu>
-              <DropdownMenuTrigger className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm ${
-                scrolled ? "bg-gray-100 text-gray-800" : "bg-white/10 text-white"
-              }`}>
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm ${
+                  scrolled
+                    ? "bg-gray-100 text-gray-800"
+                    : "bg-white/10 text-white"
+                }`}
+              >
                 <Globe className="w-4 h-4" />
                 {locale === "en" ? "English" : "Монгол"}
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setLocale("en")}>English</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLocale("mn")}>Монгол</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setLocale("en")}>
+                  English
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setLocale("mn")}>
+                  Монгол
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -262,9 +268,23 @@ export default function Header() {
           <div className="pt-4">
             <div className="inline-flex items-center gap-2 border rounded-xl px-3 py-2">
               <Globe className="w-4 h-4 text-gray-700" />
-              <button className={`text-sm ${locale === "en" ? "font-semibold" : "text-gray-500"}`} onClick={() => setLocale("en")}>English</button>
+              <button
+                className={`text-sm ${
+                  locale === "en" ? "font-semibold" : "text-gray-500"
+                }`}
+                onClick={() => setLocale("en")}
+              >
+                English
+              </button>
               <span className="text-gray-300">/</span>
-              <button className={`text-sm ${locale === "mn" ? "font-semibold" : "text-gray-500"}`} onClick={() => setLocale("mn")}>Монгол</button>
+              <button
+                className={`text-sm ${
+                  locale === "mn" ? "font-semibold" : "text-gray-500"
+                }`}
+                onClick={() => setLocale("mn")}
+              >
+                Монгол
+              </button>
             </div>
           </div>
         </nav>

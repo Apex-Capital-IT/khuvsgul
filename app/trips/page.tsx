@@ -13,6 +13,8 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
+  ChevronDown as ChevronDownIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +37,7 @@ type FeaturedTrip = {
   featured: boolean;
   category: string;
   image: string;
+  images: string[];
 };
 
 const API_URL =
@@ -71,6 +74,7 @@ const useFeaturedTrips = () => {
                 ? (trip.categories?.[0] as string)
                 : trip.categories?.[0]?.name || "other",
             image: trip.images?.[0] || "/cover.avif",
+            images: trip.images || ["/cover.avif"],
           }));
           setTrips(formatted);
         } else {
@@ -98,6 +102,140 @@ const filterOptions = [
   { label: "Хугацаа: Богино - Урт", value: "duration-asc" },
   { label: "Хугацаа: Урт - Богино", value: "duration-desc" },
 ];
+
+// Image Carousel Component
+const ImageCarousel = ({ images, title }: { images: string[]; title: string }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  if (images.length <= 1) {
+    return (
+      <div className="relative h-56">
+        <Image
+          src={images[0]}
+          alt={title}
+          fill
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-56 group">
+      <Image
+        src={images[currentImageIndex]}
+        alt={`${title} - Image ${currentImageIndex + 1}`}
+        fill
+        className="object-cover transition-transform duration-300 group-hover:scale-105"
+      />
+      
+      {/* Navigation Buttons */}
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          prevImage();
+        }}
+        className="absolute left-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100"
+        aria-label="Previous image"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+      
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          nextImage();
+        }}
+        className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100"
+        aria-label="Next image"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+      
+      {/* Image Counter */}
+      <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+        {currentImageIndex + 1} / {images.length}
+      </div>
+    </div>
+  );
+};
+
+// Featured Image Carousel Component
+const FeaturedImageCarousel = ({ images, title }: { images: string[]; title: string }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  if (images.length <= 1) {
+    return (
+      <div className="relative h-64">
+        <Image
+          src={images[0]}
+          alt={title}
+          fill
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-64 group">
+      <Image
+        src={images[currentImageIndex]}
+        alt={`${title} - Image ${currentImageIndex + 1}`}
+        fill
+        className="object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+      
+      {/* Navigation Buttons */}
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          prevImage();
+        }}
+        className="absolute left-3 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100"
+        aria-label="Previous image"
+      >
+        <ChevronLeft className="h-5 w-5" />
+      </button>
+      
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          nextImage();
+        }}
+        className="absolute right-3 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100"
+        aria-label="Next image"
+      >
+        <ChevronRight className="h-5 w-5" />
+      </button>
+      
+      {/* Image Counter */}
+      <div className="absolute bottom-3 right-3 bg-black/50 text-white text-sm px-3 py-1 rounded">
+        {currentImageIndex + 1} / {images.length}
+      </div>
+    </div>
+  );
+};
 
 export default function TripsPage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
@@ -303,14 +441,9 @@ export default function TripsPage() {
                     href={trip.href}
                     className="group bg-white rounded-lg overflow-hidden border border-gray-100 transition-all hover:shadow-lg"
                   >
-                    <div className="relative h-56">
-                      <Image
-                        src={trip.image}
-                        alt={trip.title}
-                        fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <button className="absolute top-3 right-3 w-8 h-8 bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                    <div className="relative">
+                      <ImageCarousel images={trip.images} title={trip.title} />
+                      <button className="absolute top-3 right-3 w-8 h-8 bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-110 z-10">
                         <Heart className="h-4 w-4 text-white" />
                       </button>
                     </div>
@@ -397,17 +530,12 @@ export default function TripsPage() {
                   href={trip.href}
                   className="group bg-white rounded-xl overflow-hidden shadow-md transition-all hover:shadow-xl"
                 >
-                  <div className="relative h-64">
-                    <Image
-                      src={trip.image}
-                      alt={trip.title}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <button className="absolute top-4 right-4 w-9 h-9 bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  <div className="relative">
+                    <FeaturedImageCarousel images={trip.images} title={trip.title} />
+                    <button className="absolute top-4 right-4 w-9 h-9 bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-110 z-10">
                       <Heart className="h-5 w-5 text-white" />
                     </button>
-                    <Badge className="absolute top-4 left-4 bg-yellow-500 hover:bg-yellow-600">
+                    <Badge className="absolute top-4 left-4 bg-yellow-500 hover:bg-yellow-600 z-10">
                       Онцлох
                     </Badge>
                   </div>

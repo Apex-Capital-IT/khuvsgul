@@ -1,20 +1,27 @@
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import Link from "next/link";
+import { useI18n } from "@/components/LanguageProvider";
 
 export default function ContactPage() {
+  const { t } = useI18n();
+  
   return (
     <>
       <section className="py-16 pt-32">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h1 className="text-4xl font-medium mb-8 text-center">Холбоо барих</h1>
+            <h1 className="text-4xl font-medium mb-8 text-center">
+              {t("contact.title")}
+            </h1>
             <div className="grid md:grid-cols-2 gap-8">
               <div>
-                <h2 className="text-xl font-medium mb-4">Бидэнтэй холбогдох</h2>
+                <h2 className="text-xl font-medium mb-4">{t("contact.subtitle")}</h2>
                 <p className="text-gray-600 mb-6">
-                  Бидний аяллын багцуудын талаар асуулт байна уу, эсвэл мөрөөдлийн амралтаа төлөвлөхөд тусламж хэрэгтэй юү? 
-                  Манай баг таны хөтөлбөрийн алхам бүрд туслахад бэлэн байна.
+                  {t("contact.description")}
                 </p>
                 <div className="space-y-4">
                   <div className="flex items-start">
@@ -35,8 +42,18 @@ export default function ContactPage() {
                       </svg>
                     </div>
                     <div>
-                      <div className="font-medium">Утас</div>
-                      <div className="text-gray-600">+123 456 7890</div>
+                      <div className="font-medium">{t("contact.phone.title")}</div>
+                      <div className="text-gray-600 flex flex-col ">
+                        <a className="hover:underline" href="tel:+97677451953">
+                          +976 77451953
+                        </a>
+                        <a className="hover:underline" href="tel:+97699020145">
+                          +976 99020145
+                        </a>
+                        <a className="hover:underline" href="tel:+97699020136">
+                          +976 99020136
+                        </a>
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-start">
@@ -57,8 +74,12 @@ export default function ContactPage() {
                       </svg>
                     </div>
                     <div>
-                      <div className="font-medium">И-мэйл</div>
-                      <div className="text-gray-600">info@xplore.com</div>
+                      <div className="font-medium">{t("contact.email.title")}</div>
+                      <div className="text-gray-600 hover:underline">
+                        <a href="mailto:demchirgun@gmail.com">
+                          demchirgun@gmail.com
+                        </a>
+                      </div>{" "}
                     </div>
                   </div>
                   <div className="flex items-start">
@@ -84,29 +105,52 @@ export default function ContactPage() {
                         />
                       </svg>
                     </div>
-                    <div>
-                      <div className="font-medium">Хаяг</div>
-                      <div className="text-gray-600">123 Аялагчдын гудамж, Хотын нэр, Мужийн нэр, Улс</div>
-                    </div>
+                    <Link
+                      className="hover:underline"
+                      target="blank"
+                      href="https://www.google.com/maps/place/49%C2%B037'32.4%22N+100%C2%B009'44.5%22E/@49.625674,100.162368,603m/data=!3m2!1e3!4b1!4m4!3m3!8m2!3d49.625674!4d100.162368?entry=ttu&g_ep=EgoyMDI1MDgxOS4wIKXMDSoASAFQAw%3D%3D"
+                    >
+                      <div className="font-medium">{t("contact.address.title")}</div>
+                      <div className="text-gray-600">
+                        {t("contact.address.content")}
+                      </div>
+                    </Link>
                   </div>
                 </div>
               </div>
               <div>
-                <h2 className="text-xl font-medium mb-4">Мессеж илгээх</h2>
+                <h2 className="text-xl font-medium mb-4">{t("contact.form.title")}</h2>
                 <form className="space-y-4">
                   <div>
-                    <Input type="text" placeholder="Таны нэр" className="w-full" />
+                    <Input
+                      type="text"
+                      placeholder={t("contact.form.name.placeholder")}
+                      className="w-full"
+                    />
                   </div>
                   <div>
-                    <Input type="email" placeholder="Таны и-мэйл" className="w-full" />
+                    <Input
+                      type="email"
+                      placeholder={t("contact.form.email.placeholder")}
+                      className="w-full"
+                    />
                   </div>
                   <div>
-                    <Input type="text" placeholder="Гарчиг" className="w-full" />
+                    <Input
+                      type="text"
+                      placeholder={t("contact.form.subject.placeholder")}
+                      className="w-full"
+                    />
                   </div>
                   <div>
-                    <Textarea placeholder="Таны мессеж" className="w-full min-h-[150px]" />
+                    <Textarea
+                      placeholder={t("contact.form.message.placeholder")}
+                      className="w-full min-h-[150px]"
+                    />
                   </div>
-                  <Button className="w-full bg-black text-white hover:bg-gray-800">Мессеж илгээх</Button>
+                  <Button className="w-full bg-black text-white hover:bg-gray-800">
+                    {t("contact.form.send")}
+                  </Button>
                 </form>
               </div>
             </div>
@@ -114,5 +158,5 @@ export default function ContactPage() {
         </div>
       </section>
     </>
-  )
+  );
 }

@@ -34,6 +34,7 @@ export default function CreateTripForm() {
     excluded: [""],
     plans: [{ title: "", items: [""] }],
     images: [""],
+    videos: [""],
     isSpecial: false,
     status: "SCHEDULED",
     categories: [] as string[],
@@ -255,6 +256,15 @@ export default function CreateTripForm() {
       });
     }
 
+    // Videos need to be appended as array
+    if (formData.videos?.length) {
+      formData.videos
+        .filter((video) => (video || "").trim())
+        .forEach((video) => {
+          formDataToSend.append("videos[]", video);
+        });
+    }
+
     try {
       // For debugging - log the FormData entries
       console.log("Sending form data:");
@@ -302,6 +312,7 @@ export default function CreateTripForm() {
         excluded: [""],
         plans: [{ title: "", items: [""] }],
         images: [""],
+        videos: [""],
         isSpecial: false,
         status: "SCHEDULED",
         categories: [],
@@ -647,6 +658,39 @@ export default function CreateTripForm() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Videos URLs */}
+          <div>
+            <Label>Видео холбоосууд</Label>
+            {formData.videos.map((video, index) => (
+              <div key={index} className="flex gap-2 mt-2">
+                <Input
+                  value={video}
+                  onChange={(e) =>
+                    handleArrayChange("videos", index, e.target.value)
+                  }
+                  placeholder="Жишээ: https://youtube.com/watch?v=..."
+                  type="url"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => removeArrayItem("videos", index)}
+                >
+                  Устгах
+                </Button>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => addArrayItem("videos")}
+              className="mt-2"
+            >
+              Видео нэмэх
+            </Button>
           </div>
 
           {/* Status */}
