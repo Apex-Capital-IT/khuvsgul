@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/accordion";
 import CommentForm from "@/components/CommentForm";
 import { useState, useEffect } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://taiga-9fde.onrender.com";
@@ -39,6 +41,71 @@ export default function TripDetailPage({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [trip, setTrip] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Booking form state
+  const [bookingForm, setBookingForm] = useState({
+    fullName: "",
+    email: "",
+    travelersSize: 1,
+    startDate: "",
+  });
+
+  const handleBookingSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!bookingForm.fullName.trim() || !bookingForm.email.trim()) {
+      toast.error("Бүх талбарыг бөглөнө үү");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Нэвтрэх шаардлагатай");
+      return;
+    }
+
+    setSubmitting(true);
+    
+    try {
+      const orderData = {
+        travelId: trip._id,
+        travelersSize: bookingForm.travelersSize,
+        contact: {
+          fullName: bookingForm.fullName,
+          email: bookingForm.email,
+        },
+      };
+
+      const response = await fetch(`${API_URL}/api/v1/order/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      const data = await response.json();
+      
+      if (data.code === 0) {
+        toast.success("Аялал амжилттай захиалагдлаа!");
+        // Reset form
+        setBookingForm({
+          fullName: "",
+          email: "",
+          travelersSize: 1,
+          startDate: "",
+        });
+      } else {
+        throw new Error(data.message || "Захиалга амжилтгүй");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Алдаа гарлаа");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   // Use useEffect to fetch data since this is now a client component
   useEffect(() => {
@@ -341,26 +408,49 @@ export default function TripDetailPage({
                   <div className="font-medium">Аялал захиалах</div>
                   <div className="text-gray-500">Мессежүүд</div>
                 </div>
-                <form className="space-y-4">
+                <form onSubmit={handleBookingSubmit} className="space-y-4">
                   <div>
                     <Input
                       type="text"
                       placeholder="Бүтэн нэр"
                       className="w-full"
+                      value={bookingForm.fullName}
+                      onChange={(e) => setBookingForm({ ...bookingForm, fullName: e.target.value })}
+                      required
                     />
                   </div>
                   <div>
-                    <Select>
+                    <Input
+                      type="email"
+                      placeholder="И-мэйл"
+                      className="w-full"
+                      value={bookingForm.email}
+                      onChange={(e) => setBookingForm({ ...bookingForm, email: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Select
+                      value={String(bookingForm.travelersSize)}
+                      onValueChange={(value) => setBookingForm({ ...bookingForm, travelersSize: parseInt(value, 10) })}
+                    >
                       <SelectTrigger>
-                        <SelectValue placeholder="Аяллын багц" />
+                        <SelectValue placeholder="Зочдын тоо" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value={trip._id}>{trip.title}</SelectItem>
+                        {[1, 2, 3, 4, 5, 6].map((n) => (
+                          <SelectItem value={String(n)} key={n}>
+                            {n} хүн
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Select>
+                    <Select
+                      value={bookingForm.startDate}
+                      onValueChange={(value) => setBookingForm({ ...bookingForm, startDate: value })}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Эхлэх огноо" />
                       </SelectTrigger>
@@ -372,20 +462,6 @@ export default function TripDetailPage({
                             </SelectItem>
                           )
                         )}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Зочдын тоо" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[1, 2, 3, 4].map((n) => (
-                          <SelectItem value={String(n)} key={n}>
-                            {n} хүн
-                          </SelectItem>
-                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -413,8 +489,12 @@ export default function TripDetailPage({
                       </div>
                     </div>
                   </div>
-                  <Button className="w-full bg-black text-white hover:bg-gray-800">
-                    Одоо захиалах
+                  <Button 
+                    type="submit"
+                    className="w-full bg-black text-white hover:bg-gray-800"
+                    disabled={submitting}
+                  >
+                    {submitting ? "Захиалах..." : "Одоо захиалах"}
                   </Button>
                 </form>
               </div>
@@ -504,6 +584,9 @@ export default function TripDetailPage({
           <CommentForm tripId={trip._id} />
         </div>
       </section>
+      
+      {/* Toast Container */}
+      <ToastContainer />
     </>
   );
 }
