@@ -577,20 +577,8 @@ export default function AdminDashboard() {
     setSelectedOrderForDetails(order);
     setOrderDetailsModalOpen(true);
 
-    // Fetch detailed travel data if we have a travel ID
-    const travelId = extractTravelId(order.travel);
-    if (travelId) {
-      try {
-        const detailedTravel = await fetchDetailedTravelData(travelId);
-        setDetailedTravelData(detailedTravel);
-      } catch (error) {
-        console.error("Failed to fetch detailed travel data:", error);
-        // Use existing travel data as fallback
-        setDetailedTravelData(order.travelDetails);
-      }
-    } else {
-      setDetailedTravelData(order.travelDetails);
-    }
+    // Use the already populated travel data from the API
+    setDetailedTravelData(order.travelDetails || order.travel);
   };
 
   useEffect(() => {
@@ -709,18 +697,14 @@ export default function AdminDashboard() {
           const ordersToProcess =
             selectedTab === "Dashboard" ? ordersData.slice(0, 5) : ordersData;
 
-          // hydrate travel + user in parallel for each order
-          const withDetails: Order[] = await Promise.all(
-            ordersToProcess.map(async (order: any) => {
-              const [travelDetails, userDetails] = await Promise.all([
-                fetchTravelDetails(order.travel),
-                typeof order.user === "string"
-                  ? fetchUserDetails(order.user)
-                  : null,
-              ]);
-              return { ...order, travelDetails, userDetails };
-            })
-          );
+          // The API now returns fully populated travel and user objects
+          const withDetails: Order[] = ordersToProcess.map((order: any) => {
+            return {
+              ...order,
+              travelDetails: order.travel, // travel is already populated
+              userDetails: order.user, // user is already populated
+            };
+          });
 
           setOrders(withDetails);
         })
@@ -2919,11 +2903,132 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Travel Information */}
-                {travelDataLoading ? (
+                {detailedTravelData ? (
                   <div className="bg-purple-50 p-4 rounded-lg">
-                    <div className="text-center py-4">
-                      Аяллын мэдээлэл уншиж байна...
+                    <h3 className="text-lg font-semibold mb-4 text-purple-800">
+                      Аяллын дэлгэрэнгүй мэдээлэл
+                    </h3>
+                    
+                    {/* Travel Title and Description */}
+                    <div className="mb-4">
+                      <h4 className="font-semibold text-gray-800 mb-2">
+                        {detailedTravelData.title}
+                      </h4>
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        {detailedTravelData.description}
+                      </p>
                     </div>
+
+                    {/* Travel Details Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <div className="text-sm font-medium text-gray-700">Байршил</div>
+                        <div className="text-sm text-gray-600">
+                          {detailedTravelData.destination?.location || "Тодорхойгүй"}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-gray-700">Үргэлжлэх хугацаа</div>
+                        <div className="text-sm text-gray-600">
+                          {detailedTravelData.duration?.days} хоног, {detailedTravelData.duration?.nights} шөнө
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-gray-700">Эхлэх огноо</div>
+                        <div className="text-sm text-gray-600">
+                          {detailedTravelData.startDateTime 
+                            ? new Date(detailedTravelData.startDateTime).toLocaleDateString("mn-MN")
+                            : "Тодорхойгүй"}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-gray-700">Дуусах огноо</div>
+                        <div className="text-sm text-gray-600">
+                          {detailedTravelData.endDateTime 
+                            ? new Date(detailedTravelData.endDateTime).toLocaleDateString("mn-MN")
+                            : "Тодорхойгүй"}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quota Information */}
+                    <div className="mb-4">
+                      <div className="text-sm font-medium text-gray-700 mb-2">Байрны мэдээлэл</div>
+                      <div className="flex items-center gap-4">
+                        <div className="text-sm text-gray-600">
+                          Нийт: {detailedTravelData.quota?.total || 0} байр
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          Үлдсэн: {detailedTravelData.quota?.available || 0} байр
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          Захиалагдсан: {(detailedTravelData.quota?.total || 0) - (detailedTravelData.quota?.available || 0)} байр
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Images */}
+                    {detailedTravelData.images && detailedTravelData.images.length > 0 && (
+                      <div className="mb-4">
+                        <div className="text-sm font-medium text-gray-700 mb-2">Зураг</div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                          {detailedTravelData.images.slice(0, 6).map((image: string, index: number) => (
+                            <img
+                              key={index}
+                              src={image}
+                              alt={`Аяллын зураг ${index + 1}`}
+                              className="w-full h-24 object-cover rounded-lg"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Included Services */}
+                    {detailedTravelData.included && detailedTravelData.included.length > 0 && (
+                      <div className="mb-4">
+                        <div className="text-sm font-medium text-gray-700 mb-2">Орсон үйлчилгээ</div>
+                        <div className="space-y-1">
+                          {detailedTravelData.included.slice(0, 3).map((item: string, index: number) => (
+                            <div key={index} className="text-xs text-gray-600 bg-green-50 p-2 rounded">
+                              • {item}
+                            </div>
+                          ))}
+                          {detailedTravelData.included.length > 3 && (
+                            <div className="text-xs text-gray-500">
+                              + {detailedTravelData.included.length - 3} бусад үйлчилгээ
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Travel Plans */}
+                    {detailedTravelData.plans && detailedTravelData.plans.length > 0 && (
+                      <div>
+                        <div className="text-sm font-medium text-gray-700 mb-2">Аяллын төлөвлөгөө</div>
+                        <div className="space-y-2 max-h-40 overflow-y-auto">
+                          {detailedTravelData.plans.slice(0, 3).map((plan: any, index: number) => (
+                            <div key={index} className="text-xs bg-blue-50 p-2 rounded">
+                              <div className="font-medium text-blue-800">{plan.title}</div>
+                              {plan.items && plan.items.length > 0 && (
+                                <div className="text-blue-600 mt-1">
+                                  • {plan.items[0]}
+                                  {plan.items.length > 1 && (
+                                    <span className="text-gray-500"> + {plan.items.length - 1} бусад</span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                          {detailedTravelData.plans.length > 3 && (
+                            <div className="text-xs text-gray-500">
+                              + {detailedTravelData.plans.length - 3} бусад өдрүүд
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="bg-purple-50 p-4 rounded-lg">
