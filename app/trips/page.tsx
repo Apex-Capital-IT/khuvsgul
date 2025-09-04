@@ -26,6 +26,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  TripsGridSkeleton,
+  FeaturedTripsSkeleton,
+  SearchFiltersSkeleton,
+  MainContentSkeleton,
+} from "@/components/TripCardSkeleton";
 
 type FeaturedTrip = {
   id: string;
@@ -298,6 +304,90 @@ export default function TripsPage() {
 
   const handleSortChange = (value: string) => setSortOrder(value);
 
+  // Show loading state for initial page load
+  if (featuredLoading) {
+    return (
+      <>
+        <section className="relative h-[400px] md:h-[500px] flex items-center">
+          <Image
+            src="/cover.avif"
+            alt="Аялалын танилцуулга"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="container mx-auto px-4 relative z-10 text-white pt-16">
+            <h1 className="text-4xl md:text-6xl font-medium mb-4">
+              Аяллын <span className="italic">багцууд</span>
+            </h1>
+            <p className="text-lg md:text-xl max-w-2xl opacity-90">
+              Хамгийн сайхан дурсамжийг үүсгэх аяллын багцуудаас сонгоно уу
+            </p>
+          </div>
+        </section>
+
+        <SearchFiltersSkeleton />
+        <MainContentSkeleton />
+        <FeaturedTripsSkeleton />
+        
+        <NewsletterForm />
+      </>
+    );
+  }
+
+  // Show error state
+  if (featuredError) {
+    return (
+      <>
+        <section className="relative h-[400px] md:h-[500px] flex items-center">
+          <Image
+            src="/cover.avif"
+            alt="Аялалын танилцуулга"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="container mx-auto px-4 relative z-10 text-white pt-16">
+            <h1 className="text-4xl md:text-6xl font-medium mb-4">
+              Аяллын <span className="italic">багцууд</span>
+            </h1>
+            <p className="text-lg md:text-xl max-w-2xl opacity-90">
+              Хамгийн сайхан дурсамжийг үүсгэх аяллын багцуудаас сонгоно уу
+            </p>
+          </div>
+        </section>
+
+        <div className="container mx-auto px-4 py-12">
+          <div className="text-center py-12">
+            <div className="mb-4">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Алдаа гарлаа
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Аяллын мэдээлэл ачаалахад алдаа гарлаа: {featuredError}
+              </p>
+              <Button 
+                onClick={() => window.location.reload()}
+                variant="outline"
+              >
+                Дахин оролдох
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <NewsletterForm />
+      </>
+    );
+  }
+
   return (
     <>
       <section className="relative h-[400px] md:h-[500px] flex items-center">
@@ -417,20 +507,27 @@ export default function TripsPage() {
 
           {filteredAndSortedTrips.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-lg text-gray-600">
-                Хайлтад тохирох аялал олдсонгүй.
-              </p>
-              <Button
-                variant="outline"
-                className="mt-4"
-                onClick={() => {
-                  setSearchQuery("");
-                  setActiveCategory("all");
-                  setSortOrder("all");
-                }}
-              >
-                Бүх аяллыг харах
-              </Button>
+              <div className="mb-4">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                  <Search className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Хайлтад тохирох аялал олдсонгүй
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Өөр хайлтын үг эсвэл шүүлтүүр ашиглаж үзнэ үү.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setActiveCategory("all");
+                    setSortOrder("all");
+                  }}
+                >
+                  Бүх аяллыг харах
+                </Button>
+              </div>
             </div>
           ) : (
             <>
@@ -460,7 +557,7 @@ export default function TripsPage() {
                         {trip.duration}
                       </div>
                       <div className="mt-3 font-bold text-lg">
-                        ${trip.price}
+                        {trip.price ? `${trip.price.toLocaleString()}₮` : "-"}
                       </div>
                     </div>
                   </Link>
@@ -512,12 +609,8 @@ export default function TripsPage() {
         </div>
       </section>
 
-      {/* Featured (“Онцлох”) Trips */}
-      {featuredLoading ? (
-        <div>Loading...</div>
-      ) : featuredError ? (
-        <div>Error: {featuredError}</div>
-      ) : featuredTrips.length > 0 ? (
+      {/* Featured ("Онцлох") Trips */}
+      {featuredTrips.length > 0 && (
         <section className="py-12 bg-gray-50">
           <div className="container mx-auto px-4">
             <h2 className="text-2xl md:text-3xl font-medium mb-8">
@@ -550,7 +643,7 @@ export default function TripsPage() {
                       {trip.duration}
                     </div>
                     <div className="flex items-center justify-between mt-4">
-                      <span className="font-bold text-xl">${trip.price}</span>
+                      <span className="font-bold text-xl">{trip.price ? `${trip.price.toLocaleString()}₮` : "-"}</span>
                       <Button size="sm">Дэлгэрэнгүй</Button>
                     </div>
                   </div>
@@ -559,7 +652,7 @@ export default function TripsPage() {
             </div>
           </div>
         </section>
-      ) : null}
+      )}
 
       <NewsletterForm />
     </>

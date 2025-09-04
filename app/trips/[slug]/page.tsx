@@ -53,7 +53,7 @@ export default function TripDetailPage({
 
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!bookingForm.fullName.trim() || !bookingForm.email.trim()) {
       toast.error("Бүх талбарыг бөглөнө үү");
       return;
@@ -66,7 +66,7 @@ export default function TripDetailPage({
     }
 
     setSubmitting(true);
-    
+
     try {
       const orderData = {
         travelId: trip._id,
@@ -87,7 +87,7 @@ export default function TripDetailPage({
       });
 
       const data = await response.json();
-      
+
       if (data.code === 0) {
         toast.success("Аялал амжилттай захиалагдлаа!");
         // Reset form
@@ -115,7 +115,7 @@ export default function TripDetailPage({
         const tripData = await getTrip(slug);
         setTrip(tripData);
       } catch (error) {
-        console.error('Failed to fetch trip:', error);
+        console.error("Failed to fetch trip:", error);
       } finally {
         setLoading(false);
       }
@@ -141,31 +141,31 @@ export default function TripDetailPage({
 
   // Function to convert YouTube URLs to embed format
   const getEmbedUrl = (url: string): string => {
-    if (!url) return '';
-    
+    if (!url) return "";
+
     // Handle YouTube URLs
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      let videoId = '';
-      
-      if (url.includes('youtube.com/watch?v=')) {
-        videoId = url.split('v=')[1]?.split('&')[0] || '';
-      } else if (url.includes('youtu.be/')) {
-        videoId = url.split('youtu.be/')[1]?.split('?')[0] || '';
+    if (url.includes("youtube.com") || url.includes("youtu.be")) {
+      let videoId = "";
+
+      if (url.includes("youtube.com/watch?v=")) {
+        videoId = url.split("v=")[1]?.split("&")[0] || "";
+      } else if (url.includes("youtu.be/")) {
+        videoId = url.split("youtu.be/")[1]?.split("?")[0] || "";
       }
-      
+
       if (videoId) {
         return `https://www.youtube.com/embed/${videoId}`;
       }
     }
-    
+
     // Handle Vimeo URLs
-    if (url.includes('vimeo.com/')) {
-      const videoId = url.split('vimeo.com/')[1]?.split('?')[0] || '';
+    if (url.includes("vimeo.com/")) {
+      const videoId = url.split("vimeo.com/")[1]?.split("?")[0] || "";
       if (videoId) {
         return `https://player.vimeo.com/video/${videoId}`;
       }
     }
-    
+
     // Return original URL if not a recognized video platform
     return url;
   };
@@ -181,7 +181,7 @@ export default function TripDetailPage({
           priority
         />
         <div className="absolute inset-0 bg-black/20"></div>
-        
+
         {/* Navigation buttons - only show if there are multiple images */}
         {hasMultipleImages && (
           <>
@@ -205,7 +205,7 @@ export default function TripDetailPage({
                 />
               </svg>
             </Button>
-            
+
             <Button
               onClick={nextImage}
               className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white border-0"
@@ -233,7 +233,7 @@ export default function TripDetailPage({
           <h1 className="text-4xl md:text-5xl font-medium">
             {trip.title || "Аяллын нэр"}
             <br />
-            <span className="italic">
+            <span className="italic text-2xl">
               {trip.categories && trip.categories.length > 0
                 ? trip.categories.map((cat: any) => cat.name).join(", ")
                 : "Багц"}
@@ -415,7 +415,12 @@ export default function TripDetailPage({
                       placeholder="Бүтэн нэр"
                       className="w-full"
                       value={bookingForm.fullName}
-                      onChange={(e) => setBookingForm({ ...bookingForm, fullName: e.target.value })}
+                      onChange={(e) =>
+                        setBookingForm({
+                          ...bookingForm,
+                          fullName: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -425,14 +430,24 @@ export default function TripDetailPage({
                       placeholder="И-мэйл"
                       className="w-full"
                       value={bookingForm.email}
-                      onChange={(e) => setBookingForm({ ...bookingForm, email: e.target.value })}
+                      onChange={(e) =>
+                        setBookingForm({
+                          ...bookingForm,
+                          email: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
                   <div>
                     <Select
                       value={String(bookingForm.travelersSize)}
-                      onValueChange={(value) => setBookingForm({ ...bookingForm, travelersSize: parseInt(value, 10) })}
+                      onValueChange={(value) =>
+                        setBookingForm({
+                          ...bookingForm,
+                          travelersSize: parseInt(value, 10),
+                        })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Зочдын тоо" />
@@ -449,7 +464,9 @@ export default function TripDetailPage({
                   <div>
                     <Select
                       value={bookingForm.startDate}
-                      onValueChange={(value) => setBookingForm({ ...bookingForm, startDate: value })}
+                      onValueChange={(value) =>
+                        setBookingForm({ ...bookingForm, startDate: value })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Эхлэх огноо" />
@@ -489,7 +506,7 @@ export default function TripDetailPage({
                       </div>
                     </div>
                   </div>
-                  <Button 
+                  <Button
                     type="submit"
                     className="w-full bg-black text-white hover:bg-gray-800"
                     disabled={submitting}
@@ -504,29 +521,37 @@ export default function TripDetailPage({
       </section>
 
       {/* Video Section */}
-      {trip.videos && Array.isArray(trip.videos) && trip.videos.length > 0 && trip.videos.some((video: string) => video.trim()) && (
-        <section className="py-16 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <h2 className="text-2xl font-medium mb-8">
-              Аяллын <span className="italic">видео</span>
-            </h2>
-            <div className="max-w-4xl mx-auto space-y-6">
-              {trip.videos.filter((video: string) => video.trim()).map((video: string, index: number) => (
-                <div key={index} className="relative aspect-video bg-gray-200 rounded-lg overflow-hidden">
-                  <iframe
-                    src={getEmbedUrl(video)}
-                    title={`${trip.title} - Аяллын видео ${index + 1}`}
-                    className="w-full h-full"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
-                </div>
-              ))}
+      {trip.videos &&
+        Array.isArray(trip.videos) &&
+        trip.videos.length > 0 &&
+        trip.videos.some((video: string) => video.trim()) && (
+          <section className="py-16 bg-gray-50">
+            <div className="container mx-auto px-4">
+              <h2 className="text-2xl font-medium mb-8">
+                Аяллын <span className="italic">видео</span>
+              </h2>
+              <div className="max-w-4xl mx-auto space-y-6">
+                {trip.videos
+                  .filter((video: string) => video.trim())
+                  .map((video: string, index: number) => (
+                    <div
+                      key={index}
+                      className="relative aspect-video bg-gray-200 rounded-lg overflow-hidden"
+                    >
+                      <iframe
+                        src={getEmbedUrl(video)}
+                        title={`${trip.title} - Аяллын видео ${index + 1}`}
+                        className="w-full h-full"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      ></iframe>
+                    </div>
+                  ))}
+              </div>
             </div>
-          </div>
-        </section>
-      )}
+          </section>
+        )}
 
       {/* Testimonials-style comments from real data */}
       <section className="py-16 bg-gray-50">
@@ -584,7 +609,7 @@ export default function TripDetailPage({
           <CommentForm tripId={trip._id} />
         </div>
       </section>
-      
+
       {/* Toast Container */}
       <ToastContainer />
     </>

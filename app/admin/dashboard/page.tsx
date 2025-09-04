@@ -71,22 +71,55 @@ import {
   deleteCategory,
 } from "../categories/categoryApi";
 
+// Order interface from bookings page
+interface Order {
+  _id: string;
+  travel: any; // can be string ID or populated object
+  user: any; // can be string ID or populated object
+  travelersSize: number;
+  pricePerQuota: number;
+  totalPrice: number;
+  contact: {
+    fullName: string;
+    email: string;
+  };
+  status: string;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  userDetails?: {
+    _id: string;
+    name: string;
+    email: string;
+  } | null;
+  travelDetails?: {
+    _id: string;
+    title: string;
+    description?: string;
+    price?: number;
+    destination?: { location?: string } | string;
+    duration?: { days?: number; nights?: number };
+    images?: string[];
+  } | null;
+}
+
 // Function to delete a trip
 const deleteTrip = async (tripId: string, token: string) => {
   const response = await fetch(`${API_URL}/admin/v1/travel/${tripId}`, {
-    method: 'DELETE',
+    method: "DELETE",
     headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
     },
   });
 
   const data = await response.json();
-  
+
   if (data.code !== 0) {
-    throw new Error(data.message || 'Failed to delete trip');
+    throw new Error(data.message || "Failed to delete trip");
   }
-  
+
   return data;
 };
 
@@ -97,10 +130,15 @@ const API_URL =
 const updateTrip = async (tripId: string, tripData: any, token: string) => {
   // Create FormData object to match your API expectation
   const formData = new FormData();
-  
+
   // Add all fields as form-data
-  Object.keys(tripData).forEach(key => {
-    if (key === 'included' || key === 'excluded' || key === 'categories' || key === 'videos') {
+  Object.keys(tripData).forEach((key) => {
+    if (
+      key === "included" ||
+      key === "excluded" ||
+      key === "categories" ||
+      key === "videos"
+    ) {
       // Array fields need [] notation
       if (Array.isArray(tripData[key])) {
         tripData[key].forEach((item: any) => {
@@ -109,17 +147,23 @@ const updateTrip = async (tripId: string, tripData: any, token: string) => {
           }
         });
       }
-    } else if (key === 'plans') {
+    } else if (key === "plans") {
       // Plans need to be JSON string
       if (Array.isArray(tripData[key])) {
         formData.append(key, JSON.stringify(tripData[key]));
       }
-    } else if (key === 'destination') {
+    } else if (key === "destination") {
       // Destination needs to be JSON string
       formData.append(key, JSON.stringify({ location: tripData[key] }));
-    } else if (key === 'duration') {
+    } else if (key === "duration") {
       // Duration needs to be JSON string
-      formData.append(key, JSON.stringify({ days: parseInt(tripData[key]) || 0, nights: parseInt(tripData[key]) || 0 }));
+      formData.append(
+        key,
+        JSON.stringify({
+          days: parseInt(tripData[key]) || 0,
+          nights: parseInt(tripData[key]) || 0,
+        })
+      );
     } else {
       // Regular fields
       if (tripData[key] !== undefined && tripData[key] !== null) {
@@ -129,60 +173,66 @@ const updateTrip = async (tripId: string, tripData: any, token: string) => {
   });
 
   const response = await fetch(`${API_URL}/admin/v1/travel/${tripId}`, {
-    method: 'PATCH',
+    method: "PATCH",
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       // Don't set Content-Type - browser will set it automatically with boundary for FormData
     },
     body: formData,
   });
 
   const data = await response.json();
-  
+
   if (data.code !== 0) {
-    throw new Error(data.message || 'Failed to update trip');
+    throw new Error(data.message || "Failed to update trip");
   }
-  
+
   return data;
 };
 
 // Function to remove an image from a trip
 const removeImage = async (tripId: string, imageUrl: string, token: string) => {
-  const response = await fetch(`${API_URL}/admin/v1/travel/${tripId}/images/remove`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ imageUrls: [imageUrl] }),
-  });
+  const response = await fetch(
+    `${API_URL}/admin/v1/travel/${tripId}/images/remove`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ imageUrls: [imageUrl] }),
+    }
+  );
 
   const data = await response.json();
-  
+
   if (data.code !== 0) {
-    throw new Error(data.message || 'Failed to remove image');
+    throw new Error(data.message || "Failed to remove image");
   }
-  
+
   return data;
 };
 
 // Function to add a new image to a trip
 const addImage = async (tripId: string, imageUrl: string, token: string) => {
-  const response = await fetch(`${API_URL}/admin/v1/travel/${tripId}/images/add`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ imageUrls: [imageUrl] }),
-  });
+  const response = await fetch(
+    `${API_URL}/admin/v1/travel/${tripId}/images/add`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ imageUrls: [imageUrl] }),
+    }
+  );
 
   const data = await response.json();
-  
+
   if (data.code !== 0) {
-    throw new Error(data.message || 'Failed to add image');
+    throw new Error(data.message || "Failed to add image");
   }
-  
+
   return data;
 };
 
@@ -223,7 +273,9 @@ export default function AdminDashboard() {
   const [deleteTripError, setDeleteTripError] = useState("");
   const [deleteTripConfirmOpen, setDeleteTripConfirmOpen] = useState(false);
   const [tripToDelete, setTripToDelete] = useState<any>(null);
-  const [expandedDescriptions, setExpandedDescriptions] = useState<{[key: string]: boolean}>({});
+  const [expandedDescriptions, setExpandedDescriptions] = useState<{
+    [key: string]: boolean;
+  }>({});
   const [isEditTripModalOpen, setIsEditTripModalOpen] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<any | null>(null);
   const [tripForm, setTripForm] = useState({
@@ -251,12 +303,29 @@ export default function AdminDashboard() {
     avatar?: string;
   } | null>(null);
 
+  // Order management state
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageSize] = useState(20);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [orderStatusModalOpen, setOrderStatusModalOpen] = useState(false);
+  const [newOrderStatus, setNewOrderStatus] = useState("");
+  const [statusUpdateError, setStatusUpdateError] = useState("");
+  const [orderDetailsModalOpen, setOrderDetailsModalOpen] = useState(false);
+  const [selectedOrderForDetails, setSelectedOrderForDetails] =
+    useState<Order | null>(null);
+  const [detailedTravelData, setDetailedTravelData] = useState<any>(null);
+  const [travelDataLoading, setTravelDataLoading] = useState(false);
+
   // Helper functions for form arrays
   const handleArrayChange = (field: string, index: number, value: string) => {
     setTripForm((prev) => ({
       ...prev,
-      [field]: (prev[field] as string[]).map((item: string, i: number) =>
-        i === index ? value : item
+      [field]: (prev[field as keyof typeof prev] as string[]).map(
+        (item: string, i: number) => (i === index ? value : item)
       ),
     }));
   };
@@ -264,20 +333,24 @@ export default function AdminDashboard() {
   const addArrayItem = (field: string) => {
     setTripForm((prev) => ({
       ...prev,
-      [field]: [...(prev[field] as string[]), ""],
+      [field]: [...(prev[field as keyof typeof prev] as string[]), ""],
     }));
   };
 
   const removeArrayItem = (field: string, index: number) => {
     setTripForm((prev) => ({
       ...prev,
-      [field]: (prev[field] as string[]).filter(
+      [field]: (prev[field as keyof typeof prev] as string[]).filter(
         (_: string, i: number) => i !== index
       ),
     }));
   };
 
-  const handlePlanChange = (planIndex: number, field: string, value: string) => {
+  const handlePlanChange = (
+    planIndex: number,
+    field: string,
+    value: string
+  ) => {
     setTripForm((prev) => ({
       ...prev,
       plans: prev.plans.map((plan, i) =>
@@ -286,7 +359,11 @@ export default function AdminDashboard() {
     }));
   };
 
-  const handlePlanItemChange = (planIndex: number, itemIndex: number, value: string) => {
+  const handlePlanItemChange = (
+    planIndex: number,
+    itemIndex: number,
+    value: string
+  ) => {
     setTripForm((prev) => ({
       ...prev,
       plans: prev.plans.map((plan, i) =>
@@ -337,6 +414,183 @@ export default function AdminDashboard() {
           : plan
       ),
     }));
+  };
+
+  // Order helper functions
+  const extractTravelId = (t: any): string | null => {
+    if (!t) return null;
+    if (typeof t === "string" && t.trim()) return t.trim();
+    if (typeof t === "object") {
+      return (
+        (t._id && String(t._id)) ||
+        (t.id && String(t.id)) ||
+        (t.travelId && String(t.travelId)) ||
+        (t.tripId && String(t.tripId)) ||
+        null
+      );
+    }
+    return null;
+  };
+
+  const normalizeTravel = (t: any) => {
+    if (!t || typeof t !== "object") return null;
+    return {
+      ...t,
+      destination:
+        typeof t.destination === "string"
+          ? { location: t.destination }
+          : t.destination,
+    };
+  };
+
+  const fetchTravelDetails = async (travelOrId: any) => {
+    try {
+      // If already populated, just normalize and return
+      if (
+        travelOrId &&
+        typeof travelOrId === "object" &&
+        (travelOrId.title || travelOrId._id)
+      ) {
+        return normalizeTravel(travelOrId);
+      }
+
+      const travelId = extractTravelId(travelOrId);
+      if (!travelId) return null;
+
+      const adminToken = localStorage.getItem("admin_token");
+
+      // Try admin endpoint first if we have a token
+      if (adminToken) {
+        const adminRes = await fetch(`${API_URL}/admin/v1/travel/${travelId}`, {
+          cache: "no-store",
+          headers: { Authorization: `Bearer ${adminToken}` },
+        });
+        if (adminRes.ok) {
+          const data = await adminRes.json();
+          if (data.code === 0 && data.response)
+            return normalizeTravel(data.response);
+        }
+      }
+
+      // Fallback: public endpoint
+      const pubRes = await fetch(`${API_URL}/travel/${travelId}`, {
+        cache: "no-store",
+      });
+      if (pubRes.ok) {
+        const data = await pubRes.json();
+        if (data.code === 0 && data.response)
+          return normalizeTravel(data.response);
+      }
+
+      return null;
+    } catch (e) {
+      console.error("Failed to fetch travel details:", e);
+      return null;
+    }
+  };
+
+  const fetchUserDetails = async (userId: string) => {
+    try {
+      const token = localStorage.getItem("admin_token");
+      if (!token) return null; // endpoint needs auth
+      const res = await fetch(`${API_URL}/api/v1/user/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (data.code !== 0) return null;
+      return data.response;
+    } catch (e) {
+      console.error("Failed to fetch user details:", e);
+      return null;
+    }
+  };
+
+  const updateOrderStatus = async (orderId: string, status: string) => {
+    try {
+      const token = localStorage.getItem("admin_token");
+      if (!token) throw new Error("No admin token found");
+
+      const response = await fetch(
+        `${API_URL}/admin/v1/order/${orderId}/status`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.code !== 0) {
+        throw new Error(data.message || "Failed to update order status");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      throw error;
+    }
+  };
+
+  const fetchDetailedTravelData = async (travelId: string) => {
+    try {
+      setTravelDataLoading(true);
+      const token = localStorage.getItem("admin_token");
+
+      // Try admin endpoint first for more complete data
+      if (token) {
+        const adminRes = await fetch(`${API_URL}/admin/v1/travel/${travelId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (adminRes.ok) {
+          const data = await adminRes.json();
+          if (data.code === 0 && data.response) {
+            return normalizeTravel(data.response);
+          }
+        }
+      }
+
+      // Fallback to public endpoint
+      const pubRes = await fetch(`${API_URL}/travel/${travelId}`);
+      if (pubRes.ok) {
+        const data = await pubRes.json();
+        if (data.code === 0 && data.response) {
+          return normalizeTravel(data.response);
+        }
+      }
+
+      throw new Error("Failed to fetch travel details");
+    } catch (error) {
+      console.error("Error fetching detailed travel data:", error);
+      throw error;
+    } finally {
+      setTravelDataLoading(false);
+    }
+  };
+
+  const openOrderDetails = async (order: Order) => {
+    setSelectedOrderForDetails(order);
+    setOrderDetailsModalOpen(true);
+
+    // Fetch detailed travel data if we have a travel ID
+    const travelId = extractTravelId(order.travel);
+    if (travelId) {
+      try {
+        const detailedTravel = await fetchDetailedTravelData(travelId);
+        setDetailedTravelData(detailedTravel);
+      } catch (error) {
+        console.error("Failed to fetch detailed travel data:", error);
+        // Use existing travel data as fallback
+        setDetailedTravelData(order.travelDetails);
+      }
+    } else {
+      setDetailedTravelData(order.travelDetails);
+    }
   };
 
   useEffect(() => {
@@ -416,6 +670,68 @@ export default function AdminDashboard() {
         .finally(() => setCategoriesLoading(false));
     }
   }, [selectedTab]);
+
+  // Fetch orders with pagination
+  useEffect(() => {
+    if (selectedTab === "Dashboard" || selectedTab === "Bookings") {
+      setOrdersLoading(true);
+      setOrdersError("");
+      const token = localStorage.getItem("admin_token");
+
+      fetch(
+        `${API_URL}/admin/v1/order?pageNumber=${currentPage}&pageSize=${pageSize}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        }
+      )
+        .then((response) => response.json())
+        .then(async (data) => {
+          if (data.code !== 0) {
+            throw new Error(data.message || "Failed to fetch orders");
+          }
+
+          // Be defensive about the shape returned by backend
+          const ordersData: any[] = Array.isArray(data.docs)
+            ? data.docs
+            : Array.isArray(data.response?.docs)
+            ? data.response.docs
+            : Array.isArray(data.response?.orders)
+            ? data.response.orders
+            : Array.isArray(data.response)
+            ? data.response
+            : [];
+
+          // Calculate total pages from response
+          const totalCount = data.totalPages || data.response?.totalPages || 1;
+          setTotalPages(totalCount);
+
+          // For dashboard, show only recent 5 orders, for bookings show all
+          const ordersToProcess =
+            selectedTab === "Dashboard" ? ordersData.slice(0, 5) : ordersData;
+
+          // hydrate travel + user in parallel for each order
+          const withDetails: Order[] = await Promise.all(
+            ordersToProcess.map(async (order: any) => {
+              const [travelDetails, userDetails] = await Promise.all([
+                fetchTravelDetails(order.travel),
+                typeof order.user === "string"
+                  ? fetchUserDetails(order.user)
+                  : null,
+              ]);
+              return { ...order, travelDetails, userDetails };
+            })
+          );
+
+          setOrders(withDetails);
+        })
+        .catch((err: any) => {
+          setOrdersError(err.message || "Error loading orders");
+        })
+        .finally(() => {
+          setOrdersLoading(false);
+        });
+    }
+  }, [selectedTab, currentPage, pageSize]);
 
   const renderIcon = (iconName: string) => {
     switch (iconName) {
@@ -597,71 +913,164 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="px-8 py-6">
-              <div className="text-lg font-bold mb-4">Таны аяллууд</div>
+              <div className="text-lg font-bold mb-4">Сүүлийн захиалгууд</div>
               <Card>
                 <CardContent className="p-0">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Хөтөч</TableHead>
-                        <TableHead>Аяллын төрөл</TableHead>
-                        <TableHead>Тайлбар</TableHead>
-                        <TableHead>Үйлдэл</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell className="flex items-center gap-2">
-                          <Avatar className="w-6 h-6">
-                            <AvatarImage src="/placeholder-user.jpg" />
-                            <AvatarFallback>Б</AvatarFallback>
-                          </Avatar>
-                          <span>Бат-Эрдэнэ</span>
-                        </TableCell>
-                        <TableCell>Усан аялал</TableCell>
-                        <TableCell>
-                          Хөвсгөл нуурын эрэг дээр амралт, завиар зугаалах
-                        </TableCell>
-                        <TableCell>
-                          <Button size="sm">Дэлгэрэнгүй</Button>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="flex items-center gap-2">
-                          <Avatar className="w-6 h-6">
-                            <AvatarImage src="/placeholder-user.jpg" />
-                            <AvatarFallback>С</AvatarFallback>
-                          </Avatar>
-                          <span>Сарангэрэл</span>
-                        </TableCell>
-                        <TableCell>Элсэн манхан</TableCell>
-                        <TableCell>
-                          Говийн элсэн манхан, тэмээ унах туршлага
-                        </TableCell>
-                        <TableCell>
-                          <Button size="sm">Дэлгэрэнгүй</Button>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="flex items-center gap-2">
-                          <Avatar className="w-6 h-6">
-                            <AvatarImage src="/placeholder-user.jpg" />
-                            <AvatarFallback>Д</AvatarFallback>
-                          </Avatar>
-                          <span>Даваадорж</span>
-                        </TableCell>
-                        <TableCell>Өвлийн аялал</TableCell>
-                        <TableCell>
-                          Тайгын өвөрмөц байгаль, цас мөсний адал явдал
-                        </TableCell>
-                        <TableCell>
-                          <Button size="sm">Дэлгэрэнгүй</Button>
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
+                  {ordersLoading ? (
+                    <div className="p-8 text-center">Уншиж байна...</div>
+                  ) : ordersError ? (
+                    <div className="p-8 text-red-500 text-center">
+                      {ordersError}
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Хэрэглэгч</TableHead>
+                          <TableHead>Аялал</TableHead>
+                          <TableHead>Огноо</TableHead>
+                          <TableHead>Төлбөр</TableHead>
+                          <TableHead>Төлөв</TableHead>
+                          <TableHead>Үйлдэл</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {orders.length === 0 ? (
+                          <TableRow>
+                            <TableCell
+                              colSpan={6}
+                              className="text-center py-8 text-gray-500"
+                            >
+                              Захиалга байхгүй байна
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          orders.map((order) => {
+                            // Prefer fetched travelDetails, otherwise normalize inline object
+                            const t =
+                              order.travelDetails ||
+                              (typeof order.travel === "object"
+                                ? normalizeTravel(order.travel)
+                                : null);
+
+                            return (
+                              <TableRow key={order._id}>
+                                <TableCell>
+                                  <div>
+                                    <div className="font-medium">
+                                      {order.userDetails?.name ||
+                                        order.contact?.fullName ||
+                                        "N/A"}
+                                    </div>
+                                    <div className="text-sm text-gray-500">
+                                      {order.userDetails?.email ||
+                                        order.contact?.email ||
+                                        ""}
+                                    </div>
+                                  </div>
+                                </TableCell>
+
+                                <TableCell>
+                                  <div>
+                                    <div className="font-medium">
+                                      {t?.title || "Тухайгүй аялал"}
+                                    </div>
+                                  </div>
+                                </TableCell>
+
+                                <TableCell>
+                                  <div>
+                                    <div>
+                                      {order.createdAt
+                                        ? new Date(
+                                            order.createdAt
+                                          ).toLocaleDateString("mn-MN")
+                                        : "N/A"}
+                                    </div>
+                                    <div className="text-sm text-gray-500">
+                                      {order.travelersSize} хүн
+                                    </div>
+                                  </div>
+                                </TableCell>
+
+                                <TableCell>
+                                  <div>
+                                    <div className="font-medium">
+                                      ₮
+                                      {order.totalPrice?.toLocaleString() ||
+                                        "0"}
+                                    </div>
+                                    <div className="text-sm text-gray-500">
+                                      ₮
+                                      {order.pricePerQuota?.toLocaleString() ||
+                                        "0"}{" "}
+                                      / хүн
+                                    </div>
+                                  </div>
+                                </TableCell>
+
+                                <TableCell>
+                                  <span
+                                    className={`px-2 py-1 rounded-full text-xs ${
+                                      order.status === "CONFIRMED"
+                                        ? "bg-green-100 text-green-800"
+                                        : order.status === "PENDING"
+                                        ? "bg-yellow-100 text-yellow-800"
+                                        : order.status === "CANCELLED"
+                                        ? "bg-red-100 text-red-800"
+                                        : "bg-gray-100 text-gray-800"
+                                    }`}
+                                  >
+                                    {order.status === "CONFIRMED"
+                                      ? "Баталгаажсан"
+                                      : order.status === "PENDING"
+                                      ? "Хүлээгдэж буй"
+                                      : order.status === "CANCELLED"
+                                      ? "Цуцлагдсан"
+                                      : order.status}
+                                  </span>
+                                </TableCell>
+
+                                <TableCell>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => openOrderDetails(order)}
+                                    >
+                                      Дэлгэрэнгүй
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        setSelectedOrder(order);
+                                        setNewOrderStatus(order.status);
+                                        setOrderStatusModalOpen(true);
+                                      }}
+                                    >
+                                      Төлөв солих
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })
+                        )}
+                      </TableBody>
+                    </Table>
+                  )}
                 </CardContent>
               </Card>
+
+              <div className="mt-4 flex justify-center">
+                <Button
+                  variant="outline"
+                  onClick={() => setSelectedTab("Bookings")}
+                >
+                  Бүх захиалга үзэх
+                </Button>
+              </div>
             </div>
           </>
         )}
@@ -988,8 +1397,9 @@ export default function AdminDashboard() {
                       <div className="mb-4">
                         <img
                           src={
-                            (Array.isArray(travel.images) && travel.images[0])
-                              || "/placeholder.jpg"
+                            (Array.isArray(travel.images) &&
+                              travel.images[0]) ||
+                            "/placeholder.jpg"
                           }
                           alt={travel.title || "Trip image"}
                           className="w-full h-40 object-cover rounded-lg"
@@ -1002,26 +1412,36 @@ export default function AdminDashboard() {
                         <div>
                           <h3 className="font-semibold">{travel.title}</h3>
                           <div className="text-sm text-gray-500">
-                            {travel.description && travel.description.length > 100 ? (
+                            {travel.description &&
+                            travel.description.length > 100 ? (
                               <div>
                                 <p>
-                                  {expandedDescriptions[travel._id] 
-                                    ? travel.description 
-                                    : `${travel.description.substring(0, 100)}...`
-                                  }
+                                  {expandedDescriptions[travel._id]
+                                    ? travel.description
+                                    : `${travel.description.substring(
+                                        0,
+                                        100
+                                      )}...`}
                                 </p>
                                 <button
-                                  onClick={() => setExpandedDescriptions(prev => ({
-                                    ...prev,
-                                    [travel._id]: !prev[travel._id]
-                                  }))}
+                                  onClick={() =>
+                                    setExpandedDescriptions((prev) => ({
+                                      ...prev,
+                                      [travel._id]: !prev[travel._id],
+                                    }))
+                                  }
                                   className="text-blue-600 hover:text-blue-800 text-xs font-medium mt-1"
                                 >
-                                  {expandedDescriptions[travel._id] ? 'See less' : 'See more'}
+                                  {expandedDescriptions[travel._id]
+                                    ? "See less"
+                                    : "See more"}
                                 </button>
                               </div>
                             ) : (
-                              <p>{travel.description || 'No description available'}</p>
+                              <p>
+                                {travel.description ||
+                                  "No description available"}
+                              </p>
                             )}
                           </div>
                         </div>
@@ -1060,29 +1480,64 @@ export default function AdminDashboard() {
                       </div>
                       <div className="flex justify-between items-center">
                         <div className="flex gap-2">
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             variant="outline"
                             onClick={() => {
-                              console.log('Original trip data:', travel);
+                              console.log("Original trip data:", travel);
                               setSelectedTrip(travel);
                               setTripForm({
                                 title: travel.title || "",
                                 description: travel.description || "",
                                 price: travel.price?.toString() || "",
-                                duration: travel.duration?.days?.toString() || "",
+                                duration:
+                                  travel.duration?.days?.toString() || "",
                                 destination: travel.destination?.location || "",
                                 status: travel.status || "",
-                                quota: travel.quota?.total?.toString() || travel.quota?.toString() || "",
-                                startDate: travel.startDateTime ? new Date(travel.startDateTime).toISOString().split('T')[0] : "",
-                                endDate: travel.endDateTime ? new Date(travel.endDateTime).toISOString().split('T')[0] : "",
-                                included: travel.included && Array.isArray(travel.included) ? travel.included : [""],
-                                excluded: travel.excluded && Array.isArray(travel.excluded) ? travel.excluded : [""],
-                                plans: travel.plans && Array.isArray(travel.plans) ? travel.plans : [{ title: "", items: [""] }],
-                                videos: travel.videos && Array.isArray(travel.videos) ? travel.videos : [""],
-                                images: travel.images && Array.isArray(travel.images) ? travel.images : [""],
+                                quota:
+                                  travel.quota?.total?.toString() ||
+                                  travel.quota?.toString() ||
+                                  "",
+                                startDate: travel.startDateTime
+                                  ? new Date(travel.startDateTime)
+                                      .toISOString()
+                                      .split("T")[0]
+                                  : "",
+                                endDate: travel.endDateTime
+                                  ? new Date(travel.endDateTime)
+                                      .toISOString()
+                                      .split("T")[0]
+                                  : "",
+                                included:
+                                  travel.included &&
+                                  Array.isArray(travel.included)
+                                    ? travel.included
+                                    : [""],
+                                excluded:
+                                  travel.excluded &&
+                                  Array.isArray(travel.excluded)
+                                    ? travel.excluded
+                                    : [""],
+                                plans:
+                                  travel.plans && Array.isArray(travel.plans)
+                                    ? travel.plans
+                                    : [{ title: "", items: [""] }],
+                                videos:
+                                  travel.videos && Array.isArray(travel.videos)
+                                    ? travel.videos
+                                    : [""],
+                                images:
+                                  travel.images && Array.isArray(travel.images)
+                                    ? travel.images
+                                    : [""],
                                 isSpecial: travel.isSpecial || false,
-                                categories: travel.categories && Array.isArray(travel.categories) ? travel.categories.map((cat: any) => typeof cat === 'object' ? cat._id : cat) : [],
+                                categories:
+                                  travel.categories &&
+                                  Array.isArray(travel.categories)
+                                    ? travel.categories.map((cat: any) =>
+                                        typeof cat === "object" ? cat._id : cat
+                                      )
+                                    : [],
                               });
                               setIsEditTripModalOpen(true);
                             }}
@@ -1136,7 +1591,8 @@ export default function AdminDashboard() {
             </DialogHeader>
             <div>
               <p>
-                Та <b>{tripToDelete?.title}</b> аяллыг устгах гэж байна. Энэ үйлдлийг буцаах боломжгүй!
+                Та <b>{tripToDelete?.title}</b> аяллыг устгах гэж байна. Энэ
+                үйлдлийг буцаах боломжгүй!
               </p>
               {deleteTripError && (
                 <div className="text-red-500 text-sm mt-2">
@@ -1162,16 +1618,12 @@ export default function AdminDashboard() {
                     if (!token) return;
                     await deleteTrip(tripId, token);
                     setTravels((trips) =>
-                      trips.filter(
-                        (trip) => trip._id !== tripId
-                      )
+                      trips.filter((trip) => trip._id !== tripId)
                     );
                     setDeleteTripConfirmOpen(false);
                     setTripToDelete(null);
                   } catch (err: any) {
-                    setDeleteTripError(
-                      err.message || "Error deleting trip"
-                    );
+                    setDeleteTripError(err.message || "Error deleting trip");
                   }
                 }}
               >
@@ -1563,23 +2015,31 @@ export default function AdminDashboard() {
                         try {
                           const token = localStorage.getItem("admin_token");
                           if (!token) return;
-                          
+
                           await removeImage(selectedTrip._id, image, token);
-                          
+
                           // Update local state
-                          setTripForm(prev => ({
+                          setTripForm((prev) => ({
                             ...prev,
-                            images: prev.images.filter((_, i) => i !== index)
+                            images: prev.images.filter((_, i) => i !== index),
                           }));
-                          
+
                           // Update travels state
-                          setTravels(prev => prev.map(trip => 
-                            trip._id === selectedTrip._id 
-                              ? { ...trip, images: trip.images?.filter((img: string) => img !== image) || [] }
-                              : trip
-                          ));
+                          setTravels((prev) =>
+                            prev.map((trip) =>
+                              trip._id === selectedTrip._id
+                                ? {
+                                    ...trip,
+                                    images:
+                                      trip.images?.filter(
+                                        (img: string) => img !== image
+                                      ) || [],
+                                  }
+                                : trip
+                            )
+                          );
                         } catch (err: any) {
-                          console.error('Failed to remove image:', err);
+                          console.error("Failed to remove image:", err);
                           // You could add a toast notification here
                         }
                       }}
@@ -1588,7 +2048,7 @@ export default function AdminDashboard() {
                     </Button>
                   </div>
                 ))}
-                
+
                 {/* Image file upload */}
                 <div className="mt-4">
                   <Label htmlFor="newImageFiles">Шинэ зураг нэмэх (файл)</Label>
@@ -1600,61 +2060,75 @@ export default function AdminDashboard() {
                     onChange={async (e) => {
                       const files = Array.from(e.target.files || []);
                       if (!selectedTrip?._id || files.length === 0) return;
-                      
+
                       try {
                         const token = localStorage.getItem("admin_token");
                         if (!token) return;
-                        
+
                         // Upload each file
                         for (const file of files) {
                           // Create FormData for file upload
                           const formData = new FormData();
                           formData.append("images", file);
-                          
-                          const response = await fetch(`${API_URL}/admin/v1/travel/${selectedTrip._id}/images/add`, {
-                            method: 'POST',
-                            headers: {
-                              'Authorization': `Bearer ${token}`,
-                              // Don't set Content-Type - browser will set it automatically with boundary for FormData
-                            },
-                            body: formData,
-                          });
-                          
+
+                          const response = await fetch(
+                            `${API_URL}/admin/v1/travel/${selectedTrip._id}/images/add`,
+                            {
+                              method: "POST",
+                              headers: {
+                                Authorization: `Bearer ${token}`,
+                                // Don't set Content-Type - browser will set it automatically with boundary for FormData
+                              },
+                              body: formData,
+                            }
+                          );
+
                           const data = await response.json();
-                          
+
                           if (data.code !== 0) {
-                            throw new Error(data.message || 'Failed to add image');
+                            throw new Error(
+                              data.message || "Failed to add image"
+                            );
                           }
-                          
+
                           // Get the uploaded image URL from response (assuming it returns the URL)
                           if (data.response && data.response.imageUrl) {
                             const newImageUrl = data.response.imageUrl;
-                            
+
                             // Update local state
-                            setTripForm(prev => ({
+                            setTripForm((prev) => ({
                               ...prev,
-                              images: [...prev.images, newImageUrl]
+                              images: [...prev.images, newImageUrl],
                             }));
-                            
+
                             // Update travels state
-                            setTravels(prev => prev.map(trip => 
-                              trip._id === selectedTrip._id 
-                                ? { ...trip, images: [...(trip.images || []), newImageUrl] }
-                                : trip
-                            ));
+                            setTravels((prev) =>
+                              prev.map((trip) =>
+                                trip._id === selectedTrip._id
+                                  ? {
+                                      ...trip,
+                                      images: [
+                                        ...(trip.images || []),
+                                        newImageUrl,
+                                      ],
+                                    }
+                                  : trip
+                              )
+                            );
                           }
                         }
-                        
+
                         // Clear the file input
-                        (e.target as HTMLInputElement).value = '';
+                        (e.target as HTMLInputElement).value = "";
                       } catch (err: any) {
-                        console.error('Failed to add image:', err);
+                        console.error("Failed to add image:", err);
                         // You could add a toast notification here
                       }
                     }}
                   />
                   <p className="text-sm text-gray-500 mt-1">
-                    Олон зураг сонгох боломжтой. Файл сонгосны дараа автоматаар хуулагдана.
+                    Олон зураг сонгох боломжтой. Файл сонгосны дараа автоматаар
+                    хуулагдана.
                   </p>
                 </div>
               </div>
@@ -1665,15 +2139,18 @@ export default function AdminDashboard() {
                   type="checkbox"
                   id="isSpecial"
                   checked={tripForm.isSpecial}
-                  onChange={(e) => setTripForm(prev => ({ ...prev, isSpecial: e.target.checked }))}
+                  onChange={(e) =>
+                    setTripForm((prev) => ({
+                      ...prev,
+                      isSpecial: e.target.checked,
+                    }))
+                  }
                 />
                 <Label htmlFor="isSpecial">Онцгой аялал</Label>
               </div>
 
               {tripUpdateError && (
-                <div className="text-red-500 text-sm">
-                  {tripUpdateError}
-                </div>
+                <div className="text-red-500 text-sm">{tripUpdateError}</div>
               )}
             </div>
             <DialogFooter>
@@ -1690,7 +2167,7 @@ export default function AdminDashboard() {
                     setTripUpdateError("");
                     const token = localStorage.getItem("admin_token");
                     if (!token) return;
-                    
+
                     const updateData = {
                       title: tripForm.title,
                       description: tripForm.description,
@@ -1699,21 +2176,25 @@ export default function AdminDashboard() {
                       destination: tripForm.destination,
                       status: tripForm.status,
                       quota: tripForm.quota,
-                      startDateTime: tripForm.startDate ? new Date(tripForm.startDate).toISOString() : undefined,
-                      endDateTime: tripForm.endDate ? new Date(tripForm.endDate).toISOString() : undefined,
-                      included: tripForm.included.filter(item => item.trim()),
-                      excluded: tripForm.excluded.filter(item => item.trim()),
-                      plans: tripForm.plans.filter(p => p.title.trim()),
-                      videos: tripForm.videos.filter(video => video.trim()),
+                      startDateTime: tripForm.startDate
+                        ? new Date(tripForm.startDate).toISOString()
+                        : undefined,
+                      endDateTime: tripForm.endDate
+                        ? new Date(tripForm.endDate).toISOString()
+                        : undefined,
+                      included: tripForm.included.filter((item) => item.trim()),
+                      excluded: tripForm.excluded.filter((item) => item.trim()),
+                      plans: tripForm.plans.filter((p) => p.title.trim()),
+                      videos: tripForm.videos.filter((video) => video.trim()),
                       isSpecial: tripForm.isSpecial.toString(),
                       categories: tripForm.categories,
                     };
 
                     // Debug: Log the data being sent
-                    console.log('Sending update data:', updateData);
-                    
+                    console.log("Sending update data:", updateData);
+
                     await updateTrip(selectedTrip._id, updateData, token);
-                    
+
                     // Update local state
                     setTravels((trips) =>
                       trips.map((trip) =>
@@ -1722,13 +2203,11 @@ export default function AdminDashboard() {
                           : trip
                       )
                     );
-                    
+
                     setIsEditTripModalOpen(false);
                     setSelectedTrip(null);
                   } catch (err: any) {
-                    setTripUpdateError(
-                      err.message || "Error updating trip"
-                    );
+                    setTripUpdateError(err.message || "Error updating trip");
                   }
                 }}
               >
@@ -1755,7 +2234,12 @@ export default function AdminDashboard() {
                     <Label className="text-sm font-medium">Зураг</Label>
                     <div className="mt-2">
                       <img
-                        src={Array.isArray(selectedTrip.images) && selectedTrip.images[0] ? selectedTrip.images[0] : "/placeholder.jpg"}
+                        src={
+                          Array.isArray(selectedTrip.images) &&
+                          selectedTrip.images[0]
+                            ? selectedTrip.images[0]
+                            : "/placeholder.jpg"
+                        }
                         alt={selectedTrip.title || "Trip image"}
                         className="w-full h-48 object-cover rounded-lg"
                       />
@@ -1767,7 +2251,9 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="text-sm font-medium">Гарчиг</Label>
-                    <p className="mt-1 text-gray-700">{selectedTrip.title || "Тодорхойгүй"}</p>
+                    <p className="mt-1 text-gray-700">
+                      {selectedTrip.title || "Тодорхойгүй"}
+                    </p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium">Үнэ</Label>
@@ -1826,74 +2312,121 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Categories */}
-                {selectedTrip.categories && selectedTrip.categories.length > 0 && (
-                  <div>
-                    <Label className="text-sm font-medium">Төрлүүд</Label>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {selectedTrip.categories.map((category: any, index: number) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs"
-                        >
-                          {typeof category === 'object' ? category.name || 'Unknown' : String(category)}
-                        </span>
-                      ))}
+                {selectedTrip.categories &&
+                  selectedTrip.categories.length > 0 && (
+                    <div>
+                      <Label className="text-sm font-medium">Төрлүүд</Label>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {selectedTrip.categories.map(
+                          (category: any, index: number) => (
+                            <span
+                              key={index}
+                              className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs"
+                            >
+                              {typeof category === "object"
+                                ? category.name || "Unknown"
+                                : String(category)}
+                            </span>
+                          )
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Included Services */}
-                {selectedTrip.included && Array.isArray(selectedTrip.included) && selectedTrip.included.length > 0 && (
-                  <div>
-                    <Label className="text-sm font-medium">Орсон үйлчилгээ</Label>
-                    <div className="mt-2 space-y-1">
-                      {selectedTrip.included.map((item: any, index: number) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                          <span className="text-gray-700">{typeof item === 'string' ? item : String(item)}</span>
-                        </div>
-                      ))}
+                {selectedTrip.included &&
+                  Array.isArray(selectedTrip.included) &&
+                  selectedTrip.included.length > 0 && (
+                    <div>
+                      <Label className="text-sm font-medium">
+                        Орсон үйлчилгээ
+                      </Label>
+                      <div className="mt-2 space-y-1">
+                        {selectedTrip.included.map(
+                          (item: any, index: number) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-2"
+                            >
+                              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                              <span className="text-gray-700">
+                                {typeof item === "string" ? item : String(item)}
+                              </span>
+                            </div>
+                          )
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Excluded Services */}
-                {selectedTrip.excluded && Array.isArray(selectedTrip.excluded) && selectedTrip.excluded.length > 0 && (
-                  <div>
-                    <Label className="text-sm font-medium">Орхоогүй үйлчилгээ</Label>
-                    <div className="mt-2 space-y-1">
-                      {selectedTrip.excluded.map((item: any, index: number) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                          <span className="text-gray-700">{typeof item === 'string' ? item : String(item)}</span>
-                        </div>
-                      ))}
+                {selectedTrip.excluded &&
+                  Array.isArray(selectedTrip.excluded) &&
+                  selectedTrip.excluded.length > 0 && (
+                    <div>
+                      <Label className="text-sm font-medium">
+                        Орхоогүй үйлчилгээ
+                      </Label>
+                      <div className="mt-2 space-y-1">
+                        {selectedTrip.excluded.map(
+                          (item: any, index: number) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-2"
+                            >
+                              <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                              <span className="text-gray-700">
+                                {typeof item === "string" ? item : String(item)}
+                              </span>
+                            </div>
+                          )
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Plans */}
                 {selectedTrip.plans && selectedTrip.plans.length > 0 && (
                   <div>
-                    <Label className="text-sm font-medium">Аяллын төлөвлөгөө</Label>
+                    <Label className="text-sm font-medium">
+                      Аяллын төлөвлөгөө
+                    </Label>
                     <div className="mt-2 space-y-4">
-                      {selectedTrip.plans.map((plan: any, planIndex: number) => (
-                        <div key={planIndex} className="border rounded-lg p-3">
-                          <h4 className="font-medium text-gray-800 mb-2">
-                            {typeof plan.title === 'string' ? plan.title : `Өдөр ${planIndex + 1}`}
-                          </h4>
-                          {plan.items && Array.isArray(plan.items) && plan.items.length > 0 && (
-                            <div className="space-y-1">
-                              {plan.items.map((item: any, itemIndex: number) => (
-                                <div key={itemIndex} className="flex items-center gap-2 text-sm text-gray-600">
-                                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
-                                  <span>{typeof item === 'string' ? item : String(item)}</span>
+                      {selectedTrip.plans.map(
+                        (plan: any, planIndex: number) => (
+                          <div
+                            key={planIndex}
+                            className="border rounded-lg p-3"
+                          >
+                            <h4 className="font-medium text-gray-800 mb-2">
+                              {typeof plan.title === "string"
+                                ? plan.title
+                                : `Өдөр ${planIndex + 1}`}
+                            </h4>
+                            {plan.items &&
+                              Array.isArray(plan.items) &&
+                              plan.items.length > 0 && (
+                                <div className="space-y-1">
+                                  {plan.items.map(
+                                    (item: any, itemIndex: number) => (
+                                      <div
+                                        key={itemIndex}
+                                        className="flex items-center gap-2 text-sm text-gray-600"
+                                      >
+                                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
+                                        <span>
+                                          {typeof item === "string"
+                                            ? item
+                                            : String(item)}
+                                        </span>
+                                      </div>
+                                    )
+                                  )}
                                 </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                              )}
+                          </div>
+                        )
+                      )}
                     </div>
                   </div>
                 )}
@@ -1903,19 +2436,21 @@ export default function AdminDashboard() {
                   <div>
                     <Label className="text-sm font-medium">Видеонууд</Label>
                     <div className="mt-2 space-y-2">
-                      {selectedTrip.videos.map((video: string, index: number) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                          <a
-                            href={video}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 underline text-sm"
-                          >
-                            Видео {index + 1}
-                          </a>
-                        </div>
-                      ))}
+                      {selectedTrip.videos.map(
+                        (video: string, index: number) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                            <a
+                              href={video}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 underline text-sm"
+                            >
+                              Видео {index + 1}
+                            </a>
+                          </div>
+                        )
+                      )}
                     </div>
                   </div>
                 )}
@@ -1926,40 +2461,51 @@ export default function AdminDashboard() {
                     <div>
                       <Label className="text-sm font-medium">Эхлэх огноо</Label>
                       <p className="mt-1 text-gray-700">
-                        {new Date(selectedTrip.startDateTime).toLocaleDateString("mn-MN")}
+                        {new Date(
+                          selectedTrip.startDateTime
+                        ).toLocaleDateString("mn-MN")}
                       </p>
                     </div>
                   )}
                   {selectedTrip.endDateTime && (
                     <div>
-                      <Label className="text-sm font-medium">Дуусах огноо</Label>
+                      <Label className="text-sm font-medium">
+                        Дуусах огноо
+                      </Label>
                       <p className="mt-1 text-gray-700">
-                        {new Date(selectedTrip.endDateTime).toLocaleDateString("mn-MN")}
+                        {new Date(selectedTrip.endDateTime).toLocaleDateString(
+                          "mn-MN"
+                        )}
                       </p>
                     </div>
                   )}
                   {selectedTrip.quota && (
                     <div>
-                      <Label className="text-sm font-medium">Нийт байрлал</Label>
+                      <Label className="text-sm font-medium">
+                        Нийт байрлал
+                      </Label>
                       <p className="mt-1 text-gray-700">
-                        {typeof selectedTrip.quota === 'object' 
-                          ? `${selectedTrip.quota.total || 0} (Боломжтой: ${selectedTrip.quota.available || 0})`
-                          : selectedTrip.quota
-                        }
+                        {typeof selectedTrip.quota === "object"
+                          ? `${selectedTrip.quota.total || 0} (Боломжтой: ${
+                              selectedTrip.quota.available || 0
+                            })`
+                          : selectedTrip.quota}
                       </p>
                     </div>
                   )}
                   {selectedTrip.createdAt && (
                     <div>
-                      <Label className="text-sm font-medium">Үүсгэсэн огноо</Label>
+                      <Label className="text-sm font-medium">
+                        Үүсгэсэн огноо
+                      </Label>
                       <p className="mt-1 text-gray-700">
-                        {new Date(selectedTrip.createdAt).toLocaleDateString("mn-MN")}
+                        {new Date(selectedTrip.createdAt).toLocaleDateString(
+                          "mn-MN"
+                        )}
                       </p>
                     </div>
                   )}
                 </div>
-
-
               </div>
             )}
             <DialogFooter>
@@ -1975,48 +2521,433 @@ export default function AdminDashboard() {
 
         {selectedTab === "Bookings" && (
           <div className="px-8 py-6">
-            <div className="text-lg font-bold mb-4">Захиалгууд</div>
+            <div className="text-lg font-bold mb-4">Бүх захиалгууд</div>
             <Card>
               <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Хэрэглэгч</TableHead>
-                      <TableHead>Аялал</TableHead>
-                      <TableHead>Огноо</TableHead>
-                      <TableHead>Төлбөр</TableHead>
-                      <TableHead>Төлөв</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>Бат-Эрдэнэ</TableCell>
-                      <TableCell>Хөвсгөл нуурын аялал</TableCell>
-                      <TableCell>2024-01-15</TableCell>
-                      <TableCell>₮150,000</TableCell>
-                      <TableCell>
-                        <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
-                          Төлөгдсөн
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Сарангэрэл</TableCell>
-                      <TableCell>Говийн элсэн манхан</TableCell>
-                      <TableCell>2024-01-20</TableCell>
-                      <TableCell>₮200,000</TableCell>
-                      <TableCell>
-                        <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">
-                          Хүлээгдэж буй
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
+                {ordersLoading ? (
+                  <div className="p-8 text-center">Уншиж байна...</div>
+                ) : ordersError ? (
+                  <div className="p-8 text-red-500 text-center">
+                    {ordersError}
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Хэрэглэгч</TableHead>
+                        <TableHead>Аялал</TableHead>
+                        <TableHead>Огноо</TableHead>
+                        <TableHead>Төлбөр</TableHead>
+                        <TableHead>Төлөв</TableHead>
+                        <TableHead>Үйлдэл</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {orders.length === 0 ? (
+                        <TableRow>
+                          <TableCell
+                            colSpan={6}
+                            className="text-center py-8 text-gray-500"
+                          >
+                            Захиалга байхгүй байна
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        orders.map((order) => {
+                          // Prefer fetched travelDetails, otherwise normalize inline object
+                          const t =
+                            order.travelDetails ||
+                            (typeof order.travel === "object"
+                              ? normalizeTravel(order.travel)
+                              : null);
+
+                          return (
+                            <TableRow key={order._id}>
+                              <TableCell>
+                                <div>
+                                  <div className="font-medium">
+                                    {order.userDetails?.name ||
+                                      order.contact?.fullName ||
+                                      "N/A"}
+                                  </div>
+                                  <div className="text-sm text-gray-500">
+                                    {order.userDetails?.email ||
+                                      order.contact?.email ||
+                                      ""}
+                                  </div>
+                                </div>
+                              </TableCell>
+
+                              <TableCell>
+                                <div>
+                                  <div className="font-medium">
+                                    {t?.title || "Тухайгүй аялал"}
+                                  </div>
+                                </div>
+                              </TableCell>
+
+                              <TableCell>
+                                <div>
+                                  <div>
+                                    {order.createdAt
+                                      ? new Date(
+                                          order.createdAt
+                                        ).toLocaleDateString("mn-MN")
+                                      : "N/A"}
+                                  </div>
+                                  <div className="text-sm text-gray-500">
+                                    {order.travelersSize} хүн
+                                  </div>
+                                </div>
+                              </TableCell>
+
+                              <TableCell>
+                                <div>
+                                  <div className="font-medium">
+                                    ₮{order.totalPrice?.toLocaleString() || "0"}
+                                  </div>
+                                  <div className="text-sm text-gray-500">
+                                    ₮
+                                    {order.pricePerQuota?.toLocaleString() ||
+                                      "0"}{" "}
+                                    / хүн
+                                  </div>
+                                </div>
+                              </TableCell>
+
+                              <TableCell>
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs ${
+                                    order.status === "CONFIRMED"
+                                      ? "bg-green-100 text-green-800"
+                                      : order.status === "PENDING"
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : order.status === "CANCELLED"
+                                      ? "bg-red-100 text-red-800"
+                                      : "bg-gray-100 text-gray-800"
+                                  }`}
+                                >
+                                  {order.status === "CONFIRMED"
+                                    ? "Баталгаажсан"
+                                    : order.status === "PENDING"
+                                    ? "Хүлээгдэж буй"
+                                    : order.status === "CANCELLED"
+                                    ? "Цуцлагдсан"
+                                    : order.status}
+                                </span>
+                              </TableCell>
+
+                              <TableCell>
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => openOrderDetails(order)}
+                                  >
+                                    Дэлгэрэнгүй
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      setSelectedOrder(order);
+                                      setNewOrderStatus(order.status);
+                                      setOrderStatusModalOpen(true);
+                                    }}
+                                  >
+                                    Төлөв солих
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
+                      )}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
+
+            {/* Pagination for Bookings tab */}
+            {!ordersLoading && !ordersError && totalPages > 1 && (
+              <div className="mt-4 flex justify-center items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage <= 1}
+                >
+                  Өмнөх
+                </Button>
+                <span className="text-sm text-gray-600">
+                  {currentPage} / {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
+                  disabled={currentPage >= totalPages}
+                >
+                  Дараах
+                </Button>
+              </div>
+            )}
           </div>
         )}
+
+        {/* Order Status Update Modal */}
+        <Dialog
+          open={orderStatusModalOpen}
+          onOpenChange={setOrderStatusModalOpen}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Захиалгын төлөв солих</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {selectedOrder && (
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <div className="text-sm text-gray-600 mb-2">
+                    Захиалгын мэдээлэл:
+                  </div>
+                  <div className="font-medium">
+                    {selectedOrder.userDetails?.name ||
+                      selectedOrder.contact?.fullName ||
+                      "N/A"}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {selectedOrder.travelDetails?.title || "Тухайгүй аялал"}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    ₮{selectedOrder.totalPrice?.toLocaleString() || "0"}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <Label htmlFor="newStatus">Шинэ төлөв</Label>
+                <Select
+                  value={newOrderStatus}
+                  onValueChange={setNewOrderStatus}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Төлөв сонгох" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PENDING">Хүлээгдэж буй</SelectItem>
+                    <SelectItem value="CONFIRMED">Баталгаажсан</SelectItem>
+                    <SelectItem value="CANCELLED">Цуцлагдсан</SelectItem>
+                    <SelectItem value="COMPLETED">Дууссан</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {statusUpdateError && (
+                <div className="text-red-500 text-sm">{statusUpdateError}</div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setOrderStatusModalOpen(false);
+                  setStatusUpdateError("");
+                }}
+              >
+                Цуцлах
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (!selectedOrder || !newOrderStatus) return;
+
+                  try {
+                    setStatusUpdateError("");
+                    await updateOrderStatus(selectedOrder._id, newOrderStatus);
+
+                    // Update local state
+                    setOrders((prev) =>
+                      prev.map((order) =>
+                        order._id === selectedOrder._id
+                          ? { ...order, status: newOrderStatus }
+                          : order
+                      )
+                    );
+
+                    setOrderStatusModalOpen(false);
+                    setSelectedOrder(null);
+                  } catch (err: any) {
+                    setStatusUpdateError(
+                      err.message || "Төлөв солихад алдаа гарлаа"
+                    );
+                  }
+                }}
+                disabled={
+                  !newOrderStatus || newOrderStatus === selectedOrder?.status
+                }
+              >
+                Хадгалах
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Order Details Modal */}
+        <Dialog
+          open={orderDetailsModalOpen}
+          onOpenChange={setOrderDetailsModalOpen}
+        >
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Захиалгын дэлгэрэнгүй мэдээлэл</DialogTitle>
+            </DialogHeader>
+            {selectedOrderForDetails && (
+              <div className="space-y-6">
+                {/* Order Information */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-3">
+                    Захиалгын мэдээлэл
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-sm text-gray-600">Захиалгын ID</div>
+                      <div className="font-medium">
+                        {selectedOrderForDetails._id}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-600">
+                        Үүсгэсэн огноо
+                      </div>
+                      <div className="font-medium">
+                        {selectedOrderForDetails.createdAt
+                          ? new Date(
+                              selectedOrderForDetails.createdAt
+                            ).toLocaleDateString("mn-MN", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "Тодорхойгүй"}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-600">Төлөв</div>
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm ${
+                          selectedOrderForDetails.status === "CONFIRMED"
+                            ? "bg-green-100 text-green-800"
+                            : selectedOrderForDetails.status === "PENDING"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : selectedOrderForDetails.status === "CANCELLED"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {selectedOrderForDetails.status === "CONFIRMED"
+                          ? "Баталгаажсан"
+                          : selectedOrderForDetails.status === "PENDING"
+                          ? "Хүлээгдэж буй"
+                          : selectedOrderForDetails.status === "CANCELLED"
+                          ? "Цуцлагдсан"
+                          : selectedOrderForDetails.status}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-600">
+                        Аяллагчдын тоо
+                      </div>
+                      <div className="font-medium">
+                        {selectedOrderForDetails.travelersSize} хүн
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Customer Information */}
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-3">
+                    Хэрэглэгчийн мэдээлэл
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-sm text-gray-600">Нэр</div>
+                      <div className="font-medium">
+                        {selectedOrderForDetails.userDetails?.name ||
+                          selectedOrderForDetails.contact?.fullName ||
+                          "Тодорхойгүй"}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-600">Имэйл</div>
+                      <div className="font-medium">
+                        {selectedOrderForDetails.userDetails?.email ||
+                          selectedOrderForDetails.contact?.email ||
+                          "Тодорхойгүй"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pricing Information */}
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-3">
+                    Төлбөрийн мэдээлэл
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-sm text-gray-600">Нэг хүний үнэ</div>
+                      <div className="font-medium text-lg">
+                        ₮
+                        {selectedOrderForDetails.pricePerQuota?.toLocaleString() ||
+                          "0"}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-600">Нийт төлбөр</div>
+                      <div className="font-bold text-xl text-green-700">
+                        ₮
+                        {selectedOrderForDetails.totalPrice?.toLocaleString() ||
+                          "0"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Travel Information */}
+                {travelDataLoading ? (
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <div className="text-center py-4">
+                      Аяллын мэдээлэл уншиж байна...
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <div className="text-center py-4 text-gray-500">
+                      Аяллын мэдээлэл олдсонгүй
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            <DialogFooter>
+              <Button
+                onClick={() => {
+                  setOrderDetailsModalOpen(false);
+                  setSelectedOrderForDetails(null);
+                  setDetailedTravelData(null);
+                }}
+                className="w-full"
+              >
+                Хаах
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
