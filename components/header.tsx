@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Menu, X, User, LogOut, Globe } from "lucide-react";
+import { Menu, X, User, LogOut, Globe, ShoppingCart } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,10 +11,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/components/LanguageProvider";
+import { useCart } from "@/components/CartProvider";
 
 export default function Header() {
   const router = useRouter();
   const { t, locale, setLocale } = useI18n();
+  const { getCartCount } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -78,12 +80,6 @@ export default function Header() {
             {t("nav.trips")}
           </Link>
           <Link
-            href="/"
-            className="text-sm font-medium hover:text-gray-600 transition-colors"
-          >
-            {t("nav.destination")}
-          </Link>
-          <Link
             href="/about"
             className="text-sm font-medium hover:text-gray-600 transition-colors"
           >
@@ -117,6 +113,22 @@ export default function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+          {/* Cart Icon */}
+          <Link
+            href="/cart"
+            className={`relative flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
+              scrolled ? "bg-gray-100 hover:bg-gray-200" : "bg-white/10 hover:bg-white/20"
+            }`}
+          >
+            <ShoppingCart className={`w-5 h-5 ${scrolled ? "text-gray-800" : "text-white"}`} />
+            {getCartCount() > 0 && (
+              <span className={`absolute -top-1 -right-1 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center ${
+                scrolled ? "bg-red-500 text-white" : "bg-red-500 text-white"
+              }`}>
+                {getCartCount()}
+              </span>
+            )}
+          </Link>
           {isLoggedIn ? (
             <div className="relative dropdown-container">
               <button
@@ -208,13 +220,6 @@ export default function Header() {
             {t("nav.trips")}
           </Link>
           <Link
-            href="/destination"
-            className="text-gray-800 text-lg py-4 border-b border-gray-100 hover:text-gray-600 transition-colors"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            {t("nav.destination")}
-          </Link>
-          <Link
             href="/about"
             className="text-gray-800 text-lg py-4 border-b border-gray-100 hover:text-gray-600 transition-colors"
             onClick={() => setMobileMenuOpen(false)}
@@ -227,6 +232,18 @@ export default function Header() {
             onClick={() => setMobileMenuOpen(false)}
           >
             {t("nav.contact")}
+          </Link>
+          <Link
+            href="/cart"
+            className="text-gray-800 text-lg py-4 border-b border-gray-100 hover:text-gray-600 transition-colors flex items-center justify-between"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <span>Сагс</span>
+            {getCartCount() > 0 && (
+              <span className="w-5 h-5 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center">
+                {getCartCount()}
+              </span>
+            )}
           </Link>
           {isLoggedIn ? (
             <>

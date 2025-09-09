@@ -19,8 +19,28 @@ import {
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://taiga-9fde.onrender.com";
 
+interface FormData {
+  title: string;
+  description: string;
+  location: string;
+  price: string;
+  days: string;
+  nights: string;
+  totalQuota: string;
+  startDate: string;
+  endDate: string;
+  included: string[];
+  excluded: string[];
+  plans: { title: string; items: string[] }[];
+  images: string[];
+  videos: string[];
+  isSpecial: boolean;
+  status: string;
+  categories: string[];
+}
+
 export default function CreateTripForm() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: "",
     description: "",
     location: "",
@@ -37,7 +57,7 @@ export default function CreateTripForm() {
     videos: [""],
     isSpecial: false,
     status: "SCHEDULED",
-    categories: [] as string[],
+    categories: [],
   });
 
   // Hold image files selected via file input for backend (Cloudinary) upload
@@ -65,11 +85,23 @@ export default function CreateTripForm() {
       .finally(() => setCategoriesLoading(false));
   }, []);
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleArrayChange = (field: string, index: number, value: string) => {
+  const formatNumber = (value: string) => {
+    // Remove all non-numeric characters
+    const numericValue = value.replace(/\D/g, '');
+    // Add commas for thousands
+    return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedValue = formatNumber(e.target.value);
+    setFormData((prev) => ({ ...prev, price: formattedValue }));
+  };
+
+  const handleArrayChange = (field: keyof FormData, index: number, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: (prev[field] as string[]).map((item: string, i: number) =>
@@ -78,14 +110,14 @@ export default function CreateTripForm() {
     }));
   };
 
-  const addArrayItem = (field: string) => {
+  const addArrayItem = (field: keyof FormData) => {
     setFormData((prev) => ({
       ...prev,
       [field]: [...(prev[field] as string[]), ""],
     }));
   };
 
-  const removeArrayItem = (field: string, index: number) => {
+  const removeArrayItem = (field: keyof FormData, index: number) => {
     setFormData((prev) => ({
       ...prev,
       [field]: (prev[field] as string[]).filter(
@@ -193,8 +225,9 @@ export default function CreateTripForm() {
       })
     );
 
-    // Convert price and quota to numbers
-    formDataToSend.append("price", Number(formData.price).toString());
+    // Convert price and quota to numbers (remove commas from price)
+    const numericPrice = formData.price.replace(/,/g, '');
+    formDataToSend.append("price", Number(numericPrice).toString());
     formDataToSend.append("quota", Number(formData.totalQuota).toString());
 
     // Date formatting
@@ -361,10 +394,10 @@ export default function CreateTripForm() {
               <Label htmlFor="price">Үнэ (₮)</Label>
               <Input
                 id="price"
-                type="number"
+                type="text"
                 value={formData.price}
-                onChange={(e) => handleInputChange("price", e.target.value)}
-                placeholder="150000"
+                onChange={handlePriceChange}
+                placeholder="1,500,000"
                 required
               />
             </div>

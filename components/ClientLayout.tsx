@@ -4,6 +4,7 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import React from "react";
 import { LanguageProvider } from "@/components/LanguageProvider";
+import { CartProvider } from "@/components/CartProvider";
 
 export default function ClientLayout({
   children,
@@ -19,9 +20,11 @@ export default function ClientLayout({
 
   return (
     <LanguageProvider>
-      {!hideHeaderFooter && <Header />}
-      <main>{children}</main>
-      {!hideHeaderFooter && <Footer />}
+      <CartProvider>
+        {!hideHeaderFooter && <Header />}
+        <main>{children}</main>
+        {!hideHeaderFooter && <Footer />}
+      </CartProvider>
     </LanguageProvider>
   );
 }

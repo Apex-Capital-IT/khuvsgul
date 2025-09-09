@@ -20,6 +20,7 @@ import CommentForm from "@/components/CommentForm";
 import { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useCart } from "@/components/CartProvider";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://taiga-9fde.onrender.com";
@@ -38,6 +39,7 @@ export default function TripDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   // Await params before using slug
+  const { addToCart } = useCart();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [trip, setTrip] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -59,47 +61,34 @@ export default function TripDetailPage({
       return;
     }
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("Нэвтрэх шаардлагатай");
-      return;
-    }
-
     setSubmitting(true);
 
     try {
-      const orderData = {
+      // Add to cart instead of creating order directly
+      addToCart({
         travelId: trip._id,
+        title: trip.title || "Аялал",
+        price: trip.price || 0,
         travelersSize: bookingForm.travelersSize,
+        startDate: bookingForm.startDate || trip.startDateTime || "",
         contact: {
           fullName: bookingForm.fullName,
           email: bookingForm.email,
         },
-      };
-
-      const response = await fetch(`${API_URL}/api/v1/order/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(orderData),
+        image: trip.images?.[0],
+        destination: trip.destination?.location,
+        duration: trip.duration,
       });
 
-      const data = await response.json();
-
-      if (data.code === 0) {
-        toast.success("Аялал амжилттай захиалагдлаа!");
-        // Reset form
-        setBookingForm({
-          fullName: "",
-          email: "",
-          travelersSize: 1,
-          startDate: "",
-        });
-      } else {
-        throw new Error(data.message || "Захиалга амжилтгүй");
-      }
+      toast.success("Аялал сагсанд нэмэгдлээ!");
+      
+      // Reset form
+      setBookingForm({
+        fullName: "",
+        email: "",
+        travelersSize: 1,
+        startDate: "",
+      });
     } catch (error: any) {
       toast.error(error.message || "Алдаа гарлаа");
     } finally {
@@ -174,60 +163,13 @@ export default function TripDetailPage({
     <>
       <section className="relative h-[300px] flex items-center">
         <Image
-          src={images[currentImageIndex] || "/cover.avif"}
+          src={images[0] || "/cover.avif"}
           alt={trip.title || "Trip Cover"}
           fill
           className="object-cover"
           priority
         />
         <div className="absolute inset-0 bg-black/20"></div>
-
-        {/* Navigation buttons - only show if there are multiple images */}
-        {hasMultipleImages && (
-          <>
-            <Button
-              onClick={previousImage}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white border-0"
-              size="sm"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </Button>
-
-            <Button
-              onClick={nextImage}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white border-0"
-              size="sm"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </Button>
-          </>
-        )}
 
         <div className="container mx-auto px-4 relative z-10 text-white pt-16">
           <h1 className="text-4xl md:text-5xl font-medium">
@@ -484,16 +426,16 @@ export default function TripDetailPage({
                   </div>
                   <div className="pt-4 border-t">
                     <div className="flex justify-between mb-2">
-                      <div>Үнэ (1 хүн)</div>
+                      <div>Үнэ ({bookingForm.travelersSize} хүн)</div>
                       <div className="font-medium">
-                        {trip.price ? `${trip.price.toLocaleString()}₮` : "-"}
+                        {trip.price ? `${(trip.price * bookingForm.travelersSize).toLocaleString()}₮` : "-"}
                       </div>
                     </div>
                     <div className="flex justify-between mb-2">
                       <div>НӨАТ (10%)</div>
                       <div className="font-medium">
                         {trip.price
-                          ? `${Math.round(trip.price * 0.1).toLocaleString()}₮`
+                          ? `${Math.round(trip.price * bookingForm.travelersSize * 0.1).toLocaleString()}₮`
                           : "-"}
                       </div>
                     </div>
@@ -501,7 +443,7 @@ export default function TripDetailPage({
                       <div>Нийт</div>
                       <div>
                         {trip.price
-                          ? `${Math.round(trip.price * 1.1).toLocaleString()}₮`
+                          ? `${Math.round(trip.price * bookingForm.travelersSize * 1.1).toLocaleString()}₮`
                           : "-"}
                       </div>
                     </div>
@@ -511,7 +453,7 @@ export default function TripDetailPage({
                     className="w-full bg-black text-white hover:bg-gray-800"
                     disabled={submitting}
                   >
-                    {submitting ? "Захиалах..." : "Одоо захиалах"}
+                    {submitting ? "Сагсанд нэмэх..." : "Сагсанд нэмэх"}
                   </Button>
                 </form>
               </div>
@@ -552,6 +494,100 @@ export default function TripDetailPage({
             </div>
           </section>
         )}
+
+      {/* Image Gallery Section - only show if there are multiple images */}
+      {hasMultipleImages && (
+        <section className="py-16">
+          <div className="container mx-auto px-4">
+            <h2 className="text-2xl font-medium mb-8">
+              Аяллын <span className="italic">зургууд</span>
+            </h2>
+            <div className="max-w-6xl mx-auto">
+              <div className="relative">
+                <div className="aspect-video bg-gray-200 rounded-lg overflow-hidden">
+                  <Image
+                    src={images[currentImageIndex]}
+                    alt={`${trip.title} - Зураг ${currentImageIndex + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                
+                {/* Navigation buttons */}
+                <Button
+                  onClick={previousImage}
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white border-0"
+                  size="sm"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </Button>
+
+                <Button
+                  onClick={nextImage}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white border-0"
+                  size="sm"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </Button>
+
+                {/* Image counter */}
+                <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                  {currentImageIndex + 1} / {images.length}
+                </div>
+              </div>
+
+              {/* Thumbnail navigation */}
+              <div className="grid grid-cols-4 md:grid-cols-6 gap-2 mt-4">
+                {images.map((image: string, index: number) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentImageIndex(index)}
+                    className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                      index === currentImageIndex
+                        ? "border-black ring-2 ring-black/20"
+                        : "border-gray-200 hover:border-gray-400"
+                    }`}
+                  >
+                    <Image
+                      src={image}
+                      alt={`Thumbnail ${index + 1}`}
+                      width={100}
+                      height={100}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Testimonials-style comments from real data */}
       <section className="py-16 bg-gray-50">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -112,6 +112,7 @@ type TabType = "detail" | "referral" | "orders";
 
 export default function ProfilePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -214,6 +215,14 @@ export default function ProfilePage() {
 
     fetchProfile();
   }, [router]);
+
+  // Handle URL parameters for tab switching
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab && ["detail", "referral", "orders"].includes(tab)) {
+      setActiveTab(tab as TabType);
+    }
+  }, [searchParams]);
 
   // Fetch orders when orders tab is active
   useEffect(() => {
@@ -680,6 +689,7 @@ export default function ProfilePage() {
       id: "orders" as TabType,
       label: "Захиалгууд",
       icon: Package,
+      count: orders.length,
     },
   ];
 
@@ -866,6 +876,11 @@ export default function ProfilePage() {
             <CardTitle className="flex items-center gap-2">
               <Package className="w-6 h-6" />
               Захиалгууд
+              {orders.length > 0 && (
+                <span className="bg-blue-100 text-blue-800 text-sm font-medium px-2 py-1 rounded-full">
+                  {orders.length} захиалга
+                </span>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -1037,7 +1052,12 @@ export default function ProfilePage() {
                         )}
                       >
                         <Icon className="w-5 h-5" />
-                        {tab.label}
+                        <span className="flex-1">{tab.label}</span>
+                        {tab.count !== undefined && tab.count > 0 && (
+                          <span className="bg-red-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 px-1 flex items-center justify-center">
+                            {tab.count}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
