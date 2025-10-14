@@ -326,6 +326,7 @@ export default function AdminDashboard() {
     title: "",
     subtitle: "",
   });
+  const [heroImageFile, setHeroImageFile] = useState<File | null>(null);
   const [heroLoading, setHeroLoading] = useState(false);
   const [heroError, setHeroError] = useState("");
 
@@ -902,6 +903,29 @@ export default function AdminDashboard() {
     try {
       const token = localStorage.getItem("admin_token");
 
+      // Upload image first if a new file is selected
+      if (heroImageFile) {
+        const formData = new FormData();
+        formData.append("image", heroImageFile);
+
+        const imageResponse = await fetch(
+          `${API_URL}/admin/v1/home/bgImage/change`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+          }
+        );
+        const imageData = await imageResponse.json();
+        if (imageData.code !== 0) {
+          throw new Error(imageData.message || "Failed to upload image");
+        }
+        // Clear the file after successful upload
+        setHeroImageFile(null);
+      }
+
       // Fetch current benefits to include in the payload
       const currentRes = await fetch(`${API_URL}/admin/v1/home`, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -985,48 +1009,7 @@ export default function AdminDashboard() {
   };
 
   // Upload Hero background image
-  const uploadHeroImage = async (file: File) => {
-    setHeroLoading(true);
-    try {
-      const token = localStorage.getItem("admin_token");
-      const formData = new FormData();
-      formData.append("image", file);
 
-      const response = await fetch(`${API_URL}/admin/v1/home/bgImage/change`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-      const data = await response.json();
-      if (data.code === 0) {
-        alert("Зураг амжилттай хуулагдлаа!");
-        // Refresh hero data
-        if (selectedTab === "Hero Section") {
-          const token = localStorage.getItem("admin_token");
-          const res = await fetch(`${API_URL}/admin/v1/home`, {
-            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-          });
-          const heroRes = await res.json();
-          if (
-            heroRes.code === 0 &&
-            heroRes.response &&
-            heroRes.response.length > 0
-          ) {
-            const { title, subtitle, backgroundImageUrl } = heroRes.response[0];
-            setHeroData({ title, subtitle, backgroundImageUrl });
-          }
-        }
-      } else {
-        throw new Error(data.message || "Failed to upload image");
-      }
-    } catch (err: any) {
-      alert("Зураг хуулахад алдаа гарлаа: " + err.message);
-    } finally {
-      setHeroLoading(false);
-    }
-  };
 
   // Save About Us data
   const saveAboutData = async () => {
@@ -1203,6 +1186,9 @@ export default function AdminDashboard() {
         },
         body: JSON.stringify({
           description: contactData.description,
+          phoneNumbers: contactData.phoneNumbers,
+          email: contactData.email,
+          address: contactData.address,
         }),
       });
       const data = await response.json();
@@ -1364,13 +1350,18 @@ export default function AdminDashboard() {
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
-                        uploadHeroImage(file);
+                        setHeroImageFile(file);
                       }
                     }}
                     className="mt-2"
                   />
+                  {heroImageFile && (
+                    <p className="text-sm text-green-600 mt-1">
+                      ✓ Зураг сонгогдсон: {heroImageFile.name}
+                    </p>
+                  )}
                   <p className="text-sm text-gray-500 mt-1">
-                    Шинэ зураг сонгох (автоматаар хуулагдана)
+                    Шинэ зураг сонгох (Хадгалах товч дарахад хуулагдана)
                   </p>
                 </div>
 
@@ -1386,6 +1377,13 @@ export default function AdminDashboard() {
                     variant="outline"
                     className="flex-1"
                     onClick={() => {
+                      // Clear selected file
+                      setHeroImageFile(null);
+                      // Clear file input
+                      const fileInput = document.getElementById(
+                        "heroBackgroundImageFile"
+                      ) as HTMLInputElement;
+                      if (fileInput) fileInput.value = "";
                       // Reload data from API
                       const token = localStorage.getItem("admin_token");
                       fetch(`${API_URL}/admin/v1/home`, {
@@ -1928,13 +1926,11 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* Editable Description */}
-            <Card className="mb-6">
+            {/* Editable Contact Information */}
+            <Card>
               <CardContent className="p-6 space-y-6">
                 <div>
-                  <Label htmlFor="contactDescription">
-                    Тайлбар (Засах боломжтой)
-                  </Label>
+                  <Label htmlFor="contactDescription">Тайлбар</Label>
                   <Textarea
                     id="contactDescription"
                     value={contactData.description}
@@ -1946,6 +1942,88 @@ export default function AdminDashboard() {
                     }
                     placeholder="Холбоо барих хэсгийн тайлбар текст"
                     rows={4}
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="contactEmail">Имэйл хаяг</Label>
+                  <Input
+                    id="contactEmail"
+                    type="email"
+                    value={contactData.email}
+                    onChange={(e) =>
+                      setContactData((prev) => ({
+                        ...prev,
+                        email: e.target.value,
+                      }))
+                    }
+                    placeholder="info@example.com"
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label>Утасны дугаарууд</Label>
+                  {contactData.phoneNumbers.map((phone, index) => (
+                    <div key={index} className="flex gap-2 mt-2">
+                      <Input
+                        value={phone}
+                        onChange={(e) => {
+                          const newPhones = [...contactData.phoneNumbers];
+                          newPhones[index] = e.target.value;
+                          setContactData((prev) => ({
+                            ...prev,
+                            phoneNumbers: newPhones,
+                          }));
+                        }}
+                        placeholder="+976 99999999"
+                      />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => {
+                          const newPhones = contactData.phoneNumbers.filter(
+                            (_, i) => i !== index
+                          );
+                          setContactData((prev) => ({
+                            ...prev,
+                            phoneNumbers: newPhones,
+                          }));
+                        }}
+                      >
+                        ✕
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-2"
+                    onClick={() => {
+                      setContactData((prev) => ({
+                        ...prev,
+                        phoneNumbers: [...prev.phoneNumbers, ""],
+                      }));
+                    }}
+                  >
+                    + Утас нэмэх
+                  </Button>
+                </div>
+
+                <div>
+                  <Label htmlFor="contactAddress">Хаяг</Label>
+                  <Textarea
+                    id="contactAddress"
+                    value={contactData.address}
+                    onChange={(e) =>
+                      setContactData((prev) => ({
+                        ...prev,
+                        address: e.target.value,
+                      }))
+                    }
+                    placeholder="Улаанбаатар хот, Сүхбаатар дүүрэг"
+                    rows={3}
                     className="mt-2"
                   />
                 </div>
@@ -1971,16 +2049,16 @@ export default function AdminDashboard() {
                       })
                         .then((res) => res.json())
                         .then((data) => {
-                          if (data.code === 0 && data.response) {
+                          if (data.code === 0 && data.response && data.response.length > 0) {
                             setContactData({
-                              description: data.response.description || "",
+                              description: data.response[0].description || "",
                               phoneNumbers: Array.isArray(
-                                data.response.phoneNumbers
+                                data.response[0].phoneNumbers
                               )
-                                ? data.response.phoneNumbers
+                                ? data.response[0].phoneNumbers
                                 : [],
-                              email: data.response.email || "",
-                              address: data.response.address || "",
+                              email: data.response[0].email || "",
+                              address: data.response[0].address || "",
                             });
                           }
                         });
@@ -1988,39 +2066,6 @@ export default function AdminDashboard() {
                   >
                     Цуцлах
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Read-only Contact Information */}
-            <Card>
-              <CardContent className="p-6 space-y-6">
-                <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-800">
-                  <strong>Анхаар:</strong> Доорх мэдээлэл зөвхөн унших
-                  боломжтой. Имэйл, утас, хаягийг өөрчлөх боломжгүй.
-                </div>
-
-                <div>
-                  <Label className="text-gray-600">Имэйл хаяг</Label>
-                  <div className="mt-2 p-3 bg-gray-100 rounded border">
-                    {contactData.email || "—"}
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-gray-600">Утасны дугаарууд</Label>
-                  <div className="mt-2 p-3 bg-gray-100 rounded border">
-                    {contactData.phoneNumbers.length > 0
-                      ? contactData.phoneNumbers.join(", ")
-                      : "—"}
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-gray-600">Хаяг</Label>
-                  <div className="mt-2 p-3 bg-gray-100 rounded border whitespace-pre-wrap">
-                    {contactData.address || "—"}
-                  </div>
                 </div>
               </CardContent>
             </Card>

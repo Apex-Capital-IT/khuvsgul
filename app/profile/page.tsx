@@ -100,7 +100,7 @@ interface Order {
   };
 }
 
-interface OrderDetail extends Omit<Order, 'travel' | 'updatedAt'> {
+interface OrderDetail extends Omit<Order, "travel" | "updatedAt"> {
   // Extended interface for detailed order view
   travel: string; // Keep the travel ID
   updatedAt?: string;
@@ -128,8 +128,11 @@ function ProfilePageContent() {
   // Fetch profile on component mount
   useEffect(() => {
     const token = localStorage.getItem("token");
-    console.log("Profile page: checking token", token ? "Token found" : "No token");
-    
+    console.log(
+      "Profile page: checking token",
+      token ? "Token found" : "No token"
+    );
+
     if (!token) {
       console.log("No token found, redirecting to login");
       router.push("/login");
@@ -138,18 +141,24 @@ function ProfilePageContent() {
 
     async function fetchProfile() {
       try {
-        console.log("Fetching profile with token:", token?.substring(0, 20) + "...");
+        console.log(
+          "Fetching profile with token:",
+          token?.substring(0, 20) + "..."
+        );
         console.log("API URL:", `${API_URL}/api/v1/user/profile`);
-        
+
         const response = await fetch(`${API_URL}/api/v1/user/profile`, {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         });
 
         console.log("Profile API response status:", response.status);
-        console.log("Profile API response headers:", Object.fromEntries(response.headers.entries()));
+        console.log(
+          "Profile API response headers:",
+          Object.fromEntries(response.headers.entries())
+        );
 
         const data = await response.json();
         console.log("Profile API response data:", data);
@@ -161,7 +170,7 @@ function ProfilePageContent() {
             router.push("/login");
             return;
           }
-          
+
           // Handle different error response formats
           let errorMessage = "Failed to fetch profile";
           if (data.errorMessage) {
@@ -171,8 +180,13 @@ function ProfilePageContent() {
           } else if (data.error) {
             errorMessage = data.error;
           }
-          
-          console.error("Profile API error:", errorMessage, "Full response:", data);
+
+          console.error(
+            "Profile API error:",
+            errorMessage,
+            "Full response:",
+            data
+          );
           throw new Error(errorMessage);
         }
 
@@ -196,7 +210,7 @@ function ProfilePageContent() {
       } catch (err: any) {
         console.error("Profile fetch error:", err);
         let errorMessage = err.message || "Error loading profile";
-        
+
         // Add more context for common errors
         if (err.message?.includes("Unauthorized")) {
           errorMessage = "Authorization failed. Please log in again.";
@@ -204,9 +218,10 @@ function ProfilePageContent() {
           router.push("/login");
           return;
         } else if (err.message?.includes("fetch")) {
-          errorMessage = "Network error. Please check your connection and try again.";
+          errorMessage =
+            "Network error. Please check your connection and try again.";
         }
-        
+
         setError(errorMessage);
       } finally {
         setLoading(false);
@@ -259,7 +274,7 @@ function ProfilePageContent() {
       if (data.code === 0 && data.response) {
         const ordersData = data.response;
         let ordersArray: Order[] = [];
-        
+
         if (Array.isArray(ordersData)) {
           ordersArray = ordersData;
         } else if (ordersData && Array.isArray(ordersData.docs)) {
@@ -284,35 +299,46 @@ function ProfilePageContent() {
         // Fetch trip details for each order
         const ordersWithTripDetails = await Promise.all(
           ordersArray.map(async (order) => {
-            console.log("Processing order:", order._id, "travel ID:", order.travel);
+            console.log(
+              "Processing order:",
+              order._id,
+              "travel ID:",
+              order.travel
+            );
             console.log("Travel field type:", typeof order.travel);
-            console.log("Travel field stringified:", JSON.stringify(order.travel));
+            console.log(
+              "Travel field stringified:",
+              JSON.stringify(order.travel)
+            );
             console.log("Full order object keys:", Object.keys(order));
-            
+
             // Check multiple possible travel field names
             const travelFieldCandidates = [
               order.travel,
               (order as any).travelId,
               (order as any).tripId,
-              (order as any).trip
+              (order as any).trip,
             ];
-            
+
             console.log("Travel field candidates:", travelFieldCandidates);
-            
+
             // Find the first valid travel identifier
             let validTravelField = null;
             for (const candidate of travelFieldCandidates) {
-              if (candidate && 
-                  (typeof candidate === 'string' || 
-                   (typeof candidate === 'object' && Object.keys(candidate).length > 0))) {
+              if (
+                candidate &&
+                (typeof candidate === "string" ||
+                  (typeof candidate === "object" &&
+                    Object.keys(candidate).length > 0))
+              ) {
                 validTravelField = candidate;
                 break;
               }
             }
-            
+
             console.log("Valid travel field found:", validTravelField);
             const hasTravelData = validTravelField !== null;
-            
+
             if (hasTravelData) {
               try {
                 const tripDetails = await fetchTripDetails(validTravelField);
@@ -320,11 +346,14 @@ function ProfilePageContent() {
                 if (tripDetails) {
                   return {
                     ...order,
-                    travelDetails: tripDetails
+                    travelDetails: tripDetails,
                   };
                 }
               } catch (error) {
-                console.error(`Failed to fetch trip details for order ${order._id}:`, error);
+                console.error(
+                  `Failed to fetch trip details for order ${order._id}:`,
+                  error
+                );
               }
             }
             return order;
@@ -359,13 +388,13 @@ function ProfilePageContent() {
       console.log("Fetching travel details for ID:", travelId);
       console.log("Travel ID type:", typeof travelId);
       console.log("Travel ID stringified:", JSON.stringify(travelId));
-      
+
       // Extract travel ID from different possible formats
       let extractedTravelId = null;
-      
-      if (typeof travelId === 'string' && travelId.trim() !== '') {
+
+      if (typeof travelId === "string" && travelId.trim() !== "") {
         extractedTravelId = travelId.trim();
-      } else if (typeof travelId === 'object' && travelId !== null) {
+      } else if (typeof travelId === "object" && travelId !== null) {
         // Check common object properties for travel ID
         if (travelId._id) {
           extractedTravelId = String(travelId._id).trim();
@@ -375,64 +404,74 @@ function ProfilePageContent() {
           extractedTravelId = String(travelId.travelId).trim();
         } else {
           // If it's an object but doesn't have expected properties, log it for debugging
-          console.log("Travel ID is an object without expected properties:", Object.keys(travelId));
+          console.log(
+            "Travel ID is an object without expected properties:",
+            Object.keys(travelId)
+          );
         }
       }
-      
+
       console.log("Extracted travel ID:", extractedTravelId);
-      
+
       // Validate extracted travel ID
-      if (!extractedTravelId || extractedTravelId === '') {
+      if (!extractedTravelId || extractedTravelId === "") {
         console.error("Could not extract valid travel ID from:", travelId);
         return null;
       }
-      
+
       const cleanTravelId = extractedTravelId;
       console.log("Clean travel ID:", cleanTravelId);
-      
+
       const token = localStorage.getItem("token");
-      
+
       // Strategy 1: Try public endpoint without auth (like trips detail page)
       try {
         console.log("Trying public endpoint without auth...");
-        const response = await fetch(`${API_URL}/travel/${cleanTravelId}`, { 
-          cache: "no-store"
+        const response = await fetch(`${API_URL}/travel/${cleanTravelId}`, {
+          cache: "no-store",
         });
-        
+
         console.log(`Public endpoint response status:`, response.status);
-        
+
         if (response.ok) {
           const data = await response.json();
           console.log(`Public endpoint response data:`, data);
-          
+
           if (data.code === 0 && data.response) {
-            console.log("Successfully fetched travel details from public endpoint");
+            console.log(
+              "Successfully fetched travel details from public endpoint"
+            );
             return data.response;
           }
         }
       } catch (error) {
         console.log("Public endpoint failed:", error);
       }
-      
+
       // Strategy 2: Try public endpoint with auth
       if (token) {
         try {
           console.log("Trying public endpoint with auth...");
-          const response = await fetch(`${API_URL}/travel/${cleanTravelId}`, { 
+          const response = await fetch(`${API_URL}/travel/${cleanTravelId}`, {
             cache: "no-store",
             headers: {
               Authorization: `Bearer ${token}`,
-            }
+            },
           });
-          
-          console.log(`Public endpoint with auth response status:`, response.status);
-          
+
+          console.log(
+            `Public endpoint with auth response status:`,
+            response.status
+          );
+
           if (response.ok) {
             const data = await response.json();
             console.log(`Public endpoint with auth response data:`, data);
-            
+
             if (data.code === 0 && data.response) {
-              console.log("Successfully fetched travel details from public endpoint with auth");
+              console.log(
+                "Successfully fetched travel details from public endpoint with auth"
+              );
               return data.response;
             }
           }
@@ -440,26 +479,31 @@ function ProfilePageContent() {
           console.log("Public endpoint with auth failed:", error);
         }
       }
-      
+
       // Strategy 3: Try user API endpoint
       if (token) {
         try {
           console.log("Trying user API endpoint...");
-          const response = await fetch(`${API_URL}/api/v1/travel/${cleanTravelId}`, { 
-            cache: "no-store",
-            headers: {
-              Authorization: `Bearer ${token}`,
+          const response = await fetch(
+            `${API_URL}/api/v1/travel/${cleanTravelId}`,
+            {
+              cache: "no-store",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
             }
-          });
-          
+          );
+
           console.log(`User API endpoint response status:`, response.status);
-          
+
           if (response.ok) {
             const data = await response.json();
             console.log(`User API endpoint response data:`, data);
-            
+
             if (data.code === 0 && data.response) {
-              console.log("Successfully fetched travel details from user API endpoint");
+              console.log(
+                "Successfully fetched travel details from user API endpoint"
+              );
               return data.response;
             }
           }
@@ -467,22 +511,27 @@ function ProfilePageContent() {
           console.log("User API endpoint failed:", error);
         }
       }
-      
+
       // Strategy 4: As last resort, fetch from travels list and find by ID
       try {
         console.log("Trying to fetch from travels list as fallback...");
-        const response = await fetch(`${API_URL}/travel?pageNumber=1&pageSize=1000`, { 
-          cache: "no-store"
-        });
-        
+        const response = await fetch(
+          `${API_URL}/travel?pageNumber=1&pageSize=1000`,
+          {
+            cache: "no-store",
+          }
+        );
+
         console.log(`Travels list fallback response status:`, response.status);
-        
+
         if (response.ok) {
           const data = await response.json();
           console.log(`Travels list fallback response data:`, data);
-          
+
           if (data.code === 0 && data.response && data.response.docs) {
-            const travel = data.response.docs.find((t: any) => t._id === cleanTravelId);
+            const travel = data.response.docs.find(
+              (t: any) => t._id === cleanTravelId
+            );
             if (travel) {
               console.log("Successfully found travel in list:", travel);
               return travel;
@@ -494,13 +543,15 @@ function ProfilePageContent() {
       } catch (error) {
         console.log("Travels list fallback failed:", error);
       }
-      
+
       // If all strategies failed
-      console.error("All strategies to fetch travel details failed for ID:", cleanTravelId);
+      console.error(
+        "All strategies to fetch travel details failed for ID:",
+        cleanTravelId
+      );
       return null;
-      
     } catch (error) {
-      console.error('Failed to fetch trip details:', error);
+      console.error("Failed to fetch trip details:", error);
       return null;
     }
   };
@@ -532,19 +583,30 @@ function ProfilePageContent() {
 
       if (data.code === 0 && data.response) {
         const orderData = data.response;
-        
+
         // Fetch complete trip details if travel exists
         // Check if travel field exists and has content for order details
-        const hasOrderTravelData = orderData.travel && 
-          (typeof orderData.travel === 'string' || 
-           (typeof orderData.travel === 'object' && Object.keys(orderData.travel).length > 0));
-           
+        const hasOrderTravelData =
+          orderData.travel &&
+          (typeof orderData.travel === "string" ||
+            (typeof orderData.travel === "object" &&
+              Object.keys(orderData.travel).length > 0));
+
         console.log("Order detail has travel data:", hasOrderTravelData);
-        
+
         if (hasOrderTravelData) {
-          console.log("Fetching trip details for order detail, travel ID:", orderData.travel);
-          console.log("Order detail travel field type:", typeof orderData.travel);
-          console.log("Order detail travel field stringified:", JSON.stringify(orderData.travel));
+          console.log(
+            "Fetching trip details for order detail, travel ID:",
+            orderData.travel
+          );
+          console.log(
+            "Order detail travel field type:",
+            typeof orderData.travel
+          );
+          console.log(
+            "Order detail travel field stringified:",
+            JSON.stringify(orderData.travel)
+          );
           const tripDetails = await fetchTripDetails(orderData.travel);
           console.log("Order detail trip details:", tripDetails);
           if (tripDetails) {
@@ -552,7 +614,7 @@ function ProfilePageContent() {
             orderData.travelDetails = tripDetails;
           }
         }
-        
+
         setSelectedOrder(orderData);
         setIsModalOpen(true);
       } else {
@@ -657,16 +719,28 @@ function ProfilePageContent() {
               </button>
             </div>
           </div>
-          
+
           {/* Debug information */}
           <div className="bg-gray-50 border border-gray-200 text-gray-700 px-4 py-3 rounded text-sm">
             <h4 className="font-semibold mb-2">Debug Information:</h4>
-            <p><strong>API URL:</strong> {API_URL}</p>
-            <p><strong>Token Present:</strong> {localStorage.getItem("token") ? "Yes" : "No"}</p>
-            <p><strong>Browser:</strong> {navigator.userAgent}</p>
+            <p>
+              <strong>API URL:</strong> {API_URL}
+            </p>
+            <p>
+              <strong>Token Present:</strong>{" "}
+              {localStorage.getItem("token") ? "Yes" : "No"}
+            </p>
+            <p>
+              <strong>Browser:</strong> {navigator.userAgent}
+            </p>
             <details className="mt-2">
-              <summary className="cursor-pointer font-medium">Click to open browser console for more details</summary>
-              <p className="mt-1 text-xs">Check the browser console (F12) for detailed error logs and network requests.</p>
+              <summary className="cursor-pointer font-medium">
+                Click to open browser console for more details
+              </summary>
+              <p className="mt-1 text-xs">
+                Check the browser console (F12) for detailed error logs and
+                network requests.
+              </p>
             </details>
           </div>
         </div>
@@ -969,7 +1043,9 @@ function ProfilePageContent() {
                           Үнэ (1 хүн):
                         </span>
                         <p className="text-gray-600">
-                          {order.travelDetails?.price ? `${order.travelDetails.price.toLocaleString()} ₮` : "-"}
+                          {order.travelDetails?.price
+                            ? `${order.travelDetails.price.toLocaleString()} ₮`
+                            : "-"}
                         </p>
                       </div>
                       <div className="text-sm">
@@ -977,7 +1053,9 @@ function ProfilePageContent() {
                           Нийт үнэ:
                         </span>
                         <p className="text-gray-600 font-medium">
-                          {order.totalPrice ? `${order.totalPrice.toLocaleString()} ₮` : "-"}
+                          {order.totalPrice
+                            ? `${order.totalPrice.toLocaleString()} ₮`
+                            : "-"}
                         </p>
                       </div>
                     </div>
@@ -1266,11 +1344,14 @@ function ProfilePageContent() {
                         <p className="text-xl font-bold">
                           {selectedOrder.travelDetails.title}
                         </p>
-                        {selectedOrder.travelDetails.categories && selectedOrder.travelDetails.categories.length > 0 && (
-                          <p className="text-sm text-gray-600 italic">
-                            {selectedOrder.travelDetails.categories.map((cat: any) => cat.name).join(", ")}
-                          </p>
-                        )}
+                        {selectedOrder.travelDetails.categories &&
+                          selectedOrder.travelDetails.categories.length > 0 && (
+                            <p className="text-sm text-gray-600 italic">
+                              {selectedOrder.travelDetails.categories
+                                .map((cat: any) => cat.name)
+                                .join(", ")}
+                            </p>
+                          )}
                       </div>
 
                       {selectedOrder.travelDetails.description && (
@@ -1291,8 +1372,8 @@ function ProfilePageContent() {
                           </label>
                           <p className="text-sm">
                             📍{" "}
-                            {selectedOrder.travelDetails.destination?.location ||
-                              "Тодорхойгүй"}
+                            {selectedOrder.travelDetails.destination
+                              ?.location || "Тодорхойгүй"}
                           </p>
                         </div>
                         <div>
@@ -1300,8 +1381,10 @@ function ProfilePageContent() {
                             Хугацаа
                           </label>
                           <p className="text-sm">
-                            {selectedOrder.travelDetails.duration?.days || 0} өдөр,{" "}
-                            {selectedOrder.travelDetails.duration?.nights || 0} шөнө
+                            {selectedOrder.travelDetails.duration?.days || 0}{" "}
+                            өдөр,{" "}
+                            {selectedOrder.travelDetails.duration?.nights || 0}{" "}
+                            шөнө
                           </p>
                         </div>
                         <div>
@@ -1309,7 +1392,8 @@ function ProfilePageContent() {
                             Үнэ (1 хүн)
                           </label>
                           <p className="text-lg font-bold text-green-600">
-                            {selectedOrder.travelDetails.price?.toLocaleString()} ₮
+                            {selectedOrder.travelDetails.price?.toLocaleString()}{" "}
+                            ₮
                           </p>
                         </div>
                         <div>
@@ -1317,7 +1401,11 @@ function ProfilePageContent() {
                             НӨАТ (10%)
                           </label>
                           <p className="text-sm font-medium text-gray-600">
-                            {selectedOrder.travelDetails.price ? `${Math.round(selectedOrder.travelDetails.price * 0.1).toLocaleString()} ₮` : "-"}
+                            {selectedOrder.travelDetails.price
+                              ? `${Math.round(
+                                  selectedOrder.travelDetails.price * 0.1
+                                ).toLocaleString()} ₮`
+                              : "-"}
                           </p>
                         </div>
                         <div>
@@ -1325,7 +1413,9 @@ function ProfilePageContent() {
                             Нийт үнэ
                           </label>
                           <p className="text-lg font-bold text-blue-600">
-                            {selectedOrder.totalPrice ? `${selectedOrder.totalPrice.toLocaleString()} ₮` : "-"}
+                            {selectedOrder.totalPrice
+                              ? `${selectedOrder.totalPrice.toLocaleString()} ₮`
+                              : "-"}
                           </p>
                         </div>
                         {selectedOrder.travelDetails.quota && (
@@ -1334,27 +1424,29 @@ function ProfilePageContent() {
                               Үлдсэн байр
                             </label>
                             <p className="text-sm">
-                              {selectedOrder.travelDetails.quota.available} / {selectedOrder.travelDetails.quota.total}
+                              {selectedOrder.travelDetails.quota.available} /{" "}
+                              {selectedOrder.travelDetails.quota.total}
                             </p>
                           </div>
                         )}
                       </div>
 
-                      {(selectedOrder.travelDetails.startDateTime) && (
+                      {selectedOrder.travelDetails.startDateTime && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <label className="text-sm font-medium text-gray-500">
                               Эхлэх огноо
                             </label>
                             <p className="text-sm">
-                              {selectedOrder.travelDetails.startDateTime ? 
-                                new Date(
-                                  selectedOrder.travelDetails.startDateTime
-                                ).toLocaleDateString("mn-MN", {
-                                  year: "numeric",
-                                  month: "long",
-                                  day: "numeric",
-                                }) : "Тодорхойгүй"}
+                              {selectedOrder.travelDetails.startDateTime
+                                ? new Date(
+                                    selectedOrder.travelDetails.startDateTime
+                                  ).toLocaleDateString("mn-MN", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                  })
+                                : "Тодорхойгүй"}
                             </p>
                           </div>
                           {selectedOrder.travelDetails.endDateTime && (
@@ -1363,14 +1455,15 @@ function ProfilePageContent() {
                                 Дуусах огноо
                               </label>
                               <p className="text-sm">
-                                {selectedOrder.travelDetails.endDateTime ? 
-                                  new Date(
-                                    selectedOrder.travelDetails.endDateTime
-                                  ).toLocaleDateString("mn-MN", {
-                                    year: "numeric",
-                                    month: "long",
-                                    day: "numeric",
-                                  }) : "Тодорхойгүй"}
+                                {selectedOrder.travelDetails.endDateTime
+                                  ? new Date(
+                                      selectedOrder.travelDetails.endDateTime
+                                    ).toLocaleDateString("mn-MN", {
+                                      year: "numeric",
+                                      month: "long",
+                                      day: "numeric",
+                                    })
+                                  : "Тодорхойгүй"}
                               </p>
                             </div>
                           )}
@@ -1402,90 +1495,113 @@ function ProfilePageContent() {
                         )}
 
                       {/* Included Services */}
-                      {selectedOrder.travelDetails.included && selectedOrder.travelDetails.included.length > 0 && (
-                        <div>
-                          <label className="text-sm font-medium text-gray-500">
-                            Үүнд багтсан:
-                          </label>
-                          <ul className="mt-2 space-y-1">
-                            {selectedOrder.travelDetails.included.map((item: string, idx: number) => (
-                              <li className="flex items-center text-sm" key={idx}>
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  className="h-4 w-4 text-green-500 mr-2"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M5 13l4 4L19 7"
-                                  />
-                                </svg>
-                                {item}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                      {selectedOrder.travelDetails.included &&
+                        selectedOrder.travelDetails.included.length > 0 && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-500">
+                              Үүнд багтсан:
+                            </label>
+                            <ul className="mt-2 space-y-1">
+                              {selectedOrder.travelDetails.included.map(
+                                (item: string, idx: number) => (
+                                  <li
+                                    className="flex items-center text-sm"
+                                    key={idx}
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      className="h-4 w-4 text-green-500 mr-2"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M5 13l4 4L19 7"
+                                      />
+                                    </svg>
+                                    {item}
+                                  </li>
+                                )
+                              )}
+                            </ul>
+                          </div>
+                        )}
 
                       {/* Excluded Services */}
-                      {selectedOrder.travelDetails.excluded && selectedOrder.travelDetails.excluded.length > 0 && (
-                        <div>
-                          <label className="text-sm font-medium text-gray-500">
-                            Үүнд багтаагүй:
-                          </label>
-                          <ul className="mt-2 space-y-1">
-                            {selectedOrder.travelDetails.excluded.map((item: string, idx: number) => (
-                              <li className="flex items-center text-sm" key={idx}>
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  className="h-4 w-4 text-red-500 mr-2"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M6 18L18 6M6 6l12 12"
-                                  />
-                                </svg>
-                                {item}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                      {selectedOrder.travelDetails.excluded &&
+                        selectedOrder.travelDetails.excluded.length > 0 && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-500">
+                              Үүнд багтаагүй:
+                            </label>
+                            <ul className="mt-2 space-y-1">
+                              {selectedOrder.travelDetails.excluded.map(
+                                (item: string, idx: number) => (
+                                  <li
+                                    className="flex items-center text-sm"
+                                    key={idx}
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      className="h-4 w-4 text-red-500 mr-2"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M6 18L18 6M6 6l12 12"
+                                      />
+                                    </svg>
+                                    {item}
+                                  </li>
+                                )
+                              )}
+                            </ul>
+                          </div>
+                        )}
 
                       {/* Travel Plans */}
-                      {selectedOrder.travelDetails.plans && selectedOrder.travelDetails.plans.length > 0 && (
-                        <div>
-                          <label className="text-sm font-medium text-gray-500">
-                            Аяллын төлөвлөгөө:
-                          </label>
-                          <div className="mt-2 space-y-2">
-                            {selectedOrder.travelDetails.plans.map((day: any, idx: number) => (
-                              <div key={idx} className="border rounded-lg p-3">
-                                <h4 className="font-medium text-sm mb-2">
-                                  {day.title || `Өдөр ${idx + 1}`}
-                                </h4>
-                                <ul className="text-sm text-gray-600 space-y-1">
-                                  {(day.items || []).map((activity: string, aidx: number) => (
-                                    <li key={aidx} className="flex items-start">
-                                      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
-                                      {activity}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            ))}
+                      {selectedOrder.travelDetails.plans &&
+                        selectedOrder.travelDetails.plans.length > 0 && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-500">
+                              Аяллын төлөвлөгөө:
+                            </label>
+                            <div className="mt-2 space-y-2">
+                              {selectedOrder.travelDetails.plans.map(
+                                (day: any, idx: number) => (
+                                  <div
+                                    key={idx}
+                                    className="border rounded-lg p-3"
+                                  >
+                                    <h4 className="font-medium text-sm mb-2">
+                                      {day.title || `Өдөр ${idx + 1}`}
+                                    </h4>
+                                    <ul className="text-sm text-gray-600 space-y-1">
+                                      {(day.items || []).map(
+                                        (activity: string, aidx: number) => (
+                                          <li
+                                            key={aidx}
+                                            className="flex items-start"
+                                          >
+                                            <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                                            {activity}
+                                          </li>
+                                        )
+                                      )}
+                                    </ul>
+                                  </div>
+                                )
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
                     </CardContent>
                   </Card>
                 )}
@@ -1535,15 +1651,17 @@ function ProfilePageContent() {
 
 export default function ProfilePage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 py-8 pt-24">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 py-8 pt-24">
+          <div className="container mx-auto px-4 max-w-6xl">
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+            </div>
           </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <ProfilePageContent />
     </Suspense>
   );
