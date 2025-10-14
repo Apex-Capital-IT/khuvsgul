@@ -246,7 +246,7 @@ function parseJwt(token: string) {
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const [selectedTab, setSelectedTab] = useState("Dashboard");
+  const [selectedTab, setSelectedTab] = useState("Hero Section");
   const [users, setUsers] = useState<any[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState("");
@@ -319,6 +319,48 @@ export default function AdminDashboard() {
     useState<Order | null>(null);
   const [detailedTravelData, setDetailedTravelData] = useState<any>(null);
   const [travelDataLoading, setTravelDataLoading] = useState(false);
+
+  // Hero Section state
+  const [heroData, setHeroData] = useState({
+    backgroundImageUrl: "",
+    title: "",
+    subtitle: "",
+  });
+  const [heroLoading, setHeroLoading] = useState(false);
+  const [heroError, setHeroError] = useState("");
+
+  // Benefits state
+  const [benefitsData, setBenefitsData] = useState<
+    Array<{ title: string; content: string }>
+  >([{ title: "", content: "" }]);
+  const [benefitsLoading, setBenefitsLoading] = useState(false);
+  const [benefitsError, setBenefitsError] = useState("");
+
+  // About Us state
+  const [aboutData, setAboutData] = useState({
+    video: "",
+    images: [] as string[],
+    company: {
+      establishedDate: "",
+      name: "",
+      vision: "",
+      mission: "",
+      values: [""],
+      goals: [""],
+    },
+  });
+  const [aboutLoading, setAboutLoading] = useState(false);
+  const [aboutError, setAboutError] = useState("");
+
+  // Contact Us state
+  const [contactData, setContactData] = useState({
+    description: "",
+    phoneNumbers: [] as string[],
+    email: "",
+    address: "",
+  });
+  const [contactLoading, setContactLoading] = useState(false);
+  const [contactError, setContactError] = useState("");
 
   // Helper functions for form arrays
   const handleArrayChange = (field: string, index: number, value: string) => {
@@ -740,8 +782,448 @@ export default function AdminDashboard() {
     }
   };
 
+  // Fetch Hero Section data
+  useEffect(() => {
+    if (selectedTab === "Hero Section") {
+      setHeroLoading(true);
+      setHeroError("");
+      const token = localStorage.getItem("admin_token");
+      fetch(`${API_URL}/admin/v1/home`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code === 0 && data.response && data.response.length > 0) {
+            const { title, subtitle, backgroundImageUrl } = data.response[0];
+            setHeroData({ title, subtitle, backgroundImageUrl });
+          }
+        })
+        .catch((err) => setHeroError("Failed to load hero data"))
+        .finally(() => setHeroLoading(false));
+    }
+  }, [selectedTab]);
+
+  // Fetch Benefits data
+  useEffect(() => {
+    if (selectedTab === "Benefits") {
+      setBenefitsLoading(true);
+      setBenefitsError("");
+      const token = localStorage.getItem("admin_token");
+      fetch(`${API_URL}/admin/v1/home`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code === 0 && data.response && data.response.length > 0) {
+            const benefits = data.response[0].benefits || [
+              { title: "", content: "" },
+            ];
+            setBenefitsData(benefits);
+          }
+        })
+        .catch((err) => setBenefitsError("Failed to load benefits data"))
+        .finally(() => setBenefitsLoading(false));
+    }
+  }, [selectedTab]);
+
+  // Fetch About Us data
+  useEffect(() => {
+    if (selectedTab === "About Us") {
+      setAboutLoading(true);
+      setAboutError("");
+      const token = localStorage.getItem("admin_token");
+      fetch(`${API_URL}/admin/v1/aboutUs`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code === 0 && data.response && data.response.length > 0) {
+            setAboutData({
+              video: data.response[0].video || "",
+              images: Array.isArray(data.response[0].images)
+                ? data.response[0].images
+                : [],
+              company: {
+                establishedDate:
+                  data.response[0].company?.establishedDate || "",
+                name: data.response[0].company?.name || "",
+                vision: data.response[0].company?.vision || "",
+                mission: data.response[0].company?.mission || "",
+                values: Array.isArray(data.response[0].company?.values)
+                  ? data.response[0].company.values
+                  : [""],
+                goals: Array.isArray(data.response[0].company?.goals)
+                  ? data.response[0].company.goals
+                  : [""],
+              },
+            });
+          }
+        })
+        .catch((err) => {
+          setAboutError("Failed to load about data");
+        })
+        .finally(() => setAboutLoading(false));
+    }
+  }, [selectedTab]);
+
+  // Fetch Contact Us data
+  useEffect(() => {
+    if (selectedTab === "Contact Us") {
+      setContactLoading(true);
+      setContactError("");
+      const token = localStorage.getItem("admin_token");
+      fetch(`${API_URL}/admin/v1/contactUs`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code === 0 && data.response) {
+            setContactData({
+              description: data.response.description || "",
+              phoneNumbers: Array.isArray(data.response.phoneNumbers)
+                ? data.response.phoneNumbers
+                : [],
+              email: data.response.email || "",
+              address: data.response.address || "",
+            });
+          }
+        })
+        .catch((err) => {
+          setContactError("Failed to load contact data");
+        })
+        .finally(() => setContactLoading(false));
+    }
+  }, [selectedTab]);
+
+  // Save Hero Section data
+  const saveHeroData = async () => {
+    setHeroLoading(true);
+    setHeroError("");
+    try {
+      const token = localStorage.getItem("admin_token");
+
+      // Fetch current benefits to include in the payload
+      const currentRes = await fetch(`${API_URL}/admin/v1/home`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      const currentData = await currentRes.json();
+      const currentBenefits =
+        currentData.code === 0 && currentData.response?.[0]?.benefits
+          ? currentData.response[0].benefits
+          : [];
+
+      const response = await fetch(`${API_URL}/admin/v1/home`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...heroData,
+          benefits: currentBenefits,
+        }),
+      });
+      const data = await response.json();
+      if (data.code === 0) {
+        alert("Амжилттай хадгалагдлаа!");
+      } else {
+        throw new Error(data.message || "Failed to save");
+      }
+    } catch (err: any) {
+      setHeroError(err.message || "Failed to save hero data");
+      alert("Алдаа гарлаа: " + err.message);
+    } finally {
+      setHeroLoading(false);
+    }
+  };
+
+  // Save Benefits data
+  const saveBenefitsData = async () => {
+    setBenefitsLoading(true);
+    setBenefitsError("");
+    try {
+      const token = localStorage.getItem("admin_token");
+
+      // Fetch current hero data to include in the payload
+      const currentRes = await fetch(`${API_URL}/admin/v1/home`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      const currentData = await currentRes.json();
+      const currentHeroData =
+        currentData.code === 0 && currentData.response?.[0]
+          ? {
+              title: currentData.response[0].title || "",
+              subtitle: currentData.response[0].subtitle || "",
+              backgroundImageUrl:
+                currentData.response[0].backgroundImageUrl || "",
+            }
+          : { title: "", subtitle: "", backgroundImageUrl: "" };
+
+      const response = await fetch(`${API_URL}/admin/v1/home`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...currentHeroData,
+          benefits: benefitsData,
+        }),
+      });
+      const data = await response.json();
+      if (data.code === 0) {
+        alert("Амжилттай хадгалагдлаа!");
+      } else {
+        throw new Error(data.message || "Failed to save");
+      }
+    } catch (err: any) {
+      setBenefitsError(err.message || "Failed to save benefits data");
+      alert("Алдаа гарлаа: " + err.message);
+    } finally {
+      setBenefitsLoading(false);
+    }
+  };
+
+  // Upload Hero background image
+  const uploadHeroImage = async (file: File) => {
+    setHeroLoading(true);
+    try {
+      const token = localStorage.getItem("admin_token");
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const response = await fetch(`${API_URL}/admin/v1/home/bgImage/change`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      const data = await response.json();
+      if (data.code === 0) {
+        alert("Зураг амжилттай хуулагдлаа!");
+        // Refresh hero data
+        if (selectedTab === "Hero Section") {
+          const token = localStorage.getItem("admin_token");
+          const res = await fetch(`${API_URL}/admin/v1/home`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          });
+          const heroRes = await res.json();
+          if (
+            heroRes.code === 0 &&
+            heroRes.response &&
+            heroRes.response.length > 0
+          ) {
+            const { title, subtitle, backgroundImageUrl } = heroRes.response[0];
+            setHeroData({ title, subtitle, backgroundImageUrl });
+          }
+        }
+      } else {
+        throw new Error(data.message || "Failed to upload image");
+      }
+    } catch (err: any) {
+      alert("Зураг хуулахад алдаа гарлаа: " + err.message);
+    } finally {
+      setHeroLoading(false);
+    }
+  };
+
+  // Save About Us data
+  const saveAboutData = async () => {
+    setAboutLoading(true);
+    setAboutError("");
+    try {
+      const token = localStorage.getItem("admin_token");
+      const response = await fetch(`${API_URL}/admin/v1/aboutUs`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(aboutData),
+      });
+      const data = await response.json();
+      if (data.code === 0) {
+        alert("Амжилттай хадгалагдлаа!");
+      } else {
+        throw new Error(data.message || "Failed to save");
+      }
+    } catch (err: any) {
+      setAboutError(err.message || "Failed to save about data");
+      alert("Алдаа гарлаа: " + err.message);
+    } finally {
+      setAboutLoading(false);
+    }
+  };
+
+  // Upload About Us images (minimum 3 required)
+  const uploadAboutImages = async (files: FileList) => {
+    if (files.length < 3) {
+      alert("Хамгийн багадаа 3 зураг сонгоно уу!");
+      return;
+    }
+
+    setAboutLoading(true);
+    try {
+      const token = localStorage.getItem("admin_token");
+      const formData = new FormData();
+
+      // Append multiple images
+      Array.from(files).forEach((file) => {
+        formData.append("images", file);
+      });
+
+      const response = await fetch(`${API_URL}/admin/v1/aboutUs/image/add`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      const data = await response.json();
+      if (data.code === 0) {
+        alert("Зургууд амжилттай хуулагдлаа!");
+        // Refresh about data
+        if (selectedTab === "About Us") {
+          const token = localStorage.getItem("admin_token");
+          const res = await fetch(`${API_URL}/admin/v1/aboutUs`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          });
+          const aboutRes = await res.json();
+          if (
+            aboutRes.code === 0 &&
+            aboutRes.response &&
+            aboutRes.response.length > 0
+          ) {
+            setAboutData({
+              video: aboutRes.response[0].video || "",
+              images: Array.isArray(aboutRes.response[0].images)
+                ? aboutRes.response[0].images
+                : [],
+              company: {
+                establishedDate:
+                  aboutRes.response[0].company?.establishedDate || "",
+                name: aboutRes.response[0].company?.name || "",
+                vision: aboutRes.response[0].company?.vision || "",
+                mission: aboutRes.response[0].company?.mission || "",
+                values: Array.isArray(aboutRes.response[0].company?.values)
+                  ? aboutRes.response[0].company.values
+                  : [""],
+                goals: Array.isArray(aboutRes.response[0].company?.goals)
+                  ? aboutRes.response[0].company.goals
+                  : [""],
+              },
+            });
+          }
+        }
+      } else {
+        throw new Error(data.message || "Failed to upload images");
+      }
+    } catch (err: any) {
+      alert("Зураг хуулахад алдаа гарлаа: " + err.message);
+    } finally {
+      setAboutLoading(false);
+    }
+  };
+
+  // Delete About Us images
+  const deleteAboutImages = async (imageUrls: string[]) => {
+    if (!confirm(`${imageUrls.length} зургийг устгах уу?`)) {
+      return;
+    }
+
+    setAboutLoading(true);
+    try {
+      const token = localStorage.getItem("admin_token");
+      const response = await fetch(`${API_URL}/admin/v1/aboutUs/image/remove`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ imageUrls }),
+      });
+      const data = await response.json();
+      if (data.code === 0) {
+        alert("Зураг амжилттай устгагдлаа!");
+        // Refresh about data
+        if (selectedTab === "About Us") {
+          const token = localStorage.getItem("admin_token");
+          const res = await fetch(`${API_URL}/admin/v1/aboutUs`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          });
+          const aboutRes = await res.json();
+          if (
+            aboutRes.code === 0 &&
+            aboutRes.response &&
+            aboutRes.response.length > 0
+          ) {
+            setAboutData({
+              video: aboutRes.response[0].video || "",
+              images: Array.isArray(aboutRes.response[0].images)
+                ? aboutRes.response[0].images
+                : [],
+              company: {
+                establishedDate:
+                  aboutRes.response[0].company?.establishedDate || "",
+                name: aboutRes.response[0].company?.name || "",
+                vision: aboutRes.response[0].company?.vision || "",
+                mission: aboutRes.response[0].company?.mission || "",
+                values: Array.isArray(aboutRes.response[0].company?.values)
+                  ? aboutRes.response[0].company.values
+                  : [""],
+                goals: Array.isArray(aboutRes.response[0].company?.goals)
+                  ? aboutRes.response[0].company.goals
+                  : [""],
+              },
+            });
+          }
+        }
+      } else {
+        throw new Error(data.message || "Failed to delete images");
+      }
+    } catch (err: any) {
+      alert("Зураг устгахад алдаа гарлаа: " + err.message);
+    } finally {
+      setAboutLoading(false);
+    }
+  };
+
+  // Save Contact Us data
+  const saveContactData = async () => {
+    setContactLoading(true);
+    setContactError("");
+    try {
+      const token = localStorage.getItem("admin_token");
+      const response = await fetch(`${API_URL}/admin/v1/contactUs`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          description: contactData.description,
+        }),
+      });
+      const data = await response.json();
+      if (data.code === 0) {
+        alert("Амжилттай хадгалагдлаа!");
+      } else {
+        throw new Error(data.message || "Failed to save");
+      }
+    } catch (err: any) {
+      setContactError(err.message || "Failed to save contact data");
+      alert("Алдаа гарлаа: " + err.message);
+    } finally {
+      setContactLoading(false);
+    }
+  };
+
   const navItems = [
-    { label: "Dashboard", icon: "Home" },
+    { label: "Hero Section", icon: "Home" },
+    { label: "Benefits", icon: "Star" },
+    { label: "About Us", icon: "MessageSquare" },
+    { label: "Contact Us", icon: "Users" },
     { label: "Users", icon: "Users" },
     { label: "Trips", icon: "MapPin" },
     { label: "Create Trip", icon: "Plus" },
@@ -814,249 +1296,735 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
-        {selectedTab === "Dashboard" && (
-          <>
-            <div className="px-8 py-6">
-              <Card className="bg-[#7B61FF] text-white rounded-2xl shadow-lg overflow-hidden">
-                <CardContent className="flex flex-col md:flex-row items-center justify-between p-8">
-                  <div>
-                    <div className="uppercase text-xs font-bold mb-2">
-                      АЯЛАЛ ЖУУЛЧЛАЛ
-                    </div>
-                    <div className="text-3xl font-bold mb-2">
-                      Монгол орны гайхамшгийг нээж, аяллын шинэ туршлага аваарай
-                    </div>
-                    <Button className="mt-4 bg-white text-[#7B61FF] font-bold">
-                      Аялалдаа бүртгүүлэх
-                    </Button>
-                  </div>
-                  <img
-                    src="/cover.avif"
-                    alt="Banner"
-                    className="w-64 h-32 object-cover rounded-xl hidden md:block"
+        {selectedTab === "Hero Section" && (
+          <div className="px-8 py-6">
+            <div className="text-2xl font-bold mb-6">
+              Hero Section - Нүүр хуудасны үндсэн хэсэг
+            </div>
+            {heroLoading && (
+              <div className="mb-4 p-4 bg-blue-50 text-blue-700 rounded">
+                Уншиж байна...
+              </div>
+            )}
+            {heroError && (
+              <div className="mb-4 p-4 bg-red-50 text-red-700 rounded">
+                {heroError}
+              </div>
+            )}
+            <Card>
+              <CardContent className="p-6 space-y-6">
+                <div>
+                  <Label htmlFor="heroTitle">Гарчиг</Label>
+                  <Input
+                    id="heroTitle"
+                    value={heroData.title}
+                    onChange={(e) =>
+                      setHeroData((prev) => ({
+                        ...prev,
+                        title: e.target.value,
+                      }))
+                    }
+                    placeholder="Жишээ: Зүгээр л очих газар биш жинхэнэ аялалд бидэнтэй хамт гараарай"
+                    className="mt-2"
                   />
-                </CardContent>
-              </Card>
-            </div>
-            <div className="px-8">
-              <div className="text-lg font-bold mb-4">
-                Үргэлжлүүлэн үзэх аяллууд
-              </div>
-              <div className="flex gap-6 overflow-x-auto pb-4">
-                <Card className="min-w-[300px]">
-                  <CardContent className="p-4">
-                    <div className="text-xs text-blue-600 font-bold mb-2">
-                      ХӨВСГӨЛ НУУР
-                    </div>
-                    <div className="font-semibold mb-2">
-                      Хөвсгөл нуурын гайхамшигт аялал
-                    </div>
-                    <div className="flex items-center gap-2 mt-4">
-                      <Avatar className="w-6 h-6">
-                        <AvatarImage src="/placeholder-user.jpg" />
-                        <AvatarFallback>Б</AvatarFallback>
-                      </Avatar>
-                      <span className="text-xs">Бат-Эрдэнэ</span>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="min-w-[300px]">
-                  <CardContent className="p-4">
-                    <div className="text-xs text-purple-600 font-bold mb-2">
-                      ГОВЬ
-                    </div>
-                    <div className="font-semibold mb-2">
-                      Говийн гайхамшигт элсэн манхан аялал
-                    </div>
-                    <div className="flex items-center gap-2 mt-4">
-                      <Avatar className="w-6 h-6">
-                        <AvatarImage src="/placeholder-user.jpg" />
-                        <AvatarFallback>С</AvatarFallback>
-                      </Avatar>
-                      <span className="text-xs">Сарангэрэл</span>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="min-w-[300px]">
-                  <CardContent className="p-4">
-                    <div className="text-xs text-pink-600 font-bold mb-2">
-                      ТАЙГА
-                    </div>
-                    <div className="font-semibold mb-2">
-                      Тайгын өвөрмөц байгаль, цас мөсний аялал
-                    </div>
-                    <div className="flex items-center gap-2 mt-4">
-                      <Avatar className="w-6 h-6">
-                        <AvatarImage src="/placeholder-user.jpg" />
-                        <AvatarFallback>Д</AvatarFallback>
-                      </Avatar>
-                      <span className="text-xs">Даваадорж</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-            <div className="px-8 py-6">
-              <div className="text-lg font-bold mb-4">Сүүлийн захиалгууд</div>
-              <Card>
-                <CardContent className="p-0">
-                  {ordersLoading ? (
-                    <div className="p-8 text-center">Уншиж байна...</div>
-                  ) : ordersError ? (
-                    <div className="p-8 text-red-500 text-center">
-                      {ordersError}
-                    </div>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Хэрэглэгч</TableHead>
-                          <TableHead>Аялал</TableHead>
-                          <TableHead>Огноо</TableHead>
-                          <TableHead>Төлбөр</TableHead>
-                          <TableHead>Төлөв</TableHead>
-                          <TableHead>Үйлдэл</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {orders.length === 0 ? (
-                          <TableRow>
-                            <TableCell
-                              colSpan={6}
-                              className="text-center py-8 text-gray-500"
-                            >
-                              Захиалга байхгүй байна
-                            </TableCell>
-                          </TableRow>
-                        ) : (
-                          orders.map((order) => {
-                            // Prefer fetched travelDetails, otherwise normalize inline object
-                            const t =
-                              order.travelDetails ||
-                              (typeof order.travel === "object"
-                                ? normalizeTravel(order.travel)
-                                : null);
+                </div>
 
-                            return (
-                              <TableRow key={order._id}>
-                                <TableCell>
-                                  <div>
-                                    <div className="font-medium">
-                                      {order.userDetails?.name ||
-                                        order.contact?.fullName ||
-                                        "N/A"}
-                                    </div>
-                                    <div className="text-sm text-gray-500">
-                                      {order.userDetails?.email ||
-                                        order.contact?.email ||
-                                        ""}
-                                    </div>
-                                  </div>
-                                </TableCell>
+                <div>
+                  <Label htmlFor="heroSubtitle">Дэд гарчиг</Label>
+                  <Textarea
+                    id="heroSubtitle"
+                    value={heroData.subtitle}
+                    onChange={(e) =>
+                      setHeroData((prev) => ({
+                        ...prev,
+                        subtitle: e.target.value,
+                      }))
+                    }
+                    placeholder="Жишээ: Бидэнтэй хамт гайхалтай гэрэл зураг, сэтгэл хөдөлгөм адал явдлаар дамжуулан олон соёлын хаалгыг нээнэ."
+                    rows={3}
+                    className="mt-2"
+                  />
+                </div>
 
-                                <TableCell>
-                                  <div>
-                                    <div className="font-medium">
-                                      {t?.title || "Тухайгүй аялал"}
-                                    </div>
-                                  </div>
-                                </TableCell>
-
-                                <TableCell>
-                                  <div>
-                                    <div>
-                                      {order.createdAt
-                                        ? new Date(
-                                            order.createdAt
-                                          ).toLocaleDateString("mn-MN")
-                                        : "N/A"}
-                                    </div>
-                                    <div className="text-sm text-gray-500">
-                                      {order.travelersSize} хүн
-                                    </div>
-                                  </div>
-                                </TableCell>
-
-                                <TableCell>
-                                  <div>
-                                    <div className="font-medium">
-                                      ₮
-                                      {order.totalPrice?.toLocaleString() ||
-                                        "0"}
-                                    </div>
-                                    <div className="text-sm text-gray-500">
-                                      ₮
-                                      {order.pricePerQuota?.toLocaleString() ||
-                                        "0"}{" "}
-                                      / хүн
-                                    </div>
-                                  </div>
-                                </TableCell>
-
-                                <TableCell>
-                                  <span
-                                    className={`px-2 py-1 rounded-full text-xs ${
-                                      order.status === "CONFIRMED"
-                                        ? "bg-green-100 text-green-800"
-                                        : order.status === "PENDING"
-                                        ? "bg-yellow-100 text-yellow-800"
-                                        : order.status === "CANCELLED"
-                                        ? "bg-red-100 text-red-800"
-                                        : "bg-gray-100 text-gray-800"
-                                    }`}
-                                  >
-                                    {order.status === "CONFIRMED"
-                                      ? "Баталгаажсан"
-                                      : order.status === "PENDING"
-                                      ? "Хүлээгдэж буй"
-                                      : order.status === "CANCELLED"
-                                      ? "Цуцлагдсан"
-                                      : order.status}
-                                  </span>
-                                </TableCell>
-
-                                <TableCell>
-                                  <div className="flex gap-2">
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => openOrderDetails(order)}
-                                    >
-                                      Дэлгэрэнгүй
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => {
-                                        setSelectedOrder(order);
-                                        setNewOrderStatus(order.status);
-                                        setOrderStatusModalOpen(true);
-                                      }}
-                                    >
-                                      Төлөв солих
-                                    </Button>
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })
-                        )}
-                      </TableBody>
-                    </Table>
+                <div>
+                  <Label htmlFor="heroBackgroundImage">Арын зураг</Label>
+                  {heroData.backgroundImageUrl && (
+                    <div className="mt-2 mb-2">
+                      <img
+                        src={heroData.backgroundImageUrl}
+                        alt="Background"
+                        className="w-full h-48 object-cover rounded-lg"
+                      />
+                    </div>
                   )}
-                </CardContent>
-              </Card>
+                  <Input
+                    id="heroBackgroundImageFile"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        uploadHeroImage(file);
+                      }
+                    }}
+                    className="mt-2"
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    Шинэ зураг сонгох (автоматаар хуулагдана)
+                  </p>
+                </div>
 
-              <div className="mt-4 flex justify-center">
-                <Button
-                  variant="outline"
-                  onClick={() => setSelectedTab("Bookings")}
-                >
-                  Бүх захиалга үзэх
-                </Button>
-              </div>
+                <div className="flex gap-4 pt-4">
+                  <Button
+                    className="flex-1"
+                    onClick={saveHeroData}
+                    disabled={heroLoading}
+                  >
+                    {heroLoading ? "Хадгалж байна..." : "Хадгалах"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      // Reload data from API
+                      const token = localStorage.getItem("admin_token");
+                      fetch(`${API_URL}/admin/v1/home`, {
+                        headers: token
+                          ? { Authorization: `Bearer ${token}` }
+                          : undefined,
+                      })
+                        .then((res) => res.json())
+                        .then((data) => {
+                          if (
+                            data.code === 0 &&
+                            data.response &&
+                            data.response.length > 0
+                          ) {
+                            const { title, subtitle, backgroundImageUrl } =
+                              data.response[0];
+                            setHeroData({
+                              title,
+                              subtitle,
+                              backgroundImageUrl,
+                            });
+                          }
+                        });
+                    }}
+                  >
+                    Цуцлах
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {selectedTab === "Benefits" && (
+          <div className="px-8 py-6">
+            <div className="text-2xl font-bold mb-6">
+              Давуу талууд - Benefits Section
             </div>
-          </>
+            {benefitsLoading && (
+              <div className="mb-4 p-4 bg-blue-50 text-blue-700 rounded">
+                Уншиж байна...
+              </div>
+            )}
+            {benefitsError && (
+              <div className="mb-4 p-4 bg-red-50 text-red-700 rounded">
+                {benefitsError}
+              </div>
+            )}
+            <Card>
+              <CardContent className="p-6 space-y-6">
+                <div>
+                  <Label className="text-lg font-semibold">Давуу талууд</Label>
+                  {benefitsData.map((benefit, index) => (
+                    <Card key={index} className="mt-4">
+                      <CardContent className="p-4 space-y-3">
+                        <div>
+                          <Label>Гарчиг {index + 1}</Label>
+                          <Input
+                            value={benefit.title}
+                            onChange={(e) => {
+                              const newBenefits = [...benefitsData];
+                              newBenefits[index].title = e.target.value;
+                              setBenefitsData(newBenefits);
+                            }}
+                            placeholder="Жишээ: Хэрэглэгчид төвлөсөн"
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
+                          <Label>Тайлбар {index + 1}</Label>
+                          <Textarea
+                            value={benefit.content}
+                            onChange={(e) => {
+                              const newBenefits = [...benefitsData];
+                              newBenefits[index].content = e.target.value;
+                              setBenefitsData(newBenefits);
+                            }}
+                            placeholder="Жишээ: Таны сэтгэл ханамж бол бидний аялалын үйлчилгээг чиглүүлэгч луужин юм."
+                            rows={2}
+                            className="mt-1"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => {
+                            const newBenefits = benefitsData.filter(
+                              (_, i) => i !== index
+                            );
+                            setBenefitsData(newBenefits);
+                          }}
+                        >
+                          Устгах
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-4"
+                    onClick={() => {
+                      setBenefitsData([
+                        ...benefitsData,
+                        { title: "", content: "" },
+                      ]);
+                    }}
+                  >
+                    Давуу тал нэмэх
+                  </Button>
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <Button
+                    className="flex-1"
+                    onClick={saveBenefitsData}
+                    disabled={benefitsLoading}
+                  >
+                    {benefitsLoading ? "Хадгалж байна..." : "Хадгалах"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      // Reload data from API
+                      const token = localStorage.getItem("admin_token");
+                      fetch(`${API_URL}/admin/v1/home`, {
+                        headers: token
+                          ? { Authorization: `Bearer ${token}` }
+                          : undefined,
+                      })
+                        .then((res) => res.json())
+                        .then((data) => {
+                          if (
+                            data.code === 0 &&
+                            data.response &&
+                            data.response.length > 0
+                          ) {
+                            const benefits = data.response[0].benefits || [
+                              { title: "", content: "" },
+                            ];
+                            setBenefitsData(benefits);
+                          }
+                        });
+                    }}
+                  >
+                    Цуцлах
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {selectedTab === "About Us" && (
+          <div className="px-8 py-6">
+            <div className="text-2xl font-bold mb-6">Бидний тухай хуудас</div>
+            {aboutLoading && (
+              <div className="mb-4 p-4 bg-blue-50 text-blue-700 rounded">
+                Уншиж байна...
+              </div>
+            )}
+            {aboutError && (
+              <div className="mb-4 p-4 bg-red-50 text-red-700 rounded">
+                {aboutError}
+              </div>
+            )}
+            <Card>
+              <CardContent className="p-6 space-y-6">
+                <div>
+                  <Label htmlFor="aboutVideo">Видео линк (YouTube)</Label>
+                  <Input
+                    id="aboutVideo"
+                    value={aboutData.video}
+                    onChange={(e) =>
+                      setAboutData((prev) => ({
+                        ...prev,
+                        video: e.target.value,
+                      }))
+                    }
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    className="mt-2"
+                  />
+                </div>
+
+                {/* Display all images with delete buttons */}
+                {aboutData.images && aboutData.images.length > 0 && (
+                  <div>
+                    <Label className="text-lg font-semibold mb-3 block">
+                      Одоо байгаа зургууд ({aboutData.images.length})
+                    </Label>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {aboutData.images.map((imageUrl, index) => {
+                        // Filter out placeholder strings like "cloudinary1"
+                        if (!imageUrl.startsWith("http")) return null;
+
+                        return (
+                          <div
+                            key={index}
+                            className="relative group rounded-lg overflow-hidden border border-gray-200"
+                          >
+                            <img
+                              src={imageUrl}
+                              alt={`About image ${index + 1}`}
+                              className="w-full h-40 object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => deleteAboutImages([imageUrl])}
+                              className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                              aria-label="Зураг устгах"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            </button>
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 text-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              Зураг #{index + 1}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <Label htmlFor="aboutImages">
+                    Зургууд нэмэх (хамгийн багадаа 3)
+                  </Label>
+                  <Input
+                    id="aboutImages"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => {
+                      const files = e.target.files;
+                      if (files && files.length > 0) {
+                        uploadAboutImages(files);
+                      }
+                    }}
+                    className="mt-2"
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    Хамгийн багадаа 3 зураг сонгоно уу (олон зураг сонгохын тулд
+                    Ctrl/Cmd товчийг ашиглана уу)
+                  </p>
+                </div>
+
+                <div className="border-t pt-6">
+                  <h3 className="text-xl font-semibold mb-4">
+                    Компанийн мэдээлэл
+                  </h3>
+
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="companyName">Компанийн нэр</Label>
+                      <Input
+                        id="companyName"
+                        value={aboutData.company.name}
+                        onChange={(e) =>
+                          setAboutData((prev) => ({
+                            ...prev,
+                            company: {
+                              ...prev.company,
+                              name: e.target.value,
+                            },
+                          }))
+                        }
+                        placeholder="ДЭМЧ ИР ГҮН ХХК АЯЛАЛ ЖУУЛЧЛАЛ"
+                        className="mt-2"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="establishedDate">
+                        Үүсгэн байгуулагдсан он
+                      </Label>
+                      <Input
+                        id="establishedDate"
+                        value={aboutData.company.establishedDate}
+                        onChange={(e) =>
+                          setAboutData((prev) => ({
+                            ...prev,
+                            company: {
+                              ...prev.company,
+                              establishedDate: e.target.value,
+                            },
+                          }))
+                        }
+                        placeholder="2019"
+                        className="mt-2"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="companyVision">
+                        Алсын хараа (Vision)
+                      </Label>
+                      <Textarea
+                        id="companyVision"
+                        value={aboutData.company.vision}
+                        onChange={(e) =>
+                          setAboutData((prev) => ({
+                            ...prev,
+                            company: {
+                              ...prev.company,
+                              vision: e.target.value,
+                            },
+                          }))
+                        }
+                        placeholder="Монгол дахь аялал жуулчлалын үндэсний сүлжээ компани байна"
+                        rows={3}
+                        className="mt-2"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="companyMission">
+                        Эрхэм зорилго (Mission)
+                      </Label>
+                      <Textarea
+                        id="companyMission"
+                        value={aboutData.company.mission}
+                        onChange={(e) =>
+                          setAboutData((prev) => ({
+                            ...prev,
+                            company: {
+                              ...prev.company,
+                              mission: e.target.value,
+                            },
+                          }))
+                        }
+                        placeholder="Компанийн үйл ажиллагаа нь ил тод нээлттэй, хариуцлагатай..."
+                        rows={3}
+                        className="mt-2"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t pt-6">
+                  <Label className="text-lg font-semibold">
+                    Үнэт зүйлс (Values)
+                  </Label>
+                  {Array.isArray(aboutData.company.values) &&
+                    aboutData.company.values.map((value, index) => (
+                      <div key={index} className="flex gap-2 mt-3">
+                        <Input
+                          value={value}
+                          onChange={(e) => {
+                            const newValues = [...aboutData.company.values];
+                            newValues[index] = e.target.value;
+                            setAboutData((prev) => ({
+                              ...prev,
+                              company: {
+                                ...prev.company,
+                                values: newValues,
+                              },
+                            }));
+                          }}
+                          placeholder="Жишээ: Мэргэшсэн туршлагатай боловсон хүчин"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => {
+                            const newValues = aboutData.company.values.filter(
+                              (_, i) => i !== index
+                            );
+                            setAboutData((prev) => ({
+                              ...prev,
+                              company: {
+                                ...prev.company,
+                                values: newValues,
+                              },
+                            }));
+                          }}
+                        >
+                          Устгах
+                        </Button>
+                      </div>
+                    ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-4"
+                    onClick={() => {
+                      setAboutData((prev) => ({
+                        ...prev,
+                        company: {
+                          ...prev.company,
+                          values: [...prev.company.values, ""],
+                        },
+                      }));
+                    }}
+                  >
+                    Үнэт зүйл нэмэх
+                  </Button>
+                </div>
+
+                <div className="border-t pt-6">
+                  <Label className="text-lg font-semibold">
+                    Зорилтууд (Goals)
+                  </Label>
+                  {Array.isArray(aboutData.company.goals) &&
+                    aboutData.company.goals.map((goal, index) => (
+                      <div key={index} className="flex gap-2 mt-3">
+                        <Textarea
+                          value={goal}
+                          onChange={(e) => {
+                            const newGoals = [...aboutData.company.goals];
+                            newGoals[index] = e.target.value;
+                            setAboutData((prev) => ({
+                              ...prev,
+                              company: {
+                                ...prev.company,
+                                goals: newGoals,
+                              },
+                            }));
+                          }}
+                          placeholder="Жишээ: Аялагчдыг Монгол орны үзэсгэлэнт онгон дагшин зэрлэг байгалиар аялуулна"
+                          rows={2}
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => {
+                            const newGoals = aboutData.company.goals.filter(
+                              (_, i) => i !== index
+                            );
+                            setAboutData((prev) => ({
+                              ...prev,
+                              company: {
+                                ...prev.company,
+                                goals: newGoals,
+                              },
+                            }));
+                          }}
+                        >
+                          Устгах
+                        </Button>
+                      </div>
+                    ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-4"
+                    onClick={() => {
+                      setAboutData((prev) => ({
+                        ...prev,
+                        company: {
+                          ...prev.company,
+                          goals: [...prev.company.goals, ""],
+                        },
+                      }));
+                    }}
+                  >
+                    Зорилт нэмэх
+                  </Button>
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <Button
+                    className="flex-1"
+                    onClick={saveAboutData}
+                    disabled={aboutLoading}
+                  >
+                    {aboutLoading ? "Хадгалж байна..." : "Хадгалах"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      // Reload data from API
+                      const token = localStorage.getItem("admin_token");
+                      fetch(`${API_URL}/admin/v1/aboutUs`, {
+                        headers: token
+                          ? { Authorization: `Bearer ${token}` }
+                          : undefined,
+                      })
+                        .then((res) => res.json())
+                        .then((data) => {
+                          if (data.code === 0 && data.response) {
+                            setAboutData({
+                              video: data.response.video || "",
+                              company: {
+                                establishedDate:
+                                  data.response.company?.establishedDate || "",
+                                name: data.response.company?.name || "",
+                                vision: data.response.company?.vision || "",
+                                mission: data.response.company?.mission || "",
+                                values: Array.isArray(
+                                  data.response.company?.values
+                                )
+                                  ? data.response.company.values
+                                  : [""],
+                                goals: Array.isArray(
+                                  data.response.company?.goals
+                                )
+                                  ? data.response.company.goals
+                                  : [""],
+                              },
+                            });
+                          }
+                        });
+                    }}
+                  >
+                    Цуцлах
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {selectedTab === "Contact Us" && (
+          <div className="px-8 py-6">
+            <div className="text-2xl font-bold mb-6">Холбоо барих мэдээлэл</div>
+            {contactLoading && (
+              <div className="mb-4 p-4 bg-blue-50 text-blue-700 rounded">
+                Уншиж байна...
+              </div>
+            )}
+            {contactError && (
+              <div className="mb-4 p-4 bg-red-50 text-red-700 rounded">
+                {contactError}
+              </div>
+            )}
+
+            {/* Editable Description */}
+            <Card className="mb-6">
+              <CardContent className="p-6 space-y-6">
+                <div>
+                  <Label htmlFor="contactDescription">
+                    Тайлбар (Засах боломжтой)
+                  </Label>
+                  <Textarea
+                    id="contactDescription"
+                    value={contactData.description}
+                    onChange={(e) =>
+                      setContactData((prev) => ({
+                        ...prev,
+                        description: e.target.value,
+                      }))
+                    }
+                    placeholder="Холбоо барих хэсгийн тайлбар текст"
+                    rows={4}
+                    className="mt-2"
+                  />
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <Button
+                    className="flex-1"
+                    onClick={saveContactData}
+                    disabled={contactLoading}
+                  >
+                    {contactLoading ? "Хадгалж байна..." : "Хадгалах"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      // Reload data from API
+                      const token = localStorage.getItem("admin_token");
+                      fetch(`${API_URL}/admin/v1/contactUs`, {
+                        headers: token
+                          ? { Authorization: `Bearer ${token}` }
+                          : undefined,
+                      })
+                        .then((res) => res.json())
+                        .then((data) => {
+                          if (data.code === 0 && data.response) {
+                            setContactData({
+                              description: data.response.description || "",
+                              phoneNumbers: Array.isArray(
+                                data.response.phoneNumbers
+                              )
+                                ? data.response.phoneNumbers
+                                : [],
+                              email: data.response.email || "",
+                              address: data.response.address || "",
+                            });
+                          }
+                        });
+                    }}
+                  >
+                    Цуцлах
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Read-only Contact Information */}
+            <Card>
+              <CardContent className="p-6 space-y-6">
+                <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-800">
+                  <strong>Анхаар:</strong> Доорх мэдээлэл зөвхөн унших
+                  боломжтой. Имэйл, утас, хаягийг өөрчлөх боломжгүй.
+                </div>
+
+                <div>
+                  <Label className="text-gray-600">Имэйл хаяг</Label>
+                  <div className="mt-2 p-3 bg-gray-100 rounded border">
+                    {contactData.email || "—"}
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-gray-600">Утасны дугаарууд</Label>
+                  <div className="mt-2 p-3 bg-gray-100 rounded border">
+                    {contactData.phoneNumbers.length > 0
+                      ? contactData.phoneNumbers.join(", ")
+                      : "—"}
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-gray-600">Хаяг</Label>
+                  <div className="mt-2 p-3 bg-gray-100 rounded border whitespace-pre-wrap">
+                    {contactData.address || "—"}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
         {selectedTab === "Users" && (
           <div className="px-8 py-6">
@@ -2908,7 +3876,7 @@ export default function AdminDashboard() {
                     <h3 className="text-lg font-semibold mb-4 text-purple-800">
                       Аяллын дэлгэрэнгүй мэдээлэл
                     </h3>
-                    
+
                     {/* Travel Title and Description */}
                     <div className="mb-4">
                       <h4 className="font-semibold text-gray-800 mb-2">
@@ -2922,30 +3890,44 @@ export default function AdminDashboard() {
                     {/* Travel Details Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div>
-                        <div className="text-sm font-medium text-gray-700">Байршил</div>
+                        <div className="text-sm font-medium text-gray-700">
+                          Байршил
+                        </div>
                         <div className="text-sm text-gray-600">
-                          {detailedTravelData.destination?.location || "Тодорхойгүй"}
+                          {detailedTravelData.destination?.location ||
+                            "Тодорхойгүй"}
                         </div>
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-gray-700">Үргэлжлэх хугацаа</div>
+                        <div className="text-sm font-medium text-gray-700">
+                          Үргэлжлэх хугацаа
+                        </div>
                         <div className="text-sm text-gray-600">
-                          {detailedTravelData.duration?.days} хоног, {detailedTravelData.duration?.nights} шөнө
+                          {detailedTravelData.duration?.days} хоног,{" "}
+                          {detailedTravelData.duration?.nights} шөнө
                         </div>
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-gray-700">Эхлэх огноо</div>
+                        <div className="text-sm font-medium text-gray-700">
+                          Эхлэх огноо
+                        </div>
                         <div className="text-sm text-gray-600">
-                          {detailedTravelData.startDateTime 
-                            ? new Date(detailedTravelData.startDateTime).toLocaleDateString("mn-MN")
+                          {detailedTravelData.startDateTime
+                            ? new Date(
+                                detailedTravelData.startDateTime
+                              ).toLocaleDateString("mn-MN")
                             : "Тодорхойгүй"}
                         </div>
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-gray-700">Дуусах огноо</div>
+                        <div className="text-sm font-medium text-gray-700">
+                          Дуусах огноо
+                        </div>
                         <div className="text-sm text-gray-600">
-                          {detailedTravelData.endDateTime 
-                            ? new Date(detailedTravelData.endDateTime).toLocaleDateString("mn-MN")
+                          {detailedTravelData.endDateTime
+                            ? new Date(
+                                detailedTravelData.endDateTime
+                              ).toLocaleDateString("mn-MN")
                             : "Тодорхойгүй"}
                         </div>
                       </div>
@@ -2953,82 +3935,116 @@ export default function AdminDashboard() {
 
                     {/* Quota Information */}
                     <div className="mb-4">
-                      <div className="text-sm font-medium text-gray-700 mb-2">Байрны мэдээлэл</div>
+                      <div className="text-sm font-medium text-gray-700 mb-2">
+                        Байрны мэдээлэл
+                      </div>
                       <div className="flex items-center gap-4">
                         <div className="text-sm text-gray-600">
                           Нийт: {detailedTravelData.quota?.total || 0} байр
                         </div>
                         <div className="text-sm text-gray-600">
-                          Үлдсэн: {detailedTravelData.quota?.available || 0} байр
+                          Үлдсэн: {detailedTravelData.quota?.available || 0}{" "}
+                          байр
                         </div>
                         <div className="text-sm text-gray-600">
-                          Захиалагдсан: {(detailedTravelData.quota?.total || 0) - (detailedTravelData.quota?.available || 0)} байр
+                          Захиалагдсан:{" "}
+                          {(detailedTravelData.quota?.total || 0) -
+                            (detailedTravelData.quota?.available || 0)}{" "}
+                          байр
                         </div>
                       </div>
                     </div>
 
                     {/* Images */}
-                    {detailedTravelData.images && detailedTravelData.images.length > 0 && (
-                      <div className="mb-4">
-                        <div className="text-sm font-medium text-gray-700 mb-2">Зураг</div>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                          {detailedTravelData.images.slice(0, 6).map((image: string, index: number) => (
-                            <img
-                              key={index}
-                              src={image}
-                              alt={`Аяллын зураг ${index + 1}`}
-                              className="w-full h-24 object-cover rounded-lg"
-                            />
-                          ))}
+                    {detailedTravelData.images &&
+                      detailedTravelData.images.length > 0 && (
+                        <div className="mb-4">
+                          <div className="text-sm font-medium text-gray-700 mb-2">
+                            Зураг
+                          </div>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                            {detailedTravelData.images
+                              .slice(0, 6)
+                              .map((image: string, index: number) => (
+                                <img
+                                  key={index}
+                                  src={image}
+                                  alt={`Аяллын зураг ${index + 1}`}
+                                  className="w-full h-24 object-cover rounded-lg"
+                                />
+                              ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
                     {/* Included Services */}
-                    {detailedTravelData.included && detailedTravelData.included.length > 0 && (
-                      <div className="mb-4">
-                        <div className="text-sm font-medium text-gray-700 mb-2">Орсон үйлчилгээ</div>
-                        <div className="space-y-1">
-                          {detailedTravelData.included.slice(0, 3).map((item: string, index: number) => (
-                            <div key={index} className="text-xs text-gray-600 bg-green-50 p-2 rounded">
-                              • {item}
-                            </div>
-                          ))}
-                          {detailedTravelData.included.length > 3 && (
-                            <div className="text-xs text-gray-500">
-                              + {detailedTravelData.included.length - 3} бусад үйлчилгээ
-                            </div>
-                          )}
+                    {detailedTravelData.included &&
+                      detailedTravelData.included.length > 0 && (
+                        <div className="mb-4">
+                          <div className="text-sm font-medium text-gray-700 mb-2">
+                            Орсон үйлчилгээ
+                          </div>
+                          <div className="space-y-1">
+                            {detailedTravelData.included
+                              .slice(0, 3)
+                              .map((item: string, index: number) => (
+                                <div
+                                  key={index}
+                                  className="text-xs text-gray-600 bg-green-50 p-2 rounded"
+                                >
+                                  • {item}
+                                </div>
+                              ))}
+                            {detailedTravelData.included.length > 3 && (
+                              <div className="text-xs text-gray-500">
+                                + {detailedTravelData.included.length - 3} бусад
+                                үйлчилгээ
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
                     {/* Travel Plans */}
-                    {detailedTravelData.plans && detailedTravelData.plans.length > 0 && (
-                      <div>
-                        <div className="text-sm font-medium text-gray-700 mb-2">Аяллын төлөвлөгөө</div>
-                        <div className="space-y-2 max-h-40 overflow-y-auto">
-                          {detailedTravelData.plans.slice(0, 3).map((plan: any, index: number) => (
-                            <div key={index} className="text-xs bg-blue-50 p-2 rounded">
-                              <div className="font-medium text-blue-800">{plan.title}</div>
-                              {plan.items && plan.items.length > 0 && (
-                                <div className="text-blue-600 mt-1">
-                                  • {plan.items[0]}
-                                  {plan.items.length > 1 && (
-                                    <span className="text-gray-500"> + {plan.items.length - 1} бусад</span>
+                    {detailedTravelData.plans &&
+                      detailedTravelData.plans.length > 0 && (
+                        <div>
+                          <div className="text-sm font-medium text-gray-700 mb-2">
+                            Аяллын төлөвлөгөө
+                          </div>
+                          <div className="space-y-2 max-h-40 overflow-y-auto">
+                            {detailedTravelData.plans
+                              .slice(0, 3)
+                              .map((plan: any, index: number) => (
+                                <div
+                                  key={index}
+                                  className="text-xs bg-blue-50 p-2 rounded"
+                                >
+                                  <div className="font-medium text-blue-800">
+                                    {plan.title}
+                                  </div>
+                                  {plan.items && plan.items.length > 0 && (
+                                    <div className="text-blue-600 mt-1">
+                                      • {plan.items[0]}
+                                      {plan.items.length > 1 && (
+                                        <span className="text-gray-500">
+                                          {" "}
+                                          + {plan.items.length - 1} бусад
+                                        </span>
+                                      )}
+                                    </div>
                                   )}
                                 </div>
-                              )}
-                            </div>
-                          ))}
-                          {detailedTravelData.plans.length > 3 && (
-                            <div className="text-xs text-gray-500">
-                              + {detailedTravelData.plans.length - 3} бусад өдрүүд
-                            </div>
-                          )}
+                              ))}
+                            {detailedTravelData.plans.length > 3 && (
+                              <div className="text-xs text-gray-500">
+                                + {detailedTravelData.plans.length - 3} бусад
+                                өдрүүд
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </div>
                 ) : (
                   <div className="bg-purple-50 p-4 rounded-lg">

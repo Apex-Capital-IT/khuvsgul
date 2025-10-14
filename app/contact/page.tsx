@@ -5,10 +5,49 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 import { useI18n } from "@/components/LanguageProvider";
+import { useEffect, useState } from "react";
+
+interface ContactData {
+  description: string;
+  phoneNumbers: string[];
+  email: string;
+  address: string;
+}
+
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://taiga-9fde.onrender.com";
 
 export default function ContactPage() {
   const { t } = useI18n();
-  
+  const [contactData, setContactData] = useState<ContactData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchContactData = async () => {
+      try {
+        const res = await fetch(`${API_URL}/contactUs`);
+        const data = await res.json();
+        console.log("Contact data fetched:", data);
+        if (data.code === 0 && data.response && data.response.length > 0) {
+          setContactData({
+            description: data.response[0].description || "",
+            phoneNumbers: Array.isArray(data.response[0].phoneNumbers)
+              ? data.response[0].phoneNumbers
+              : [],
+            email: data.response[0].email || "",
+            address: data.response[0].address || "",
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch contact data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContactData();
+  }, []);
+
   return (
     <>
       <section className="py-16 pt-32">
@@ -17,11 +56,13 @@ export default function ContactPage() {
             <h1 className="text-4xl font-medium mb-8 text-center">
               {t("contact.title")}
             </h1>
-            <div className="grid md:grid-cols-2 gap-8">
+                        <div className="grid md:grid-cols-2 gap-8">
               <div>
                 <h2 className="text-xl font-medium mb-4">{t("contact.subtitle")}</h2>
                 <p className="text-gray-600 mb-6">
-                  {t("contact.description")}
+                  {loading || !contactData
+                    ? t("contact.description")
+                    : contactData.description || t("contact.description")}
                 </p>
                 <div className="space-y-4">
                   <div className="flex items-start">
@@ -42,17 +83,63 @@ export default function ContactPage() {
                       </svg>
                     </div>
                     <div>
-                      <div className="font-medium">{t("contact.phone.title")}</div>
+                      <div className="font-medium">
+                        {t("contact.phone.title")}
+                      </div>
                       <div className="text-gray-600 flex flex-col ">
-                        <a className="hover:underline" href="tel:+97677451953">
-                          +976 77451953
-                        </a>
-                        <a className="hover:underline" href="tel:+97699020145">
-                          +976 99020145
-                        </a>
-                        <a className="hover:underline" href="tel:+97699020136">
-                          +976 99020136
-                        </a>
+                        {loading || !contactData ? (
+                          <>
+                            <a
+                              className="hover:underline"
+                              href="tel:+97677451953"
+                            >
+                              +976 77451953
+                            </a>
+                            <a
+                              className="hover:underline"
+                              href="tel:+97699020145"
+                            >
+                              +976 99020145
+                            </a>
+                            <a
+                              className="hover:underline"
+                              href="tel:+97699020136"
+                            >
+                              +976 99020136
+                            </a>
+                          </>
+                        ) : contactData.phoneNumbers.length > 0 ? (
+                          contactData.phoneNumbers.map((phone, index) => (
+                            <a
+                              key={index}
+                              className="hover:underline"
+                              href={`tel:${phone}`}
+                            >
+                              {phone}
+                            </a>
+                          ))
+                        ) : (
+                          <>
+                            <a
+                              className="hover:underline"
+                              href="tel:+97677451953"
+                            >
+                              +976 77451953
+                            </a>
+                            <a
+                              className="hover:underline"
+                              href="tel:+97699020145"
+                            >
+                              +976 99020145
+                            </a>
+                            <a
+                              className="hover:underline"
+                              href="tel:+97699020136"
+                            >
+                              +976 99020136
+                            </a>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -74,10 +161,20 @@ export default function ContactPage() {
                       </svg>
                     </div>
                     <div>
-                      <div className="font-medium">{t("contact.email.title")}</div>
+                      <div className="font-medium">
+                        {t("contact.email.title")}
+                      </div>
                       <div className="text-gray-600 hover:underline">
-                        <a href="mailto:demchirgun@gmail.com">
-                          demchirgun@gmail.com
+                        <a
+                          href={`mailto:${
+                            loading || !contactData || !contactData.email
+                              ? "demchirgun@gmail.com"
+                              : contactData.email
+                          }`}
+                        >
+                          {loading || !contactData || !contactData.email
+                            ? "demchirgun@gmail.com"
+                            : contactData.email}
                         </a>
                       </div>{" "}
                     </div>
@@ -110,16 +207,22 @@ export default function ContactPage() {
                       target="blank"
                       href="https://www.google.com/maps/place/49%C2%B037'32.4%22N+100%C2%B009'44.5%22E/@49.625674,100.162368,603m/data=!3m2!1e3!4b1!4m4!3m3!8m2!3d49.625674!4d100.162368?entry=ttu&g_ep=EgoyMDI1MDgxOS4wIKXMDSoASAFQAw%3D%3D"
                     >
-                      <div className="font-medium">{t("contact.address.title")}</div>
+                      <div className="font-medium">
+                        {t("contact.address.title")}
+                      </div>
                       <div className="text-gray-600">
-                        {t("contact.address.content")}
+                        {loading || !contactData || !contactData.address
+                          ? t("contact.address.content")
+                          : contactData.address}
                       </div>
                     </Link>
                   </div>
                 </div>
               </div>
               <div>
-                <h2 className="text-xl font-medium mb-4">{t("contact.form.title")}</h2>
+                <h2 className="text-xl font-medium mb-4">
+                  {t("contact.form.title")}
+                </h2>
                 <form className="space-y-4">
                   <div>
                     <Input

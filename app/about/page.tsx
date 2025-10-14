@@ -8,6 +8,22 @@ import NewsletterForm from "@/components/newsletter-form";
 import BenefitsSection from "@/components/benefits-section";
 import { useI18n } from "@/components/LanguageProvider";
 
+type AboutData = {
+  video: string;
+  images: string[];
+  company: {
+    establishedDate: string;
+    name: string;
+    vision: string;
+    mission: string;
+    values: string[];
+    goals: string[];
+  };
+};
+
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://taiga-9fde.onrender.com";
+
 function getYouTubeId(input: string): string | null {
   if (!input) return null;
 
@@ -42,13 +58,39 @@ export default function AboutPage() {
   const [open, setOpen] = useState(false);
   const [introVideoOpen, setIntroVideoOpen] = useState(false);
   const { t, getArray } = useI18n();
+  const [aboutData, setAboutData] = useState<AboutData | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // You can keep a full URL here OR just the ID — both will work
-  const YOUTUBE_SOURCE = "https://www.youtube.com/watch?v=dq5JJ7nIer8";
-  const INTRO_VIDEO_SOURCE = "https://www.youtube.com/watch?v=dq5JJ7nIer8"; // You can change this to a different video
+  useEffect(() => {
+    const fetchAboutData = async () => {
+      try {
+        const res = await fetch(`${API_URL}/aboutUs`);
+        const data = await res.json();
+        console.log("About data fetched:", data);
+        if (data.code === 0 && data.response && data.response.length > 0) {
+          setAboutData(data.response[0]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch about data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const videoId = useMemo(() => getYouTubeId(YOUTUBE_SOURCE), [YOUTUBE_SOURCE]);
-  const introVideoId = useMemo(() => getYouTubeId(INTRO_VIDEO_SOURCE), [INTRO_VIDEO_SOURCE]);
+    fetchAboutData();
+  }, []);
+
+  // Use API data or fallback
+  const videoSource =
+    aboutData?.video || "https://www.youtube.com/watch?v=dq5JJ7nIer8";
+
+  // Get last 3 images from the array, filter out non-URL items like "cloudinary1", "cloudinary2"
+  const allImages = aboutData?.images || [];
+  const validImages = allImages.filter((img: string) => img.startsWith("http"));
+  const images = validImages.slice(-3); // Get last 3 valid images
+
+  const videoId = useMemo(() => getYouTubeId(videoSource), [videoSource]);
+  const introVideoId = useMemo(() => getYouTubeId(videoSource), [videoSource]);
 
   return (
     <>
@@ -63,7 +105,8 @@ export default function AboutPage() {
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="container mx-auto px-4 relative z-10 text-white pt-16">
           <h1 className="text-4xl md:text-5xl font-medium">
-            {t("about.hero.title")} <span className="italic">{t("about.hero.title.italic")}</span>
+            {t("about.hero.title")}{" "}
+            <span className="italic">{t("about.hero.title.italic")}</span>
           </h1>
         </div>
       </section>
@@ -104,7 +147,7 @@ export default function AboutPage() {
                   </button>
                 </div>
                 <Image
-                  src="/cover.avif"
+                  src={images[0] || "/cover.avif"}
                   alt={t("about.video.play")}
                   width={300}
                   height={200}
@@ -114,7 +157,7 @@ export default function AboutPage() {
 
               <div className="relative rounded-2xl overflow-hidden row-span-2">
                 <Image
-                  src="/cover.avif"
+                  src={images[1] || "/cover.avif"}
                   alt={t("about.hero.title")}
                   width={300}
                   height={500}
@@ -124,7 +167,7 @@ export default function AboutPage() {
 
               <div className="relative rounded-2xl overflow-hidden">
                 <Image
-                  src="/cover.avif"
+                  src={images[2] || "/cover.avif"}
                   alt={t("about.hero.title")}
                   width={300}
                   height={200}
@@ -134,31 +177,91 @@ export default function AboutPage() {
             </div>
 
             <div>
-              <h2 className="text-3xl font-medium mb-6">
-                {t("about.company.name")} <br />
-                {t("about.company.type")}
-              </h2>
-              <div className="text-gray-600 mb-6">
-                <strong>{t("about.vision.title")}</strong> {t("about.vision.content")}
-                <br />
-                <strong>{t("about.mission.title")}</strong> {t("about.mission.content")}
-                <br />
-                <strong>{t("about.values.title")}</strong>
-                <ul className="list-disc list-inside mt-2">
-                  {getArray("about.values.list").map((value, index) => (
-                    <li key={index}>{value}</li>
-                  ))}
-                </ul>
-                <strong className="block mt-4">{t("about.goals.title")}</strong>
-                <ul className="list-disc list-inside mt-2">
-                  {getArray("about.goals.list").map((goal, index) => (
-                    <li key={index}>{goal}</li>
-                  ))}
-                </ul>
-              </div>
-              <Button asChild className="bg-black text-white hover:bg-gray-800">
-                <Link href="/trips">{t("about.learnMore")}</Link>
-              </Button>
+              {loading ? (
+                <div className="space-y-4 animate-pulse">
+                  <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-full"></div>
+                  <div className="h-4 bg-gray-200 rounded w-full"></div>
+                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                </div>
+              ) : (
+                <>
+                  <h2 className="text-3xl font-medium mb-6">
+                    {aboutData?.company?.name || t("about.company.name")} <br />
+                    {t("about.company.type")}
+                  </h2>
+                  <div className="text-gray-600 mb-6">
+                    {aboutData?.company?.vision && (
+                      <>
+                        <strong>{t("about.vision.title")}</strong>{" "}
+                        {aboutData.company.vision}
+                        <br />
+                      </>
+                    )}
+                    {aboutData?.company?.mission && (
+                      <>
+                        <strong>{t("about.mission.title")}</strong>{" "}
+                        {aboutData.company.mission}
+                        <br />
+                      </>
+                    )}
+                    {aboutData?.company?.values &&
+                      aboutData.company.values.length > 0 &&
+                      aboutData.company.values[0] !== "" && (
+                        <>
+                          <strong>{t("about.values.title")}</strong>
+                          <ul className="list-disc list-inside mt-2">
+                            {aboutData.company.values.map((value, index) => (
+                              <li key={index}>{value}</li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
+                    {aboutData?.company?.goals &&
+                      aboutData.company.goals.length > 0 &&
+                      aboutData.company.goals[0] !== "" && (
+                        <>
+                          <strong className="block mt-4">
+                            {t("about.goals.title")}
+                          </strong>
+                          <ul className="list-disc list-inside mt-2">
+                            {aboutData.company.goals.map((goal, index) => (
+                              <li key={index}>{goal}</li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
+                    {/* Fallback to translation keys if no API data */}
+                    {!aboutData?.company?.vision &&
+                      !aboutData?.company?.mission && (
+                        <>
+                          <strong>{t("about.vision.title")}</strong>{" "}
+                          {t("about.vision.content")}
+                          <br />
+                          <strong>{t("about.mission.title")}</strong>{" "}
+                          {t("about.mission.content")}
+                          <br />
+                          <strong>{t("about.values.title")}</strong>
+                          <ul className="list-disc list-inside mt-2">
+                            {getArray("about.values.list").map(
+                              (value, index) => (
+                                <li key={index}>{value}</li>
+                              )
+                            )}
+                          </ul>
+                          <strong className="block mt-4">
+                            {t("about.goals.title")}
+                          </strong>
+                          <ul className="list-disc list-inside mt-2">
+                            {getArray("about.goals.list").map((goal, index) => (
+                              <li key={index}>{goal}</li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -174,7 +277,7 @@ export default function AboutPage() {
             </h2>
             <div className="w-24 h-1 bg-black mx-auto"></div>
           </div>
-          
+
           <div className="max-w-6xl mx-auto">
             <div className="grid md:grid-cols-2 gap-8 items-center mb-12">
               <div className="relative">
@@ -188,7 +291,9 @@ export default function AboutPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                   <div className="absolute bottom-4 left-4 text-white">
-                    <div className="text-sm opacity-80">Est. 2019</div>
+                    <div className="text-sm opacity-80">
+                      Est. {aboutData?.company?.establishedDate || "2019"}
+                    </div>
                   </div>
                   {/* Play Button Overlay */}
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -222,44 +327,80 @@ export default function AboutPage() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
                   <div className="bg-black p-3 rounded-full flex-shrink-0">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    <svg
+                      className="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                      />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-xl font-medium mb-2">{t("about.introduction.professional.title")}</h3>
+                    <h3 className="text-xl font-medium mb-2">
+                      {t("about.introduction.professional.title")}
+                    </h3>
                     <p className="text-gray-600 leading-relaxed">
                       {t("about.introduction.professional.description")}
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start space-x-4">
                   <div className="bg-black p-3 rounded-full flex-shrink-0">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    <svg
+                      className="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                      />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-xl font-medium mb-2">{t("about.introduction.team.title")}</h3>
+                    <h3 className="text-xl font-medium mb-2">
+                      {t("about.introduction.team.title")}
+                    </h3>
                     <p className="text-gray-600 leading-relaxed">
                       {t("about.introduction.team.description")}
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start space-x-4">
                   <div className="bg-black p-3 rounded-full flex-shrink-0">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                    <svg
+                      className="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+                      />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-xl font-medium mb-2">{t("about.introduction.partnerships.title")}</h3>
+                    <h3 className="text-xl font-medium mb-2">
+                      {t("about.introduction.partnerships.title")}
+                    </h3>
                     <p className="text-gray-600 leading-relaxed">
                       {t("about.introduction.partnerships.description")}
                     </p>
@@ -267,20 +408,28 @@ export default function AboutPage() {
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
               <div className="grid md:grid-cols-3 gap-8 text-center">
                 <div className="space-y-3">
-                  <div className="text-3xl font-bold text-black">2019</div>
-                  <div className="text-sm text-gray-600 uppercase tracking-wide">{t("about.introduction.stats.founded")}</div>
+                  <div className="text-3xl font-bold text-black">
+                    {aboutData?.company?.establishedDate || "2019"}
+                  </div>
+                  <div className="text-sm text-gray-600 uppercase tracking-wide">
+                    {t("about.introduction.stats.founded")}
+                  </div>
                 </div>
                 <div className="space-y-3">
                   <div className="text-3xl font-bold text-black">100+</div>
-                  <div className="text-sm text-gray-600 uppercase tracking-wide">{t("about.introduction.stats.travelers")}</div>
+                  <div className="text-sm text-gray-600 uppercase tracking-wide">
+                    {t("about.introduction.stats.travelers")}
+                  </div>
                 </div>
                 <div className="space-y-3">
                   <div className="text-3xl font-bold text-black">24/7</div>
-                  <div className="text-sm text-gray-600 uppercase tracking-wide">{t("about.introduction.stats.support")}</div>
+                  <div className="text-sm text-gray-600 uppercase tracking-wide">
+                    {t("about.introduction.stats.support")}
+                  </div>
                 </div>
               </div>
             </div>
@@ -292,11 +441,12 @@ export default function AboutPage() {
         <div className="container mx-auto px-4">
           <div className="mb-8">
             <h2 className="text-2xl font-medium mb-2">
-              {t("about.team.title.part1")} <span className="italic">{t("about.team.title.part2")} {t("about.team.title.part3")}</span>
+              {t("about.team.title.part1")}{" "}
+              <span className="italic">
+                {t("about.team.title.part2")} {t("about.team.title.part3")}
+              </span>
             </h2>
-            <p className="text-gray-600">
-              {t("about.team.description")}
-            </p>
+            <p className="text-gray-600">{t("about.team.description")}</p>
           </div>
           <div className="flex items-center mb-4">
             <button className="w-8 h-8 flex items-center justify-center rounded-full border mr-2">
@@ -336,13 +486,25 @@ export default function AboutPage() {
             <div className="rounded-lg overflow-hidden bg-white shadow-lg border border-gray-100">
               <div className="bg-gray-50 p-8 flex items-center justify-center">
                 <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center">
-                  <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  <svg
+                    className="w-12 h-12 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
                   </svg>
                 </div>
               </div>
               <div className="p-4">
-                <h3 className="font-medium">{t("about.team.management.title")}</h3>
+                <h3 className="font-medium">
+                  {t("about.team.management.title")}
+                </h3>
                 <p className="text-sm text-gray-500">
                   {t("about.team.management.description")}
                 </p>
@@ -351,13 +513,25 @@ export default function AboutPage() {
             <div className="rounded-lg overflow-hidden bg-white shadow-lg border border-gray-100">
               <div className="bg-gray-50 p-8 flex items-center justify-center">
                 <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center">
-                  <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  <svg
+                    className="w-12 h-12 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
                   </svg>
                 </div>
               </div>
               <div className="p-4">
-                <h3 className="font-medium">{t("about.team.professionals.title")}</h3>
+                <h3 className="font-medium">
+                  {t("about.team.professionals.title")}
+                </h3>
                 <p className="text-sm text-gray-500">
                   {t("about.team.professionals.description")}
                 </p>
@@ -366,13 +540,25 @@ export default function AboutPage() {
             <div className="rounded-lg overflow-hidden bg-white shadow-lg border border-gray-100">
               <div className="bg-gray-50 p-8 flex items-center justify-center">
                 <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center">
-                  <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  <svg
+                    className="w-12 h-12 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                    />
                   </svg>
                 </div>
               </div>
               <div className="p-4">
-                <h3 className="font-medium">{t("about.team.partners.title")}</h3>
+                <h3 className="font-medium">
+                  {t("about.team.partners.title")}
+                </h3>
                 <p className="text-sm text-gray-500">
                   {t("about.team.partners.description")}
                 </p>
@@ -427,7 +613,7 @@ function VideoModal({
   onClose: () => void;
 }) {
   const { t } = useI18n();
-  
+
   // lock body scroll & ESC to close
   useEffect(() => {
     const prev = document.body.style.overflow;
