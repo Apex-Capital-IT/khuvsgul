@@ -22,6 +22,17 @@ export default function ContactPage() {
   const [contactData, setContactData] = useState<ContactData | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Form state
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    title: "",
+    message: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
   useEffect(() => {
     const fetchContactData = async () => {
       try {
@@ -48,6 +59,55 @@ export default function ContactPage() {
     fetchContactData();
   }, []);
 
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setSubmitError("");
+    setSubmitSuccess(false);
+
+    try {
+      const response = await fetch(`${API_URL}/message`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          title: formData.title,
+          message: formData.message,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && (data.code === 0 || response.status === 200)) {
+        setSubmitSuccess(true);
+        setFormData({ name: "", email: "", title: "", message: "" });
+      } else {
+        throw new Error(data.message || "Failed to send message");
+      }
+    } catch (error: any) {
+      setSubmitError(
+        error.message || "Failed to send message. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Handle form input changes
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   return (
     <>
       <section className="py-16 pt-32">
@@ -56,9 +116,11 @@ export default function ContactPage() {
             <h1 className="text-4xl font-medium mb-8 text-center">
               {t("contact.title")}
             </h1>
-                        <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-8">
               <div>
-                <h2 className="text-xl font-medium mb-4">{t("contact.subtitle")}</h2>
+                <h2 className="text-xl font-medium mb-4">
+                  {t("contact.subtitle")}
+                </h2>
                 <p className="text-gray-600 mb-6">
                   {loading || !contactData
                     ? t("contact.description")
@@ -223,36 +285,74 @@ export default function ContactPage() {
                 <h2 className="text-xl font-medium mb-4">
                   {t("contact.form.title")}
                 </h2>
-                <form className="space-y-4">
+
+                {/* Success message */}
+                {submitSuccess && (
+                  <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="text-green-800 text-sm">
+                      Таны мессеж амжилттай илгээгдлээ! Бид удахгүй хариулах
+                      болно.
+                    </p>
+                  </div>
+                )}
+
+                {/* Error message */}
+                {submitError && (
+                  <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-red-800 text-sm">{submitError}</p>
+                  </div>
+                )}
+
+                <form className="space-y-4" onSubmit={handleSubmit}>
                   <div>
                     <Input
                       type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
                       placeholder={t("contact.form.name.placeholder")}
                       className="w-full"
+                      required
                     />
                   </div>
                   <div>
                     <Input
                       type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
                       placeholder={t("contact.form.email.placeholder")}
                       className="w-full"
+                      required
                     />
                   </div>
                   <div>
                     <Input
                       type="text"
+                      name="title"
+                      value={formData.title}
+                      onChange={handleInputChange}
                       placeholder={t("contact.form.subject.placeholder")}
                       className="w-full"
+                      required
                     />
                   </div>
                   <div>
                     <Textarea
+                      name="message"
+                      value={formData.message}
+                      onChange={handleInputChange}
                       placeholder={t("contact.form.message.placeholder")}
                       className="w-full min-h-[150px]"
+                      required
                     />
                   </div>
-                  <Button className="w-full bg-black text-white hover:bg-gray-800">
-                    {t("contact.form.send")}
+                  <Button
+                    type="submit"
+                    className="w-full bg-black text-white hover:bg-gray-800"
+                    disabled={submitting}
+                  >
+                    {submitting ? "Илгээж байна..." : t("contact.form.send")}
                   </Button>
                 </form>
               </div>

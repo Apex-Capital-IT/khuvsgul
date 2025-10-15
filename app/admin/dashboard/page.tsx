@@ -64,6 +64,7 @@ import {
   Calendar,
   MessageSquare,
   Plus,
+  Mail,
 } from "lucide-react";
 import {
   updateCategory,
@@ -352,6 +353,7 @@ export default function AdminDashboard() {
   });
   const [aboutLoading, setAboutLoading] = useState(false);
   const [aboutError, setAboutError] = useState("");
+  const [aboutImageFiles, setAboutImageFiles] = useState<File[]>([]);
 
   // Contact Us state
   const [contactData, setContactData] = useState({
@@ -362,6 +364,17 @@ export default function AdminDashboard() {
   });
   const [contactLoading, setContactLoading] = useState(false);
   const [contactError, setContactError] = useState("");
+
+  // Messages state
+  const [messagesData, setMessagesData] = useState<any[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
+  const [messagesError, setMessagesError] = useState("");
+  const [messagesPagination, setMessagesPagination] = useState({
+    pageSize: 10,
+    pageNumber: 1,
+    totalPages: 1,
+    totalCount: 0,
+  });
 
   // Helper functions for form arrays
   const handleArrayChange = (field: string, index: number, value: string) => {
@@ -778,6 +791,8 @@ export default function AdminDashboard() {
         return <MessageSquare className="w-4 h-4" />;
       case "Plus":
         return <Plus className="w-4 h-4" />;
+      case "Mail":
+        return <Mail className="w-4 h-4" />;
       default:
         return null;
     }
@@ -896,6 +911,38 @@ export default function AdminDashboard() {
     }
   }, [selectedTab]);
 
+  // Fetch Messages data
+  useEffect(() => {
+    if (selectedTab === "Messages") {
+      setMessagesLoading(true);
+      setMessagesError("");
+      const token = localStorage.getItem("admin_token");
+      fetch(
+        `${API_URL}/admin/v1/message?pageSize=${messagesPagination.pageSize}&pageNumber=${messagesPagination.pageNumber}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        }
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("Messages data:", data);
+          if (data.code === 0 && data.response) {
+            setMessagesData(data.response.docs || []);
+            setMessagesPagination((prev) => ({
+              ...prev,
+              totalPages: data.response.totalPages || 1,
+              totalCount: data.response.totalDocs || 0,
+            }));
+          }
+        })
+        .catch((err) => {
+          setMessagesError("Failed to load messages");
+          console.error("Messages fetch error:", err);
+        })
+        .finally(() => setMessagesLoading(false));
+    }
+  }, [selectedTab, messagesPagination.pageSize, messagesPagination.pageNumber]);
+
   // Save Hero Section data
   const saveHeroData = async () => {
     setHeroLoading(true);
@@ -1010,13 +1057,41 @@ export default function AdminDashboard() {
 
   // Upload Hero background image
 
-
   // Save About Us data
   const saveAboutData = async () => {
     setAboutLoading(true);
     setAboutError("");
     try {
       const token = localStorage.getItem("admin_token");
+
+      // First, upload any pending images
+      if (aboutImageFiles.length > 0) {
+        const formData = new FormData();
+        aboutImageFiles.forEach((file) => {
+          formData.append("images", file);
+        });
+
+        const imageResponse = await fetch(
+          `${API_URL}/admin/v1/aboutUs/image/add`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+          }
+        );
+
+        const imageData = await imageResponse.json();
+        if (imageData.code !== 0) {
+          throw new Error(imageData.message || "Failed to upload images");
+        }
+
+        // Clear the pending images after successful upload
+        setAboutImageFiles([]);
+      }
+
+      // Then save the text data
       const response = await fetch(`${API_URL}/admin/v1/aboutUs`, {
         method: "POST",
         headers: {
@@ -1028,6 +1103,38 @@ export default function AdminDashboard() {
       const data = await response.json();
       if (data.code === 0) {
         alert("Амжилттай хадгалагдлаа!");
+        // Refresh the About Us data to show the new images
+        if (selectedTab === "About Us") {
+          const refreshResponse = await fetch(`${API_URL}/admin/v1/aboutUs`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const refreshData = await refreshResponse.json();
+          if (
+            refreshData.code === 0 &&
+            refreshData.response &&
+            refreshData.response.length > 0
+          ) {
+            setAboutData({
+              video: refreshData.response[0].video || "",
+              images: Array.isArray(refreshData.response[0].images)
+                ? refreshData.response[0].images
+                : [],
+              company: {
+                establishedDate:
+                  refreshData.response[0].company?.establishedDate || "",
+                name: refreshData.response[0].company?.name || "",
+                vision: refreshData.response[0].company?.vision || "",
+                mission: refreshData.response[0].company?.mission || "",
+                values: Array.isArray(refreshData.response[0].company?.values)
+                  ? refreshData.response[0].company.values
+                  : [""],
+                goals: Array.isArray(refreshData.response[0].company?.goals)
+                  ? refreshData.response[0].company.goals
+                  : [""],
+              },
+            });
+          }
+        }
       } else {
         throw new Error(data.message || "Failed to save");
       }
@@ -1210,6 +1317,7 @@ export default function AdminDashboard() {
     { label: "Benefits", icon: "Star" },
     { label: "About Us", icon: "MessageSquare" },
     { label: "Contact Us", icon: "Users" },
+    { label: "Messages", icon: "Mail" },
     { label: "Users", icon: "Users" },
     { label: "Trips", icon: "MapPin" },
     { label: "Create Trip", icon: "Plus" },
@@ -1620,6 +1728,59 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
+                {/* Display pending images (not yet uploaded) */}
+                {aboutImageFiles.length > 0 && (
+                  <div>
+                    <Label className="text-lg font-semibold mb-3 block text-orange-600">
+                      Хадгалахыг хүлээж буй зургууд ({aboutImageFiles.length})
+                    </Label>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {aboutImageFiles.map((file, index) => (
+                        <div
+                          key={index}
+                          className="relative group rounded-lg overflow-hidden border border-orange-200 bg-orange-50"
+                        >
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={`Pending image ${index + 1}`}
+                            className="w-full h-40 object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAboutImageFiles((prev) =>
+                                prev.filter((_, i) => i !== index)
+                              );
+                            }}
+                            className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                            aria-label="Зураг хасах"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </button>
+                          <div className="absolute bottom-0 left-0 right-0 bg-orange-500 text-white text-xs p-1 text-center">
+                            Хадгалахыг хүлээж байна
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-sm text-orange-600 mt-2">
+                      Эдгээр зургууд "Хадгалах" товчийг дарснаар cloudinary-д
+                      хуулагдана.
+                    </p>
+                  </div>
+                )}
+
                 <div>
                   <Label htmlFor="aboutImages">
                     Зургууд нэмэх (хамгийн багадаа 3)
@@ -1632,14 +1793,23 @@ export default function AdminDashboard() {
                     onChange={(e) => {
                       const files = e.target.files;
                       if (files && files.length > 0) {
-                        uploadAboutImages(files);
+                        // Check minimum 3 images requirement
+                        if (files.length < 3) {
+                          alert("Хамгийн багадаа 3 зураг сонгоно уу!");
+                          return;
+                        }
+                        // Store files in pending state instead of uploading immediately
+                        setAboutImageFiles(Array.from(files));
+                        // Clear the file input
+                        e.target.value = "";
                       }
                     }}
                     className="mt-2"
                   />
                   <p className="text-sm text-gray-500 mt-1">
                     Хамгийн багадаа 3 зураг сонгоно уу (олон зураг сонгохын тулд
-                    Ctrl/Cmd товчийг ашиглана уу)
+                    Ctrl/Cmd товчийг ашиглана уу). Зургууд "Хадгалах" товчийг
+                    дарснаар хуулагдана.
                   </p>
                 </div>
 
@@ -2049,7 +2219,11 @@ export default function AdminDashboard() {
                       })
                         .then((res) => res.json())
                         .then((data) => {
-                          if (data.code === 0 && data.response && data.response.length > 0) {
+                          if (
+                            data.code === 0 &&
+                            data.response &&
+                            data.response.length > 0
+                          ) {
                             setContactData({
                               description: data.response[0].description || "",
                               phoneNumbers: Array.isArray(
@@ -2071,6 +2245,116 @@ export default function AdminDashboard() {
             </Card>
           </div>
         )}
+
+        {selectedTab === "Messages" && (
+          <div className="px-8 py-6">
+            <div className="text-2xl font-bold mb-6">
+              Хүлээн авсан мессежүүд
+            </div>
+            {messagesLoading && (
+              <div className="mb-4 p-4 bg-blue-50 text-blue-700 rounded">
+                Уншиж байна...
+              </div>
+            )}
+            {messagesError && (
+              <div className="mb-4 p-4 bg-red-50 text-red-700 rounded">
+                {messagesError}
+              </div>
+            )}
+
+            <Card>
+              <CardContent className="p-6">
+                {messagesData.length === 0 ? (
+                  <div className="text-center text-gray-500 py-8">
+                    Мессеж байхгүй байна
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {messagesData.map((message, index) => (
+                      <div
+                        key={message._id || index}
+                        className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg text-gray-900">
+                              {message.title || "Гарчиг байхгүй"}
+                            </h3>
+                            <p className="text-sm text-gray-600">
+                              <span className="font-medium">Илгээгч:</span>{" "}
+                              {message.name || "Нэр байхгүй"}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              <span className="font-medium">Имэйл:</span>{" "}
+                              {message.email || "Имэйл байхгүй"}
+                            </p>
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {message.createdAt
+                              ? new Date(message.createdAt).toLocaleDateString(
+                                  "mn-MN"
+                                )
+                              : "Огноо байхгүй"}
+                          </div>
+                        </div>
+                        <div className="mt-3">
+                          <p className="text-gray-700 leading-relaxed">
+                            {message.message || "Мессеж байхгүй"}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Pagination */}
+                {messagesPagination.totalPages > 1 && (
+                  <div className="flex justify-between items-center mt-6 pt-4 border-t">
+                    <div className="text-sm text-gray-600">
+                      Нийт: {messagesPagination.totalCount} мессеж
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={messagesPagination.pageNumber === 1}
+                        onClick={() => {
+                          setMessagesPagination((prev) => ({
+                            ...prev,
+                            pageNumber: prev.pageNumber - 1,
+                          }));
+                        }}
+                      >
+                        Өмнөх
+                      </Button>
+                      <span className="px-3 py-1 text-sm text-gray-600">
+                        {messagesPagination.pageNumber} /{" "}
+                        {messagesPagination.totalPages}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={
+                          messagesPagination.pageNumber ===
+                          messagesPagination.totalPages
+                        }
+                        onClick={() => {
+                          setMessagesPagination((prev) => ({
+                            ...prev,
+                            pageNumber: prev.pageNumber + 1,
+                          }));
+                        }}
+                      >
+                        Дараах
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {selectedTab === "Users" && (
           <div className="px-8 py-6">
             <div className="text-lg font-bold mb-4">Хэрэглэгчид</div>
