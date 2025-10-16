@@ -81,7 +81,7 @@ export default function TripDetailPage({
       });
 
       toast.success("Аялал сагсанд нэмэгдлээ!");
-      
+
       // Reset form
       setBookingForm({
         fullName: "",
@@ -428,14 +428,20 @@ export default function TripDetailPage({
                     <div className="flex justify-between mb-2">
                       <div>Үнэ ({bookingForm.travelersSize} хүн)</div>
                       <div className="font-medium">
-                        {trip.price ? `${(trip.price * bookingForm.travelersSize).toLocaleString()}₮` : "-"}
+                        {trip.price
+                          ? `${(
+                              trip.price * bookingForm.travelersSize
+                            ).toLocaleString()}₮`
+                          : "-"}
                       </div>
                     </div>
                     <div className="flex justify-between mb-2">
                       <div>НӨАТ (10%)</div>
                       <div className="font-medium">
                         {trip.price
-                          ? `${Math.round(trip.price * bookingForm.travelersSize * 0.1).toLocaleString()}₮`
+                          ? `${Math.round(
+                              trip.price * bookingForm.travelersSize * 0.1
+                            ).toLocaleString()}₮`
                           : "-"}
                       </div>
                     </div>
@@ -443,7 +449,9 @@ export default function TripDetailPage({
                       <div>Нийт</div>
                       <div>
                         {trip.price
-                          ? `${Math.round(trip.price * bookingForm.travelersSize * 1.1).toLocaleString()}₮`
+                          ? `${Math.round(
+                              trip.price * bookingForm.travelersSize * 1.1
+                            ).toLocaleString()}₮`
                           : "-"}
                       </div>
                     </div>
@@ -512,7 +520,7 @@ export default function TripDetailPage({
                     className="object-cover"
                   />
                 </div>
-                
+
                 {/* Navigation buttons */}
                 <Button
                   onClick={previousImage}
@@ -608,9 +616,33 @@ export default function TripDetailPage({
                 >
                   <div className="flex items-start mb-4">
                     <div className="text-3xl text-gray-300 mr-2">"</div>
-                    <p className="text-sm">
-                      {c.content || c.comment || c.text}
-                    </p>
+                    <div className="flex-1">
+                      <p className="text-sm mb-2">
+                        {c.content || c.comment || c.text}
+                      </p>
+                      {/* Rating Display */}
+                      {c.rating && (
+                        <div className="flex items-center mb-2">
+                          <div className="flex items-center mr-2">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <span
+                                key={star}
+                                className={`text-lg ${
+                                  star <= c.rating
+                                    ? "text-yellow-400"
+                                    : "text-gray-300"
+                                }`}
+                              >
+                                ★
+                              </span>
+                            ))}
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            ({c.rating}/5)
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center">
                     <div className="w-8 h-8 rounded-full bg-gray-200 mr-3 overflow-hidden">

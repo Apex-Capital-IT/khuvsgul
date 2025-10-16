@@ -27,6 +27,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   TripsGridSkeleton,
   FeaturedTripsSkeleton,
   SearchFiltersSkeleton,
@@ -44,6 +50,13 @@ type FeaturedTrip = {
   category: string;
   image: string;
   images: string[];
+};
+
+type Category = {
+  _id: string;
+  name: string;
+  nameMn?: string;
+  description?: string;
 };
 
 const API_URL =
@@ -78,7 +91,9 @@ const useFeaturedTrips = () => {
             category:
               typeof trip.categories?.[0] === "string"
                 ? (trip.categories?.[0] as string)
-                : trip.categories?.[0]?.name || "other",
+                : trip.categories?.[0]?._id ||
+                  trip.categories?.[0]?.name ||
+                  "other",
             image: trip.images?.[0] || "/cover.avif",
             images: trip.images || ["/cover.avif"],
           }));
@@ -100,6 +115,37 @@ const useFeaturedTrips = () => {
   return { trips, loading, error };
 };
 
+// Fetch categories from API
+const useCategories = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(`${API_URL}/category`);
+        const data = await res.json();
+        if (data.code === 0) {
+          const raw = Array.isArray(data.response) ? data.response : [];
+          setCategories(raw);
+        } else {
+          throw new Error(data.message || "Failed to fetch categories");
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Unknown error";
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  return { categories, loading, error };
+};
+
 // Filter options
 const filterOptions = [
   { label: "Бүгд", value: "all" },
@@ -110,7 +156,13 @@ const filterOptions = [
 ];
 
 // Image Carousel Component
-const ImageCarousel = ({ images, title }: { images: string[]; title: string }) => {
+const ImageCarousel = ({
+  images,
+  title,
+}: {
+  images: string[];
+  title: string;
+}) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const nextImage = () => {
@@ -142,7 +194,7 @@ const ImageCarousel = ({ images, title }: { images: string[]; title: string }) =
         fill
         className="object-cover transition-transform duration-300 group-hover:scale-105"
       />
-      
+
       {/* Navigation Buttons */}
       <button
         onClick={(e) => {
@@ -155,7 +207,7 @@ const ImageCarousel = ({ images, title }: { images: string[]; title: string }) =
       >
         <ChevronLeft className="h-4 w-4" />
       </button>
-      
+
       <button
         onClick={(e) => {
           e.preventDefault();
@@ -167,7 +219,7 @@ const ImageCarousel = ({ images, title }: { images: string[]; title: string }) =
       >
         <ChevronRight className="h-4 w-4" />
       </button>
-      
+
       {/* Image Counter */}
       <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
         {currentImageIndex + 1} / {images.length}
@@ -177,7 +229,13 @@ const ImageCarousel = ({ images, title }: { images: string[]; title: string }) =
 };
 
 // Featured Image Carousel Component
-const FeaturedImageCarousel = ({ images, title }: { images: string[]; title: string }) => {
+const FeaturedImageCarousel = ({
+  images,
+  title,
+}: {
+  images: string[];
+  title: string;
+}) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const nextImage = () => {
@@ -209,7 +267,7 @@ const FeaturedImageCarousel = ({ images, title }: { images: string[]; title: str
         fill
         className="object-cover transition-transform duration-500 group-hover:scale-105"
       />
-      
+
       {/* Navigation Buttons */}
       <button
         onClick={(e) => {
@@ -222,7 +280,7 @@ const FeaturedImageCarousel = ({ images, title }: { images: string[]; title: str
       >
         <ChevronLeft className="h-5 w-5" />
       </button>
-      
+
       <button
         onClick={(e) => {
           e.preventDefault();
@@ -234,7 +292,7 @@ const FeaturedImageCarousel = ({ images, title }: { images: string[]; title: str
       >
         <ChevronRight className="h-5 w-5" />
       </button>
-      
+
       {/* Image Counter */}
       <div className="absolute bottom-3 right-3 bg-black/50 text-white text-sm px-3 py-1 rounded">
         {currentImageIndex + 1} / {images.length}
@@ -255,6 +313,12 @@ export default function TripsPage() {
     loading: featuredLoading,
     error: featuredError,
   } = useFeaturedTrips();
+
+  const {
+    categories,
+    loading: categoriesLoading,
+    error: categoriesError,
+  } = useCategories();
 
   // Filter & sort
   const filteredAndSortedTrips = featuredTrips
@@ -304,8 +368,17 @@ export default function TripsPage() {
 
   const handleSortChange = (value: string) => setSortOrder(value);
 
+  // Helper function to get category display name
+  const getCategoryDisplayName = (categoryId: string) => {
+    if (categoryId === "all") {
+      return `Бүх аяллууд (${filteredAndSortedTrips.length})`;
+    }
+    const category = categories.find((cat) => cat._id === categoryId);
+    return category ? `${category.nameMn || category.name} аяллууд` : "Аяллууд";
+  };
+
   // Show loading state for initial page load
-  if (featuredLoading) {
+  if (featuredLoading || categoriesLoading) {
     return (
       <>
         <section className="relative h-[400px] md:h-[500px] flex items-center">
@@ -330,14 +403,14 @@ export default function TripsPage() {
         <SearchFiltersSkeleton />
         <MainContentSkeleton />
         <FeaturedTripsSkeleton />
-        
+
         <NewsletterForm />
       </>
     );
   }
 
   // Show error state
-  if (featuredError) {
+  if (featuredError || categoriesError) {
     return (
       <>
         <section className="relative h-[400px] md:h-[500px] flex items-center">
@@ -363,17 +436,28 @@ export default function TripsPage() {
           <div className="text-center py-12">
             <div className="mb-4">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
-                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                <svg
+                  className="w-8 h-8 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
                 </svg>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Алдаа гарлаа
               </h3>
               <p className="text-gray-600 mb-4">
-                Аяллын мэдээлэл ачаалахад алдаа гарлаа: {featuredError}
+                Аяллын мэдээлэл ачаалахад алдаа гарлаа:{" "}
+                {featuredError || categoriesError}
               </p>
-              <Button 
+              <Button
                 onClick={() => window.location.reload()}
                 variant="outline"
               >
@@ -434,20 +518,25 @@ export default function TripsPage() {
                 <DropdownMenuItem onClick={() => setActiveCategory("all")}>
                   Бүгд
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setActiveCategory("adventure")}
-                >
-                  Адал явдалт
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setActiveCategory("beach")}>
-                  Далайн эрэг
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setActiveCategory("cultural")}>
-                  Соёлын
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setActiveCategory("cruise")}>
-                  Усан онгоц
-                </DropdownMenuItem>
+                {categories.map((category) => (
+                  <TooltipProvider key={category._id} delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <DropdownMenuItem
+                          onClick={() => setActiveCategory(category._id)}
+                          className="max-w-[200px]"
+                        >
+                          <span className="truncate">
+                            {category.nameMn || category.name}
+                          </span>
+                        </DropdownMenuItem>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{category.nameMn || category.name}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -484,24 +573,42 @@ export default function TripsPage() {
               onValueChange={setActiveCategory}
             >
               <TabsList className="mb-6">
-                <TabsTrigger value="all">Бүгд</TabsTrigger>
-                <TabsTrigger value="adventure">Адал явдалт</TabsTrigger>
-                <TabsTrigger value="beach">Далайн эрэг</TabsTrigger>
-                <TabsTrigger value="cultural">Соёлын</TabsTrigger>
-                <TabsTrigger value="cruise">Усан онгоц</TabsTrigger>
+                <TabsTrigger
+                  value="all"
+                  className={
+                    activeCategory === "all" ? "bg-white text-black" : ""
+                  }
+                >
+                  Бүгд
+                </TabsTrigger>
+                {categories.map((category) => (
+                  <TooltipProvider key={category._id} delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <TabsTrigger
+                          value={category._id}
+                          className={`max-w-[200px] ${
+                            activeCategory === category._id
+                              ? "bg-white text-black"
+                              : ""
+                          }`}
+                        >
+                          <span className="truncate">
+                            {category.nameMn || category.name}
+                          </span>
+                        </TabsTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{category.nameMn || category.name}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ))}
               </TabsList>
             </Tabs>
 
             <h2 className="text-2xl md:text-3xl font-medium mb-6">
-              {activeCategory === "all"
-                ? `Бүх аяллууд (${filteredAndSortedTrips.length})`
-                : activeCategory === "adventure"
-                ? "Адал явдалт аяллууд"
-                : activeCategory === "beach"
-                ? "Далайн эргийн аяллууд"
-                : activeCategory === "cultural"
-                ? "Соёлын аяллууд"
-                : "Усан онгоцны аяллууд"}
+              {getCategoryDisplayName(activeCategory)}
             </h2>
           </div>
 
@@ -540,9 +647,6 @@ export default function TripsPage() {
                   >
                     <div className="relative">
                       <ImageCarousel images={trip.images} title={trip.title} />
-                      <button className="absolute top-3 right-3 w-8 h-8 bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-110 z-10">
-                        <Heart className="h-4 w-4 text-white" />
-                      </button>
                     </div>
                     <div className="p-4">
                       <h3 className="font-semibold text-lg mb-2">
@@ -624,10 +728,11 @@ export default function TripsPage() {
                   className="group bg-white rounded-xl overflow-hidden shadow-md transition-all hover:shadow-xl"
                 >
                   <div className="relative">
-                    <FeaturedImageCarousel images={trip.images} title={trip.title} />
-                    <button className="absolute top-4 right-4 w-9 h-9 bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-110 z-10">
-                      <Heart className="h-5 w-5 text-white" />
-                    </button>
+                    <FeaturedImageCarousel
+                      images={trip.images}
+                      title={trip.title}
+                    />
+
                     <Badge className="absolute top-4 left-4 bg-yellow-500 hover:bg-yellow-600 z-10">
                       Онцлох
                     </Badge>
@@ -643,7 +748,9 @@ export default function TripsPage() {
                       {trip.duration}
                     </div>
                     <div className="flex items-center justify-between mt-4">
-                      <span className="font-bold text-xl">{trip.price ? `${trip.price.toLocaleString()}₮` : "-"}</span>
+                      <span className="font-bold text-xl">
+                        {trip.price ? `${trip.price.toLocaleString()}₮` : "-"}
+                      </span>
                       <Button size="sm">Дэлгэрэнгүй</Button>
                     </div>
                   </div>
