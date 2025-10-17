@@ -125,13 +125,17 @@ export default function AboutPage() {
   return (
     <>
       <section className="relative h-[500px] flex items-center">
-        <Image
-          src={homeData?.backgroundImageUrl || "/cover.avif"}
-          alt={t("about.hero.title")}
-          fill
-          className="object-cover"
-          priority
-        />
+        {homeLoading ? (
+          <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+        ) : (
+          <Image
+            src={homeData?.backgroundImageUrl || "/cover.avif"}
+            alt={t("about.hero.title")}
+            fill
+            className="object-cover"
+            priority
+          />
+        )}
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="container mx-auto px-4 relative z-10 text-white pt-16">
           <h1 className="text-4xl md:text-5xl font-medium">
