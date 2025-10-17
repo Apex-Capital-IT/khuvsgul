@@ -62,6 +62,34 @@ type Category = {
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://taiga-9fde.onrender.com";
 
+// Fetch home data for cover image
+const useHomeData = () => {
+  const [homeData, setHomeData] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchHomeData = async () => {
+      try {
+        const res = await fetch(`${API_URL}/home`);
+        const data = await res.json();
+        if (data.code === 0 && data.response && data.response.length > 0) {
+          setHomeData(data.response[0]);
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Unknown error";
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHomeData();
+  }, []);
+
+  return { homeData, loading, error };
+};
+
 // Fetch featured trips from API
 const useFeaturedTrips = () => {
   const [trips, setTrips] = useState<FeaturedTrip[]>([]);
@@ -320,6 +348,12 @@ export default function TripsPage() {
     error: categoriesError,
   } = useCategories();
 
+  const {
+    homeData,
+    loading: homeLoading,
+    error: homeError,
+  } = useHomeData();
+
   // Filter & sort
   const filteredAndSortedTrips = featuredTrips
     .filter((trip) => {
@@ -378,7 +412,7 @@ export default function TripsPage() {
   };
 
   // Show loading state for initial page load
-  if (featuredLoading || categoriesLoading) {
+  if (featuredLoading || categoriesLoading || homeLoading) {
     return (
       <>
         <section className="relative h-[400px] md:h-[500px] flex items-center">
@@ -410,7 +444,7 @@ export default function TripsPage() {
   }
 
   // Show error state
-  if (featuredError || categoriesError) {
+  if (featuredError || categoriesError || homeError) {
     return (
       <>
         <section className="relative h-[400px] md:h-[500px] flex items-center">
@@ -455,7 +489,7 @@ export default function TripsPage() {
               </h3>
               <p className="text-gray-600 mb-4">
                 Аяллын мэдээлэл ачаалахад алдаа гарлаа:{" "}
-                {featuredError || categoriesError}
+                {featuredError || categoriesError || homeError}
               </p>
               <Button
                 onClick={() => window.location.reload()}
@@ -476,7 +510,7 @@ export default function TripsPage() {
     <>
       <section className="relative h-[400px] md:h-[500px] flex items-center">
         <Image
-          src="/cover.avif"
+          src={homeData?.backgroundImageUrl || "/cover.avif"}
           alt="Аялалын танилцуулга"
           fill
           className="object-cover"

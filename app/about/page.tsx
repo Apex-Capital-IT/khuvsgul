@@ -24,6 +24,34 @@ type AboutData = {
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://taiga-9fde.onrender.com";
 
+// Fetch home data for cover image
+const useHomeData = () => {
+  const [homeData, setHomeData] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchHomeData = async () => {
+      try {
+        const res = await fetch(`${API_URL}/home`);
+        const data = await res.json();
+        if (data.code === 0 && data.response && data.response.length > 0) {
+          setHomeData(data.response[0]);
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Unknown error";
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHomeData();
+  }, []);
+
+  return { homeData, loading, error };
+};
+
 function getYouTubeId(input: string): string | null {
   if (!input) return null;
 
@@ -61,6 +89,8 @@ export default function AboutPage() {
   const [aboutData, setAboutData] = useState<AboutData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const { homeData, loading: homeLoading, error: homeError } = useHomeData();
+
   useEffect(() => {
     const fetchAboutData = async () => {
       try {
@@ -94,9 +124,9 @@ export default function AboutPage() {
 
   return (
     <>
-      <section className="relative h-[300px] flex items-center">
+      <section className="relative h-[500px] flex items-center">
         <Image
-          src="/cover.avif"
+          src={homeData?.backgroundImageUrl || "/cover.avif"}
           alt={t("about.hero.title")}
           fill
           className="object-cover"
