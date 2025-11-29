@@ -110,28 +110,34 @@ export default function ContactPage() {
 
   return (
     <>
-      <section className="py-16 pt-32">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-4xl font-medium mb-8 text-center">
-              {t("contact.title")}
-            </h1>
-            <div className="grid md:grid-cols-2 gap-8">
-              <div>
-                <h2 className="text-xl font-medium mb-4">
+      <section className="py-16 sm:py-20 lg:py-24 pt-24 sm:pt-28 lg:pt-32 bg-brand-cream">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-6xl mx-auto">
+            {/* Page Header */}
+            <div className="text-center mb-12 lg:mb-16">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-medium text-brand-dark mb-4">
+                {t("contact.title")}
+              </h1>
+              <div className="w-24 h-[3px] bg-brand-orange mx-auto"></div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+              {/* Contact Info */}
+              <div className="bg-white p-6 sm:p-8 lg:p-10 rounded-2xl shadow-sm">
+                <h2 className="text-xl sm:text-2xl font-semibold text-brand-dark mb-4">
                   {t("contact.subtitle")}
                 </h2>
-                <p className="text-gray-600 mb-6">
+                <p className="text-gray-700 font-light leading-relaxed mb-8">
                   {loading || !contactData
                     ? t("contact.description")
                     : contactData.description || t("contact.description")}
                 </p>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div className="flex items-start">
-                    <div className="bg-gray-100 p-2 rounded-full mr-4">
+                    <div className="bg-brand-orange/10 p-3 rounded-full mr-4 flex-shrink-0">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
+                        className="h-5 w-5 text-brand-orange"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -206,10 +212,10 @@ export default function ContactPage() {
                     </div>
                   </div>
                   <div className="flex items-start">
-                    <div className="bg-gray-100 p-2 rounded-full mr-4">
+                    <div className="bg-brand-orange/10 p-3 rounded-full mr-4 flex-shrink-0">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
+                        className="h-5 w-5 text-brand-orange"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -242,10 +248,10 @@ export default function ContactPage() {
                     </div>
                   </div>
                   <div className="flex items-start">
-                    <div className="bg-gray-100 p-2 rounded-full mr-4">
+                    <div className="bg-brand-orange/10 p-3 rounded-full mr-4 flex-shrink-0">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
+                        className="h-5 w-5 text-brand-orange"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -281,15 +287,17 @@ export default function ContactPage() {
                   </div>
                 </div>
               </div>
-              <div>
-                <h2 className="text-xl font-medium mb-4">
+
+              {/* Contact Form */}
+              <div className="bg-white p-6 sm:p-8 lg:p-10 rounded-2xl shadow-sm">
+                <h2 className="text-xl sm:text-2xl font-semibold text-brand-dark mb-6">
                   {t("contact.form.title")}
                 </h2>
 
                 {/* Success message */}
                 {submitSuccess && (
-                  <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="text-green-800 text-sm">
+                  <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="text-green-800 text-sm font-medium">
                       Таны мессеж амжилттай илгээгдлээ! Бид удахгүй хариулах
                       болно.
                     </p>
@@ -298,12 +306,14 @@ export default function ContactPage() {
 
                 {/* Error message */}
                 {submitError && (
-                  <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-red-800 text-sm">{submitError}</p>
+                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-red-800 text-sm font-medium">
+                      {submitError}
+                    </p>
                   </div>
                 )}
 
-                <form className="space-y-4" onSubmit={handleSubmit}>
+                <form className="space-y-5" onSubmit={handleSubmit}>
                   <div>
                     <Input
                       type="text"
@@ -349,7 +359,7 @@ export default function ContactPage() {
                   </div>
                   <Button
                     type="submit"
-                    className="w-full bg-black text-white hover:bg-gray-800"
+                    className="w-full bg-brand-orange text-white hover:bg-brand-orange/90 font-medium py-6 rounded-lg transition-colors"
                     disabled={submitting}
                   >
                     {submitting ? "Илгээж байна..." : t("contact.form.send")}

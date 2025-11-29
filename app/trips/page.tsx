@@ -609,8 +609,10 @@ export default function TripsPage() {
               defaultValue="all"
               value={activeCategory}
               onValueChange={setActiveCategory}
+              className="w-full overflow-hidden"
             >
-              <TabsList className="mb-6">
+              <div className="w-full overflow-x-auto scrollbar-hide mb-6">
+                <TabsList className="inline-flex w-auto min-w-full">
                 <TabsTrigger
                   value="all"
                   className={
@@ -642,7 +644,8 @@ export default function TripsPage() {
                     </Tooltip>
                   </TooltipProvider>
                 ))}
-              </TabsList>
+                </TabsList>
+              </div>
             </Tabs>
 
             <h2 className="text-2xl md:text-3xl font-medium mb-6">
@@ -753,7 +756,7 @@ export default function TripsPage() {
 
       {/* Featured ("Онцлох") Trips */}
       {featuredTrips.length > 0 && (
-        <section className="py-12 bg-gray-50">
+        <section className="py-12 lg:py-16 bg-brand-cream">
           <div className="container mx-auto px-4">
             <h2 className="text-2xl md:text-3xl font-medium mb-8">
               Онцлох аяллууд

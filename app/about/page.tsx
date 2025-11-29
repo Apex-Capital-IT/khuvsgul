@@ -145,9 +145,9 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+      <section className="py-16 lg:py-20 bg-brand-cream">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
             <div className="grid grid-cols-2 gap-4">
               <div className="relative rounded-2xl overflow-hidden">
                 {/* ▶️ Click to open YouTube modal */}
@@ -303,13 +303,13 @@ export default function AboutPage() {
 
       <BenefitsSection />
 
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 lg:py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-medium mb-4">
               {t("about.introduction.title")}
             </h2>
-            <div className="w-24 h-1 bg-black mx-auto"></div>
+            <div className="w-24 h-[3px] bg-brand-orange mx-auto"></div>
           </div>
 
           <div className="max-w-6xl mx-auto">
@@ -364,7 +364,7 @@ export default function AboutPage() {
 
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
-                  <div className="bg-black p-3 rounded-full flex-shrink-0">
+                  <div className="bg-brand-orange p-3 rounded-full flex-shrink-0">
                     <svg
                       className="w-6 h-6 text-white"
                       fill="none"
@@ -390,7 +390,7 @@ export default function AboutPage() {
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <div className="bg-black p-3 rounded-full flex-shrink-0">
+                  <div className="bg-brand-orange p-3 rounded-full flex-shrink-0">
                     <svg
                       className="w-6 h-6 text-white"
                       fill="none"
@@ -416,7 +416,7 @@ export default function AboutPage() {
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <div className="bg-black p-3 rounded-full flex-shrink-0">
+                  <div className="bg-brand-orange p-3 rounded-full flex-shrink-0">
                     <svg
                       className="w-6 h-6 text-white"
                       fill="none"
@@ -446,7 +446,7 @@ export default function AboutPage() {
             <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
               <div className="grid md:grid-cols-3 gap-8 text-center">
                 <div className="space-y-3">
-                  <div className="text-3xl font-bold text-black">
+                  <div className="text-3xl font-bold text-brand-dark">
                     {aboutData?.company?.establishedDate || "2019"}
                   </div>
                   <div className="text-sm text-gray-600 uppercase tracking-wide">
@@ -454,13 +454,13 @@ export default function AboutPage() {
                   </div>
                 </div>
                 <div className="space-y-3">
-                  <div className="text-3xl font-bold text-black">100+</div>
+                  <div className="text-3xl font-bold text-brand-dark">100+</div>
                   <div className="text-sm text-gray-600 uppercase tracking-wide">
                     {t("about.introduction.stats.travelers")}
                   </div>
                 </div>
                 <div className="space-y-3">
-                  <div className="text-3xl font-bold text-black">24/7</div>
+                  <div className="text-3xl font-bold text-brand-dark">24/7</div>
                   <div className="text-sm text-gray-600 uppercase tracking-wide">
                     {t("about.introduction.stats.support")}
                   </div>
@@ -499,7 +499,7 @@ export default function AboutPage() {
                 />
               </svg>
             </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-black text-white">
+            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-brand-orange text-white">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-4 w-4"
@@ -519,7 +519,7 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="rounded-lg overflow-hidden bg-white shadow-lg border border-gray-100">
               <div className="bg-gray-50 p-8 flex items-center justify-center">
-                <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center">
+                <div className="w-24 h-24 bg-brand-orange rounded-full flex items-center justify-center">
                   <svg
                     className="w-12 h-12 text-white"
                     fill="none"
@@ -546,7 +546,7 @@ export default function AboutPage() {
             </div>
             <div className="rounded-lg overflow-hidden bg-white shadow-lg border border-gray-100">
               <div className="bg-gray-50 p-8 flex items-center justify-center">
-                <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center">
+                <div className="w-24 h-24 bg-brand-orange rounded-full flex items-center justify-center">
                   <svg
                     className="w-12 h-12 text-white"
                     fill="none"
@@ -573,7 +573,7 @@ export default function AboutPage() {
             </div>
             <div className="rounded-lg overflow-hidden bg-white shadow-lg border border-gray-100">
               <div className="bg-gray-50 p-8 flex items-center justify-center">
-                <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center">
+                <div className="w-24 h-24 bg-brand-orange rounded-full flex items-center justify-center">
                   <svg
                     className="w-12 h-12 text-white"
                     fill="none"

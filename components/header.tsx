@@ -9,18 +9,22 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useI18n } from "@/components/LanguageProvider";
 import { useCart } from "@/components/CartProvider";
 
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const { t, locale, setLocale } = useI18n();
   const { getCartCount } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // Check if we're on a page with white background
+  const isWhitePage = pathname === '/contact' || pathname === '/about' || pathname === '/trips';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -60,34 +64,34 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-white/90 backdrop-blur-sm shadow-md text-gray-800"
-          : "bg-black/50  backdrop-blur-2xl text-white"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 font-sans ${
+        scrolled || isWhitePage
+          ? "bg-white/95 backdrop-blur-sm shadow-md text-brand-dark"
+          : "text-white"
       }`}
     >
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Link href="/" className="text-xl font-light italic">
-          {t("brand.name")}
+        <Link href="/" className="text-xl font-semibold">
+          <img src="/logo.png" width={50} height={50} alt="Logo" />
         </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
           <Link
             href="/trips"
-            className="text-sm font-medium hover:text-gray-600 transition-colors"
+            className="text-sm font-medium tracking-wide hover:text-brand-orange transition-colors uppercase"
           >
             {t("nav.trips")}
           </Link>
           <Link
             href="/about"
-            className="text-sm font-medium hover:text-gray-600 transition-colors"
+            className="text-sm font-medium tracking-wide hover:text-brand-orange transition-colors uppercase"
           >
             {t("nav.about")}
           </Link>
           <Link
             href="/contact"
-            className="text-sm font-medium hover:text-gray-600 transition-colors"
+            className="text-sm font-medium tracking-wide hover:text-brand-orange transition-colors uppercase"
           >
             {t("nav.contact")}
           </Link>
@@ -95,7 +99,7 @@ export default function Header() {
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger
                 className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm ${
-                  scrolled
+                  scrolled || isWhitePage
                     ? "bg-gray-100 text-gray-800"
                     : "bg-white/10 text-white"
                 }`}
@@ -117,14 +121,18 @@ export default function Header() {
           <Link
             href="/cart"
             className={`relative flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
-              scrolled ? "bg-gray-100 hover:bg-gray-200" : "bg-white/10 hover:bg-white/20"
+              scrolled || isWhitePage
+                ? "bg-gray-100 hover:bg-gray-200"
+                : "bg-white/10 hover:bg-white/20"
             }`}
           >
-            <ShoppingCart className={`w-5 h-5 ${scrolled ? "text-gray-800" : "text-white"}`} />
+            <ShoppingCart
+              className={`w-5 h-5 ${scrolled || isWhitePage ? "text-gray-800" : "text-white"}`}
+            />
             {getCartCount() > 0 && (
-              <span className={`absolute -top-1 -right-1 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center ${
-                scrolled ? "bg-red-500 text-white" : "bg-red-500 text-white"
-              }`}>
+              <span
+                className="absolute -top-1 -right-1 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center bg-red-500 text-white"
+              >
                 {getCartCount()}
               </span>
             )}
@@ -134,10 +142,10 @@ export default function Header() {
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className={`flex items-center justify-center w-10 h-10 rounded-full ${
-                  scrolled ? "bg-gray-100" : "bg-white/10"
+                  scrolled || isWhitePage ? "bg-gray-100" : "bg-white/10"
                 }`}
               >
-                <User className="w-5 h-5" />
+                <User className={`w-5 h-5 ${scrolled || isWhitePage ? "text-gray-800" : "text-white"}`} />
               </button>
               {isDropdownOpen && (
                 <div className="absolute right-0 top-full mt-4 w-48 bg-white/90 backdrop-blur-sm shadow-md border border-gray-200 hover:rounded-lg rounded-lg z-[9999]">
@@ -167,10 +175,10 @@ export default function Header() {
           ) : (
             <Link
               href="/login"
-              className={`text-sm font-medium px-3 py-2 rounded-xl transition-colors ${
+              className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors uppercase tracking-wide ${
                 scrolled
-                  ? "bg-black text-white hover:bg-gray-900"
-                  : "bg-white text-black hover:text-blue-600"
+                  ? "bg-brand-orange text-white hover:bg-brand-orange/90"
+                  : "bg-brand-orange text-white hover:bg-brand-orange/90"
               }`}
             >
               {t("nav.login")}
@@ -188,7 +196,7 @@ export default function Header() {
             <X className="h-6 w-6 text-gray-800" />
           ) : (
             <Menu
-              className={`h-6 w-6 ${scrolled ? "text-gray-800" : "text-white"}`}
+              className={`h-6 w-6 ${scrolled || isWhitePage ? "text-gray-800" : "text-white"}`}
             />
           )}
         </button>

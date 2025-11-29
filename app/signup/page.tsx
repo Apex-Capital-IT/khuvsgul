@@ -3,7 +3,15 @@
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Mail, CheckCircle, User, Lock, Phone } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  CheckCircle,
+  User,
+  Lock,
+  Phone,
+} from "lucide-react";
 
 // API URL from environment variables
 const API_URL =
@@ -35,8 +43,18 @@ export default function SignupPage() {
 
   const steps = [
     { id: 1, title: "Хувийн мэдээлэл", icon: User, completed: currentStep > 1 },
-    { id: 2, title: "OTP баталгаажуулалт", icon: Mail, completed: currentStep > 2 },
-    { id: 3, title: "Бүртгэл амжилттай", icon: CheckCircle, completed: currentStep > 3 },
+    {
+      id: 2,
+      title: "OTP баталгаажуулалт",
+      icon: Mail,
+      completed: currentStep > 2,
+    },
+    {
+      id: 3,
+      title: "Бүртгэл амжилттай",
+      icon: CheckCircle,
+      completed: currentStep > 3,
+    },
   ];
 
   const sendOtp = async () => {
@@ -362,7 +380,7 @@ export default function SignupPage() {
         </div>
 
         {/* Баруун: Форм */}
-        <div className="flex-1 flex flex-col justify-center px-4 sm:px-8 md:px-10 py-8 md:py-12 overflow-y-auto">
+        <div className="flex flex-col justify-center px-4 sm:px-8 md:px-10 py-8 md:py-12 overflow-y-auto">
           {/* Back button */}
           {currentStep === 1 && (
             <a
@@ -388,7 +406,7 @@ export default function SignupPage() {
           )}
 
           {/* Stepper */}
-          <div className="mb-8">
+          <div className="mb-2">
             <div className="flex items-center justify-center space-x-4">
               {steps.map((step, index) => (
                 <div key={step.id} className="flex items-center">
@@ -436,9 +454,6 @@ export default function SignupPage() {
           </div>
 
           <div className="flex flex-col items-center mb-8">
-            <div className="mb-4">
-              <span className="font-bold text-2xl">🌐 Лого</span>
-            </div>
             <h2 className="text-3xl font-bold mb-2 text-center">
               {currentStep === 1
                 ? "Бүртгүүлэх"

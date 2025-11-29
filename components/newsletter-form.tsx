@@ -4,81 +4,43 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { useI18n } from "@/components/LanguageProvider";
+import { ArrowRight } from "lucide-react";
 
 export default function NewsletterForm() {
   const { t } = useI18n();
   return (
-    <section className="relative py-16 bg-gray-100 overflow-hidden">
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-white/40 backdrop-blur-2xl"></div>
-      </div>
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-xl mx-auto text-center mb-8">
-          <h2 className="text-3xl font-medium mb-2">
-            <span className="italic">{t("newsletter.title.part1")}</span> {t("newsletter.title.part2")}
-            <br />
-            <span className="italic">{t("newsletter.title.part3")}</span> {t("newsletter.title.part4")}
-          </h2>
-          <p className="text-gray-600 text-sm">
-            {t("newsletter.description")}
-          </p>
+    <section className="bg-brand-cream min-h-screen flex items-center justify-center p-4 lg:p-8">
+      {/* Main Card Container */}
+      <div className="relative w-full max-w-6xl mx-auto rounded-[2rem] lg:rounded-[3rem] overflow-hidden shadow-2xl bg-brand-dark min-h-[400px] flex flex-col items-center justify-center text-center">
+        {/* Abstract Background Effect */}
+        <div className="absolute inset-0 w-full h-full overflow-hidden">
+          {/* Dark base */}
+          <div className="absolute inset-0 bg-[#0a0a0a]"></div>
+
+          {/* Orange Gradient Flows */}
+          <div className="absolute top-[-20%] right-[-10%] w-[600px] lg:w-[1000px] h-[600px] lg:h-[1000px] bg-brand-orange/40 rounded-full blur-[100px] lg:blur-[160px] mix-blend-screen opacity-60 animate-pulse"></div>
+          <div className="absolute bottom-[-20%] left-[-10%] w-[500px] lg:w-[800px] h-[500px] lg:h-[800px] bg-brand-orange/20 rounded-full blur-[80px] lg:blur-[140px] mix-blend-screen opacity-40"></div>
+
+          {/* Diagonal Overlay for depth */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/40"></div>
         </div>
-        <div className="max-w-md mx-auto bg-white/40 backdrop-blur-sm p-6 rounded-lg">
-          <form className="space-y-4">
-            <div className="flex space-x-4">
-              <div className="w-1/2">
-                <input
-                  type="text"
-                  placeholder={t("newsletter.form.name")}
-                  className="w-full border-b border-gray-300 focus:outline-none focus:border-black bg-transparent placeholder-gray-400 text-sm py-2"
-                />
-              </div>
-              <div className="w-1/2">
-                <input
-                  type="tel"
-                  placeholder={t("newsletter.form.phone")}
-                  className="w-full border-b border-gray-300 focus:outline-none focus:border-black bg-transparent placeholder-gray-400 text-sm py-2"
-                />
-              </div>
-            </div>
-            <div>
-              <input
-                type="email"
-                placeholder={t("newsletter.form.email")}
-                className="w-full border-b border-gray-300 focus:outline-none focus:border-black bg-transparent placeholder-gray-400 text-sm py-2"
-              />
-            </div>
-            <div className="flex items-start space-x-2">
-              <Checkbox
-                id="terms"
-                defaultChecked
-                className="text-black focus:ring-0 focus:ring-offset-0"
-              />
-              <label
-                htmlFor="terms"
-                className="text-xs text-gray-600 leading-tight"
-              >
-                {t("newsletter.form.terms")}
-              </label>
-            </div>
-            <button className="flex items-center justify-center w-full rounded-full py-2 px-4 bg-black text-white hover:bg-gray-800 text-sm font-medium">
-              {t("newsletter.form.submit")}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 ml-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M14 5l7 7m0 0l-7 7m7-7H3"
-                />
-              </svg>
-            </button>
-          </form>
+
+        {/* Content Layer */}
+        <div className="relative z-10 w-full max-w-2xl px-6 py-12 lg:py-20 flex flex-col items-center">
+          {/* Header Section */}
+          <div className="mb-10 lg:mb-12">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-sans font-medium text-white mb-4 tracking-tight leading-tight">
+              Шинэ боломжийг
+              <span className="block font-serif italic text-brand-orange mt-2">
+                Цаг алдалгүй аваарай
+              </span>
+            </h2>
+            <p className="text-gray-300 text-sm md:text-base font-light leading-relaxed max-w-md mx-auto">
+              Та манай мэдээллийн сүлжээнд нэгдсэнээр шинэ аяллын маршрут,
+              онцгой хямдрал болон урамшууллын мэдээллийг хамгийн түрүүнд авах
+              болно.
+            </p>
+          </div>
         </div>
       </div>
     </section>

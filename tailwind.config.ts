@@ -19,7 +19,17 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        serif: ['Playfair Display', 'serif'],
+      },
       colors: {
+        brand: {
+          orange: '#E85D35',
+          cream: '#FDFBF7',
+          dark: '#1A1A1A',
+          gold: '#C5A059',
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
