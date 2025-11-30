@@ -32,7 +32,7 @@ const dictionaries: Dictionaries = {
     "footer.copyright": "All rights reserved.",
     "home.hero.imageAlt": "Hero background image",
     "home.hero.kicker": "The right place to plan your next adventure",
-    "home.hero.title.part1": "Just",
+    "home.hero.title.part1": "Дэмч ир гүн",
     "home.hero.title.part2": "a place to go",
     "home.hero.title.part3": "real",
     "home.hero.title.part4": "journeys",
@@ -116,7 +116,8 @@ const dictionaries: Dictionaries = {
     "trips.hero.imageAlt": "Trips cover",
     "trips.hero.title.part1": "Travel",
     "trips.hero.title.part2": "packages",
-    "trips.hero.subtitle": "Choose from trip packages that create your best memories",
+    "trips.hero.subtitle":
+      "Choose from trip packages that create your best memories",
     "trips.search.placeholder": "Search trips...",
     "trips.filters.filter": "Filter",
     "trips.filters.all": "All",
@@ -141,15 +142,17 @@ const dictionaries: Dictionaries = {
     "about.company.name": "DEMCH IR GUN LLC",
     "about.company.type": "TRAVEL & TOURISM",
     "about.vision.title": "Vision:",
-    "about.vision.content": "We are a national network company for travel and tourism in Mongolia",
+    "about.vision.content":
+      "We are a national network company for travel and tourism in Mongolia",
     "about.mission.title": "Our Mission:",
-    "about.mission.content": "Our company operations are transparent, accountable, and accessible to every citizen",
+    "about.mission.content":
+      "Our company operations are transparent, accountable, and accessible to every citizen",
     "about.values.title": "Our Values:",
     "about.values.list": [
       "Professional and experienced human resources",
       "Responsible partners",
       "Sustainable operations",
-      "Openness and transparency"
+      "Openness and transparency",
     ],
     "about.goals.title": "Our Goals:",
     "about.goals.list": [
@@ -157,39 +160,47 @@ const dictionaries: Dictionaries = {
       "Provide real prices and discounts for each trip.",
       "Ensure safety in our work.",
       "Provide services that meet each traveler's expectations.",
-      "Create a national network that serves regular travelers."
+      "Create a national network that serves regular travelers.",
     ],
     "about.learnMore": "Learn More",
     "about.introduction.title": "Introduction",
-    "about.introduction.content": "DEMCH IR GUN LLC was established in 2019. We operate in travel and tourism, training and consulting services. We are a professional organization with special permits from the Ministry of Labor and Social Protection and the Occupational Health Center. We have a management team for organizing travel activities, as well as professional staff such as drivers, guides, translators, and cooks. We work with partner individuals and organizations such as hotels, guesthouses, restaurants, and tourist camps that serve travelers.",
+    "about.introduction.content":
+      "DEMCH IR GUN LLC was established in 2019. We operate in travel and tourism, training and consulting services. We are a professional organization with special permits from the Ministry of Labor and Social Protection and the Occupational Health Center. We have a management team for organizing travel activities, as well as professional staff such as drivers, guides, translators, and cooks. We work with partner individuals and organizations such as hotels, guesthouses, restaurants, and tourist camps that serve travelers.",
     "about.team.title.part1": "Our",
     "about.team.title.part2": "team",
     "about.team.title.part3": "members",
-    "about.team.description": "The management team and professional staff who play a crucial role in successfully carrying out the travel and tourism activities of DEMCH IR GUN LLC.",
+    "about.team.description":
+      "The management team and professional staff who play a crucial role in successfully carrying out the travel and tourism activities of DEMCH IR GUN LLC.",
     "about.team.management.title": "Management Team",
     "about.team.management.description": "Travel organizers",
     "about.team.professionals.title": "Professional Staff",
-    "about.team.professionals.description": "Drivers, guides, translators, cooks",
+    "about.team.professionals.description":
+      "Drivers, guides, translators, cooks",
     "about.team.partners.title": "Partner Organizations",
     "about.team.partners.description": "Hotels, guesthouses, restaurants",
     "about.video.play": "Play video",
     "about.video.close": "Close video",
     "about.introduction.professional.title": "Professional Organization",
-    "about.introduction.professional.description": "We are a professional organization with special permits from the Ministry of Labor and Social Protection and the Occupational Health Center.",
+    "about.introduction.professional.description":
+      "We are a professional organization with special permits from the Ministry of Labor and Social Protection and the Occupational Health Center.",
     "about.introduction.team.title": "Expert Team",
-    "about.introduction.team.description": "We have a management team for organizing travel activities, as well as professional staff such as drivers, guides, translators, and cooks.",
+    "about.introduction.team.description":
+      "We have a management team for organizing travel activities, as well as professional staff such as drivers, guides, translators, and cooks.",
     "about.introduction.partnerships.title": "Global Partnerships",
-    "about.introduction.partnerships.description": "We work with partner individuals and organizations such as hotels, guesthouses, restaurants, and tourist camps that serve travelers.",
+    "about.introduction.partnerships.description":
+      "We work with partner individuals and organizations such as hotels, guesthouses, restaurants, and tourist camps that serve travelers.",
     "about.introduction.stats.founded": "Founded",
     "about.introduction.stats.travelers": "Happy Travelers",
     "about.introduction.stats.support": "Support",
     "contact.title": "Contact Us",
     "contact.subtitle": "Get in Touch",
-    "contact.description": "Do you have questions about our travel packages, or do you need help planning your dream vacation? Our team is ready to help you with every step of your program.",
+    "contact.description":
+      "Do you have questions about our travel packages, or do you need help planning your dream vacation? Our team is ready to help you with every step of your program.",
     "contact.phone.title": "Phone",
     "contact.email.title": "Email",
     "contact.address.title": "Address",
-    "contact.address.content": "46th Street, 13th District, 12th Building, Moron Sum 67138, Khuvsgul Province, Mongolia",
+    "contact.address.content":
+      "46th Street, 13th District, 12th Building, Moron Sum 67138, Khuvsgul Province, Mongolia",
     "contact.form.title": "Send Message",
     "contact.form.name.placeholder": "Your name",
     "contact.form.email.placeholder": "Your email",
@@ -213,7 +224,7 @@ const dictionaries: Dictionaries = {
     "footer.copyright": "Бүх эрх хуулиар хамгаалагдсан.",
     "home.hero.imageAlt": "Нүүр зургийн ар дэвсгэр",
     "home.hero.kicker": "Дараагийн адал явдлаа төлөвлөх зөв газар",
-    "home.hero.title.part1": "Зүгээр л",
+    "home.hero.title.part1": "Дэмч ир гүн",
     "home.hero.title.part2": "очих газар биш",
     "home.hero.title.part3": "жинхэнэ",
     "home.hero.title.part4": "аялалд",
@@ -297,7 +308,8 @@ const dictionaries: Dictionaries = {
     "trips.hero.imageAlt": "Аялалын танилцуулга",
     "trips.hero.title.part1": "Аяллын",
     "trips.hero.title.part2": "багцууд",
-    "trips.hero.subtitle": "Хамгийн сайхан дурсамжийг үүсгэх аяллын багцуудаас сонгоно уу",
+    "trips.hero.subtitle":
+      "Хамгийн сайхан дурсамжийг үүсгэх аяллын багцуудаас сонгоно уу",
     "trips.search.placeholder": "Аялал хайх...",
     "trips.filters.filter": "Шүүлтүүр",
     "trips.filters.all": "Бүгд",
@@ -322,15 +334,17 @@ const dictionaries: Dictionaries = {
     "about.company.name": "ДЭМЧ ИР ГҮН ХХК",
     "about.company.type": "АЯЛАЛ ЖУУЛЧЛАЛ",
     "about.vision.title": "Алсын хараа:",
-    "about.vision.content": "Монгол дахь аялал жуулчлалын үндэсний сүлжээ компани байна",
+    "about.vision.content":
+      "Монгол дахь аялал жуулчлалын үндэсний сүлжээ компани байна",
     "about.mission.title": "Бидний эрхэм зорилго:",
-    "about.mission.content": "Компанийн үйл ажиллагаа нь ил тод нээлттэй, хариуцлагатай, иргэн бүр оролцох боломжтой байна",
+    "about.mission.content":
+      "Компанийн үйл ажиллагаа нь ил тод нээлттэй, хариуцлагатай, иргэн бүр оролцох боломжтой байна",
     "about.values.title": "Бидний үнэт зүйл:",
     "about.values.list": [
       "Мэргэшсэн туршлагатай боловсон хүчин",
       "Хариуцлагатай хамтрагчид",
       "Тогтвортой үйл ажиллагаа",
-      "Нээлттэй ил тод байдал"
+      "Нээлттэй ил тод байдал",
     ],
     "about.goals.title": "Бидний зорилт:",
     "about.goals.list": [
@@ -338,15 +352,17 @@ const dictionaries: Dictionaries = {
       "Аялал бүрд тохирсон бодит үнэ, хөнгөлөлт урамшуулал эдлүүлнэ.",
       "Аюулгүй байдлыг хангаж ажиллана.",
       "Аялагч бүрийн хүлээлтэд нийцсэн үйлчилгээ үзүүлнэ.",
-      "Байнгын үйл ажиллагаатай жуулчдад үйлчилдэг үндэсний сүлжээг бий болгоно."
+      "Байнгын үйл ажиллагаатай жуулчдад үйлчилдэг үндэсний сүлжээг бий болгоно.",
     ],
     "about.learnMore": "Дэлгэрэнгүй",
     "about.introduction.title": "Танилцуулга",
-    "about.introduction.content": "ДЭМЧ ИР ГҮН ХХК нь 2019 онд байгуулагдсан. Аялал жуулчлал, сургалт зөвлөх үйлчилгээний чиглэлээр үйл ажиллагаа явуулдаг. Хөдөлмөр нийгмийн хамгааллын яам, Хөдөлмөрийн эрүүл мэндийн төвөөс тусгай зөвшөөрөлтэй мэргэжлийн байгууллага юм. Аялал жуулчлалын үйл ажиллагааг зохион байгуулагч менежментийн баг болон жолооч, хөтөч, орчуулагч, тогооч гэх мэт мэргэжлийн ажиллагсадтай. Аялагч нарт үйлчилгээ үзүүлдэг зочид буудал гэр буудал, ресторан, жуулчны бааз гэх мэт хамтран ажиллагч хувь хүн, байгууллагуудтайгаар үйл ажиллагаагаа явуулж байна.",
+    "about.introduction.content":
+      "ДЭМЧ ИР ГҮН ХХК нь 2019 онд байгуулагдсан. Аялал жуулчлал, сургалт зөвлөх үйлчилгээний чиглэлээр үйл ажиллагаа явуулдаг. Хөдөлмөр нийгмийн хамгааллын яам, Хөдөлмөрийн эрүүл мэндийн төвөөс тусгай зөвшөөрөлтэй мэргэжлийн байгууллага юм. Аялал жуулчлалын үйл ажиллагааг зохион байгуулагч менежментийн баг болон жолооч, хөтөч, орчуулагч, тогооч гэх мэт мэргэжлийн ажиллагсадтай. Аялагч нарт үйлчилгээ үзүүлдэг зочид буудал гэр буудал, ресторан, жуулчны бааз гэх мэт хамтран ажиллагч хувь хүн, байгууллагуудтайгаар үйл ажиллагаагаа явуулж байна.",
     "about.team.title.part1": "Бидний",
     "about.team.title.part2": "баг",
     "about.team.title.part3": "хамт олон",
-    "about.team.description": "ДЭМЧ ИР ГҮН ХХК-ийн аялал жуулчлалын үйл ажиллагааг амжилттай явуулахад чухал үүрэг гүйцэтгэж буй менежментийн баг болон мэргэжлийн ажиллагсад.",
+    "about.team.description":
+      "ДЭМЧ ИР ГҮН ХХК-ийн аялал жуулчлалын үйл ажиллагааг амжилттай явуулахад чухал үүрэг гүйцэтгэж буй менежментийн баг болон мэргэжлийн ажиллагсад.",
     "about.team.management.title": "Менежментийн баг",
     "about.team.management.description": "Аялал зохион байгуулагчид",
     "about.team.professionals.title": "Мэргэжлийн ажилтнууд",
@@ -356,21 +372,26 @@ const dictionaries: Dictionaries = {
     "about.video.play": "Видеог үзэх",
     "about.video.close": "Видео хаах",
     "about.introduction.professional.title": "Мэргэжлийн байгууллага",
-    "about.introduction.professional.description": "Бид Хөдөлмөр нийгмийн хамгааллын яам, Хөдөлмөрийн эрүүл мэндийн төвөөс тусгай зөвшөөрөлтэй мэргэжлийн байгууллага юм.",
+    "about.introduction.professional.description":
+      "Бид Хөдөлмөр нийгмийн хамгааллын яам, Хөдөлмөрийн эрүүл мэндийн төвөөс тусгай зөвшөөрөлтэй мэргэжлийн байгууллага юм.",
     "about.introduction.team.title": "Мэргэжлийн баг",
-    "about.introduction.team.description": "Аялал жуулчлалын үйл ажиллагааг зохион байгуулагч менежментийн баг болон жолооч, хөтөч, орчуулагч, тогооч гэх мэт мэргэжлийн ажиллагсадтай.",
+    "about.introduction.team.description":
+      "Аялал жуулчлалын үйл ажиллагааг зохион байгуулагч менежментийн баг болон жолооч, хөтөч, орчуулагч, тогооч гэх мэт мэргэжлийн ажиллагсадтай.",
     "about.introduction.partnerships.title": "Дэлхийн хамтрагчид",
-    "about.introduction.partnerships.description": "Аялагч нарт үйлчилгээ үзүүлдэг зочид буудал, гэр буудал, ресторан, жуулчны бааз гэх мэт хамтран ажиллагч хувь хүн, байгууллагуудтай ажилладаг.",
+    "about.introduction.partnerships.description":
+      "Аялагч нарт үйлчилгээ үзүүлдэг зочид буудал, гэр буудал, ресторан, жуулчны бааз гэх мэт хамтран ажиллагч хувь хүн, байгууллагуудтай ажилладаг.",
     "about.introduction.stats.founded": "Байгуулагдсан",
     "about.introduction.stats.travelers": "Сэтгэл ханамжтай аялагчид",
     "about.introduction.stats.support": "Дэмжлэг",
     "contact.title": "Холбоо барих",
     "contact.subtitle": "Бидэнтэй холбогдох",
-    "contact.description": "Бидний аяллын багцуудын талаар асуулт байна уу, эсвэл мөрөөдлийн амралтаа төлөвлөхөд тусламж хэрэгтэй юү? Манай баг таны хөтөлбөрийн алхам бүрд туслахад бэлэн байна.",
+    "contact.description":
+      "Бидний аяллын багцуудын талаар асуулт байна уу, эсвэл мөрөөдлийн амралтаа төлөвлөхөд тусламж хэрэгтэй юү? Манай баг таны хөтөлбөрийн алхам бүрд туслахад бэлэн байна.",
     "contact.phone.title": "Утас",
     "contact.email.title": "И-мэйл",
     "contact.address.title": "Хаяг",
-    "contact.address.content": "46- дугаар гудамж, 13-дугаар хороо, 12- тоот, Мөрөн сум 67138, Хөвсгөл аймаг, Монгол улс",
+    "contact.address.content":
+      "46- дугаар гудамж, 13-дугаар хороо, 12- тоот, Мөрөн сум 67138, Хөвсгөл аймаг, Монгол улс",
     "contact.form.title": "Мессеж илгээх",
     "contact.form.name.placeholder": "Таны нэр",
     "contact.form.email.placeholder": "Таны и-мэйл",
@@ -437,15 +458,18 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 export function useI18n() {
   const ctx = useContext(I18nContext);
   if (!ctx) throw new Error("useI18n must be used within LanguageProvider");
-  
-  const getArray = useCallback((key: string): string[] => {
-    const value = ctx.t(key);
-    if (Array.isArray(value)) {
-      return value;
-    }
-    return [];
-  }, [ctx]);
-  
+
+  const getArray = useCallback(
+    (key: string): string[] => {
+      const value = ctx.t(key);
+      if (Array.isArray(value)) {
+        return value;
+      }
+      return [];
+    },
+    [ctx]
+  );
+
   return { ...ctx, getArray };
 }
 
