@@ -146,11 +146,14 @@ export default function Home() {
     <>
       <section className="relative min-h-screen h-screen w-full overflow-hidden flex flex-col font-sans">
         {/* 1. Background Image with Overlay */}
-        <div className="absolute inset-0 z-0">
-          <img
+        <div className="absolute inset-0 z-0 relative">
+          <Image
             src={homeData?.backgroundImageUrl || "/cover.jpg"}
             alt={t("home.hero.imageAlt")}
-            className="w-full h-full object-cover object-center"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center"
           />
           {/* Dark warm overlay to match the 'atmosphere' vibe */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/30" />

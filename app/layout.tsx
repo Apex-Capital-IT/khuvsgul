@@ -6,18 +6,31 @@ import ClientLayout from "@/components/ClientLayout";
 
 const inter = Inter({ subsets: ["latin"] });
 
+const siteUrl = "https://taiga.mn";
+const defaultTitle = "Taiga Mongolia - Travel Agency";
+const defaultDescription =
+  "Discover amazing travel experiences around the world with Taiga Mongolia. Explore curated trips, sustainable adventures, and authentic cultural journeys.";
+const defaultOgImage = "/taiga.jpg";
+
 export const metadata: Metadata = {
-  title: "Taiga Mongolia - Travel Agency",
-  description: "Discover amazing travel experiences around the world",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: defaultTitle,
+    template: "%s | Taiga Mongolia",
+  },
+  description: defaultDescription,
   generator: "Hollo",
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "Taiga Mongolia - Travel Agency",
-    description: "Discover amazing travel experiences around the world",
-    url: "https://taiga.mn",
+    title: defaultTitle,
+    description: defaultDescription,
+    url: siteUrl,
     siteName: "Taiga Mongolia",
     images: [
       {
-        url: "/taiga.jpg", // make sure this file is in the /public directory
+        url: defaultOgImage,
         width: 1200,
         height: 630,
         alt: "Beautiful Mongolian travel landscape",
@@ -26,6 +39,29 @@ export const metadata: Metadata = {
     locale: "en_US",
     type: "website",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: defaultTitle,
+    description: defaultDescription,
+    images: [defaultOgImage],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
+};
+
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "TravelAgency",
+  name: "Taiga Mongolia",
+  url: siteUrl,
+  logo: `${siteUrl}/logo.png`,
+  description: defaultDescription,
+  sameAs: ["https://www.facebook.com/taigamongolia", "https://www.instagram.com/taigamongolia"],
 };
 
 export default function RootLayout({
@@ -39,6 +75,10 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" />
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
       </head>
       <body className={inter.className}>
         <ClientLayout>{children}</ClientLayout>
