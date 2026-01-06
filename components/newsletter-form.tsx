@@ -28,18 +28,13 @@ export default function NewsletterForm() {
         {/* Content Layer */}
         <div className="relative z-10 w-full max-w-2xl px-6 py-12 lg:py-20 flex flex-col items-center">
           {/* Header Section */}
-          <div className="mb-10 lg:mb-12">
+          <div className="">
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-sans font-medium text-white mb-4 tracking-tight leading-tight">
-              Шинэ боломжийг
+              Дурсамжаар дүүрэн
               <span className="block font-serif italic text-brand-orange mt-2">
-                Цаг алдалгүй аваарай
+                аяллаа эхлүүл
               </span>
             </h2>
-            <p className="text-gray-300 text-sm md:text-base font-light leading-relaxed max-w-md mx-auto">
-              Та манай мэдээллийн сүлжээнд нэгдсэнээр шинэ аяллын маршрут,
-              онцгой хямдрал болон урамшууллын мэдээллийг хамгийн түрүүнд авах
-              болно.
-            </p>
           </div>
         </div>
       </div>

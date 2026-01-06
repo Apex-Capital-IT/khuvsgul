@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { useI18n } from "@/components/LanguageProvider";
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from "lucide-react";
+import {
+  Facebook,
+  Instagram,
+  Twitter,
+  Mail,
+  Phone,
+  MapPin,
+} from "lucide-react";
 
 export default function Footer() {
   const { t } = useI18n();
@@ -107,19 +114,19 @@ export default function Footer() {
               <li className="flex items-start gap-3">
                 <Mail className="w-5 h-5 text-brand-orange mt-0.5 flex-shrink-0" />
                 <a
-                  href="mailto:info@example.com"
+                  href="mailto:demchirgun@gmail.com"
                   className="text-gray-300 hover:text-brand-orange transition-colors duration-300 font-light text-sm"
                 >
-                  info@demchirgun.mn
+                  demchirgun@gmail.com
                 </a>
               </li>
               <li className="flex items-start gap-3">
                 <Phone className="w-5 h-5 text-brand-orange mt-0.5 flex-shrink-0" />
                 <a
-                  href="tel:+97611234567"
+                  href="tel:+97699020145"
                   className="text-gray-300 hover:text-brand-orange transition-colors duration-300 font-light text-sm"
                 >
-                  +976 1123-4567
+                  +976 99020145
                 </a>
               </li>
               <li className="flex items-start gap-3">
@@ -136,7 +143,8 @@ export default function Footer() {
         <div className="pt-8 border-t border-white/10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-400 text-sm font-light">
-              © {new Date().getFullYear()} {t("brand.name")}. Бүх эрх хуулиар хамгаалагдсан.
+              © {new Date().getFullYear()} {t("brand.name")}. Бүх эрх хуулиар
+              хамгаалагдсан.
             </p>
             <div className="flex gap-6 text-sm">
               <Link

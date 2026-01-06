@@ -95,16 +95,16 @@ export default function CartPage() {
 
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 py-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-md mt-12 mx-auto text-center">
-            <div className="w-24 h-24 mx-auto mb-6 bg-gray-200 rounded-full flex items-center justify-center">
-              <ShoppingCart className="w-12 h-12 text-gray-400" />
+      <div className="min-h-screen bg-black py-16">
+        <div className="container h-screen  mx-auto px-4">
+          <div className="max-w-md h-screen my-auto mx-auto text-center">
+            <div className="w-24 h-24 mx-auto mb-6 bg-brand-orange rounded-full flex items-center justify-center">
+              <ShoppingCart className="w-12 h-12 text-white" />
             </div>
-            <h1 className="text-2xl font-medium text-gray-900 mb-4">
+            <h1 className="text-2xl font-medium text-white mb-4">
               Сагс хоосон байна
             </h1>
-            <p className="text-gray-600 mb-8">
+            <p className="text-white mb-8">
               Аяллын сагсанд нэмэх зүйл алга байна
             </p>
             <Link href="/trips">

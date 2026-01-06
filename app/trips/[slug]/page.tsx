@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -44,6 +45,7 @@ export default function TripDetailPage({
   const [trip, setTrip] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // Booking form state
   const [bookingForm, setBookingForm] = useState({
@@ -111,6 +113,11 @@ export default function TripDetailPage({
     };
     fetchTrip();
   }, [params]);
+
+  useEffect(() => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    setIsLoggedIn(!!token);
+  }, []);
 
   if (loading || !trip) {
     return <div>Loading...</div>;
@@ -270,13 +277,16 @@ export default function TripDetailPage({
 
               <div className="mb-8">
                 <h3 className="text-xl font-medium mb-4">Үүнд багтсан:</h3>
-                <ul className="space-y-2">
+                <ul className="space-y-2 list-none">
                   {(trip.included || ["Мэдээлэл байхгүй"]).map(
                     (item: string, idx: number) => (
-                      <li className="flex items-center" key={idx}>
+                      <li
+                        className="flex items-center text-sm leading-relaxed"
+                        key={idx}
+                      >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-green-500 mr-2"
+                          className="h-4 w-4 text-green-500 mr-2 flex-shrink-0"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -297,13 +307,16 @@ export default function TripDetailPage({
 
               <div className="mb-8">
                 <h3 className="text-xl font-medium mb-4">Үүнд багтаагүй:</h3>
-                <ul className="space-y-2">
+                <ul className="space-y-2 list-none">
                   {(trip.excluded || ["Мэдээлэл байхгүй"]).map(
                     (item: string, idx: number) => (
-                      <li className="flex items-center" key={idx}>
+                      <li
+                        className="flex items-center text-sm leading-relaxed"
+                        key={idx}
+                      >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-red-500 mr-2"
+                          className="h-4 w-4 text-red-500 mr-2 flex-shrink-0"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -323,18 +336,20 @@ export default function TripDetailPage({
               </div>
 
               <div>
-                <h3 className="text-xl font-medium mb-4">Аяллын төлөвлөгөө</h3>
-                <Accordion type="single" collapsible className="w-full">
+                <h3 className="text-xl  font-medium mb-4">Аяллын төлөвлөгөө</h3>
+                <Accordion type="single" collapsible className="w-full ">
                   {(trip.plans || []).map((day: any, idx: number) => (
                     <AccordionItem value={`day${idx + 1}`} key={idx}>
                       <AccordionTrigger>
                         {day.title || `Өдөр ${idx + 1}`}
                       </AccordionTrigger>
                       <AccordionContent>
-                        <ul className="list-disc pl-5 text-gray-600">
+                        <ul className="list-disc pl-5  text-gray-600 marker:text-gray-400">
                           {(day.items || []).map(
                             (activity: string, aidx: number) => (
-                              <li key={aidx}>{activity}</li>
+                              <li key={aidx} className="pl-1">
+                                {activity}
+                              </li>
                             )
                           )}
                         </ul>
@@ -597,84 +612,106 @@ export default function TripDetailPage({
         </section>
       )}
 
-      {/* Testimonials-style comments from real data */}
       <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-2xl font-medium mb-8">
+        <div className="container mx-auto px-4 space-y-10">
+          <h2 className="text-2xl font-medium">
             Жинхэнэ <span className="italic">түүхүүд</span>
             <br />
             аялагчдаас
           </h2>
-          {comments.length === 0 ? (
-            <div className="text-gray-500">Одоогоор сэтгэгдэл алга.</div>
-          ) : (
-            <div className="grid md:grid-cols-2 gap-6">
-              {comments.map((c: any, idx: number) => (
-                <div
-                  key={c._id || idx}
-                  className="border bg-white rounded-lg p-6"
-                >
-                  <div className="flex items-start mb-4">
-                    <div className="text-3xl text-gray-300 mr-2">"</div>
-                    <div className="flex-1">
-                      <p className="text-sm mb-2">
-                        {c.content || c.comment || c.text}
-                      </p>
-                      {/* Rating Display */}
-                      {c.rating && (
-                        <div className="flex items-center mb-2">
-                          <div className="flex items-center mr-2">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <span
-                                key={star}
-                                className={`text-lg ${
-                                  star <= c.rating
-                                    ? "text-yellow-400"
-                                    : "text-gray-300"
-                                }`}
-                              >
-                                ★
+          {isLoggedIn ? (
+            <>
+              {comments.length === 0 ? (
+                <div className="text-gray-500">Одоогоор сэтгэгдэл алга.</div>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-6">
+                  {comments.map((c: any, idx: number) => (
+                    <div
+                      key={c._id || idx}
+                      className="border bg-white rounded-lg p-6"
+                    >
+                      <div className="flex items-start mb-4">
+                        <div className="text-3xl text-gray-300 mr-2">"</div>
+                        <div className="flex-1">
+                          <p className="text-sm mb-2">
+                            {c.content || c.comment || c.text}
+                          </p>
+                          {/* Rating Display */}
+                          {c.rating && (
+                            <div className="flex items-center mb-2">
+                              <div className="flex items-center mr-2">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <span
+                                    key={star}
+                                    className={`text-lg ${
+                                      star <= c.rating
+                                        ? "text-yellow-400"
+                                        : "text-gray-300"
+                                    }`}
+                                  >
+                                    ★
+                                  </span>
+                                ))}
+                              </div>
+                              <span className="text-xs text-gray-500">
+                                ({c.rating}/5)
                               </span>
-                            ))}
-                          </div>
-                          <span className="text-xs text-gray-500">
-                            ({c.rating}/5)
-                          </span>
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 rounded-full bg-gray-200 mr-3 overflow-hidden">
+                          <Image
+                            src={trip.images?.[0] || "/placeholder-user.jpg"}
+                            alt="Avatar"
+                            width={32}
+                            height={32}
+                          />
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium">
+                            {typeof c.user === "string"
+                              ? "Зочин"
+                              : c.user?.name || "Зочин"}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {c.createdAt
+                              ? new Date(c.createdAt).toLocaleDateString()
+                              : ""}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 rounded-full bg-gray-200 mr-3 overflow-hidden">
-                      <Image
-                        src={trip.images?.[0] || "/placeholder-user.jpg"}
-                        alt="Avatar"
-                        width={32}
-                        height={32}
-                      />
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium">
-                        {typeof c.user === "string"
-                          ? "Зочин"
-                          : c.user?.name || "Зочин"}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {c.createdAt
-                          ? new Date(c.createdAt).toLocaleDateString()
-                          : ""}
-                      </p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              )}
+              <div className="pt-6">
+                <CommentForm tripId={trip._id} />
+              </div>
+            </>
+          ) : (
+            <div className="border rounded-lg bg-white p-6 text-center space-y-3">
+              <h3 className="text-lg font-medium">Сэтгэгдэл</h3>
+              <p className="text-sm text-gray-600">
+                Сэтгэгдэл харах болон бичихийн тулд нэвтэрнэ үү.
+              </p>
+              <div className="flex justify-center gap-3">
+                <Link
+                  href="/login"
+                  className="px-4 py-2 rounded-md bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors"
+                >
+                  Нэвтрэх
+                </Link>
+                <Link
+                  href="/signup"
+                  className="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium hover:border-gray-500 transition-colors"
+                >
+                  Бүртгүүлэх
+                </Link>
+              </div>
             </div>
           )}
-        </div>
-      </section>
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <CommentForm tripId={trip._id} />
         </div>
       </section>
 
